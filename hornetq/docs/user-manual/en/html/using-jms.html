@@ -1,0 +1,113 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;7.&nbsp;Using JMS</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="using-server.html" title="Chapter&nbsp;6.&nbsp;Using the Server"><link rel="next" href="using-core.html" title="Chapter&nbsp;8.&nbsp;Using Core"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;7.&nbsp;Using JMS</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="using-server.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="using-core.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="using-jms"></a>Chapter&nbsp;7.&nbsp;Using JMS</h2></div></div><div></div></div><p>Although HornetQ provides a JMS agnostic messaging API, many users will be more
+        comfortable using JMS.</p><p>JMS is a very popular API standard for messaging, and most messaging systems provide a JMS
+        API. If you are completely new to JMS we suggest you follow the<a href="http://java.sun.com/products/jms/tutorial/1_3_1-fcs/doc/jms_tutorialTOC.html" target="_top"> Sun
+            JMS tutorial</a> - a full JMS tutorial is out of scope for this guide.</p><p>HornetQ also ships with a wide range of examples, many of which demonstrate JMS API usage.
+        A good place to start would be to play around with the simple JMS Queue and Topic example,
+        but we also provide examples for many other parts of the JMS API. A full description of the
+        examples is available in <a href="examples.html" title="Chapter&nbsp;11.&nbsp;Examples">Chapter&nbsp;11, <i>Examples</i></a>.</p><p>In this section we'll go through the main steps in configuring the server for JMS and
+        creating a simple JMS program. We'll also show how to configure and use JNDI, and also how
+        to use JMS with HornetQ without using any JNDI.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1032"></a>7.1.&nbsp;A simple ordering system</h2></div></div><div></div></div><p>For this chapter we're going to use a very simple ordering system as our example. It's
+            a somewhat contrived example because of its extreme simplicity, but it serves to
+            demonstrate the very basics of setting up and using JMS.</p><p>We will have a single JMS Queue called <tt class="literal">OrderQueue</tt>, and we will have
+            a single <tt class="literal">MessageProducer</tt> sending an order message to the queue and a
+            single <tt class="literal">MessageConsumer</tt> consuming the order message from the
+            queue.</p><p>The queue will be a <tt class="literal">durable</tt> queue, i.e. it will survive a server
+            restart or crash. We also want to predeploy the queue, i.e. specify the queue in the
+            server JMS configuration so it's created automatically without us having to explicitly
+            create it from the client.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="using-jms.server.configuration"></a>7.2.&nbsp;JMS Server Configuration</h2></div></div><div></div></div><p>The file <tt class="literal">hornetq-jms.xml</tt> on the server classpath contains any JMS
+            Queue, Topic and ConnectionFactory instances that we wish to create and make available
+            to lookup via the JNDI.</p><p>A JMS ConnectionFactory object is used by the client to make connections to the
+            server. It knows the location of the server it is connecting to, as well as many other
+            configuration parameters. In most cases the defaults will be acceptable.</p><p>We'll deploy a single JMS Queue and a single JMS Connection Factory instance on the
+            server for this example but there are no limits to the number of Queues, Topics and
+            Connection Factory instances you can deploy from the file. Here's our
+            configuration:</p><pre class="programlisting">
+&lt;configuration xmlns="urn:hornetq" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:hornetq ../schemas/hornetq-jms.xsd "&gt;
+    
+    &lt;connection-factory name="ConnectionFactory"&gt;
+        &lt;connectors&gt;
+           &lt;connector-ref connector-name="netty"/&gt;
+        &lt;/connectors&gt;
+        &lt;entries&gt;
+            &lt;entry name="ConnectionFactory"/&gt;           
+        &lt;/entries&gt;
+    &lt;/connection-factory&gt;
+    
+    &lt;queue name="OrderQueue"&gt;
+        &lt;entry name="queues/OrderQueue"/&gt;
+    &lt;/queue&gt;
+    
+&lt;/configuration&gt; 
+        </pre><p>We deploy one ConnectionFactory called <tt class="literal">ConnectionFactory</tt> and bind
+            it in just one place in JNDI as given by the <tt class="literal">entry</tt> element.
+            ConnectionFactory instances can be bound in many places in JNDI if you require. </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The JMS connection factory references a <tt class="literal">connector</tt> called
+                    <tt class="literal">netty</tt>. This is a reference to a connector object deployed in
+                the main core configuration file <tt class="literal">hornetq-configuration.xml</tt> which
+                defines the transport and parameters used to actually connect to the server.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1087"></a>7.3.&nbsp;JNDI configuration</h2></div></div><div></div></div><p>When using JNDI from the client side you need to specify a set of JNDI properties
+            which tell the JNDI client where to locate the JNDI server, amongst other things. These
+            are often specified in a file called <tt class="literal">jndi.properties</tt> on the client
+            classpath, or you can specify them directly when creating the JNDI initial context. A
+            full JNDI tutorial is outside the scope of this document, please see the <a href="http://java.sun.com/products/jndi/tutorial/TOC.html" target="_top">Sun JNDI tutorial</a>
+            for more information on how to use JNDI.</p><p>For talking to the JBoss JNDI Server, the jndi properties will look something like
+            this:</p><pre class="programlisting">
+java.naming.factory.initial=org.jnp.interfaces.NamingContextFactory
+java.naming.provider.url=jnp://myhost:1099
+java.naming.factory.url.pkgs=org.jboss.naming:org.jnp.interfaces                        
+        </pre><p>Where <tt class="literal">myhost</tt> is the hostname or IP address of the JNDI server. 1099
+            is the port used by the JNDI server and may vary depending on how you have configured
+            your JNDI server.</p><p>In the default standalone configuration, JNDI server ports are configured in the file
+                <tt class="literal">hornetq-beans.xml</tt> by setting properties on the <tt class="literal">JNDIServer</tt> bean:</p><pre class="programlisting">
+&lt;bean name="JNDIServer" class="org.jnp.server.Main"&gt;
+    &lt;property name="namingInfo"&gt;
+        &lt;inject bean="Naming"/&gt;
+    &lt;/property&gt;
+    &lt;property name="port"&gt;1099&lt;/property&gt;
+    &lt;property name="bindAddress"&gt;localhost&lt;/property&gt;
+    &lt;property name="rmiPort"&gt;1098&lt;/property&gt;
+    &lt;property name="rmiBindAddress"&gt;localhost&lt;/property&gt;
+&lt;/bean&gt;                        
+        </pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>If you want your JNDI server to be available to non local clients make sure you
+                change it's bind address to something other than <tt class="literal">localhost</tt>!</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The JNDIServer bean must be defined <span class="emphasis"><em>only when HornetQ is running in
+                    stand-alone mode</em></span>. When HornetQ is integrated to JBoss Application
+                Server, JBoss AS will provide a ready-to-use JNDI server without any additional
+                configuration.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1129"></a>7.4.&nbsp;The code</h2></div></div><div></div></div><p>Here's the code for the example:</p><p>First we'll create a JNDI initial context from which to lookup our JMS objects:</p><pre class="programlisting">InitialContect ic = new InitialContext();</pre><p>Now we'll look up the connection factory:</p><pre class="programlisting">ConnectionFactory cf = (ConnectionFactory)ic.lookup("/ConnectionFactory");</pre><p>And look up the Queue:</p><pre class="programlisting">Queue orderQueue = (Queue)ic.lookup("/queues/OrderQueue");</pre><p>Next we create a JMS connection using the connection factory:</p><pre class="programlisting">Connection connection = cf.createConnection();</pre><p>And we create a non transacted JMS Session, with AUTO_ACKNOWLEDGE acknowledge
+            mode:</p><pre class="programlisting">Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);</pre><p>We create a MessageProducer that will send orders to the queue:</p><pre class="programlisting">MessageProducer producer = session.createProducer(orderQueue);</pre><p>And we create a MessageConsumer which will consume orders from the queue:</p><pre class="programlisting">MessageConsumer consumer = session.createConsumer(orderQueue);</pre><p>We make sure we start the connection, or delivery won't occur on it:</p><pre class="programlisting">connection.start();</pre><p>We create a simple TextMessage and send it:</p><pre class="programlisting">TextMessage message = session.createTextMessage("This is an order");
+producer.send(message);</pre><p>And we consume the message:</p><pre class="programlisting">TextMessage receivedMessage = (TextMessage)consumer.receive();
+System.out.println("Got order: " + receivedMessage.getText());
+        </pre><p>It's as simple as that. For a wide range of working JMS examples please see the
+            examples directory in the distribution.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Please note that JMS connections, sessions, producers and consumers are
+                    <span class="emphasis"><em>designed to be re-used</em></span>.</p><p>It's an anti-pattern to create new connections, sessions, producers and consumers
+                for each message you produce or consume. If you do this, your application will
+                perform very poorly. This is discussed further in the section on performance tuning
+                    <a href="perf-tuning.html" title="Chapter&nbsp;46.&nbsp;Performance Tuning">Chapter&nbsp;46, <i>Performance Tuning</i></a>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1186"></a>7.5.&nbsp;Directly instantiating JMS Resources without using JNDI</h2></div></div><div></div></div><p>Although it's a very common JMS usage pattern to lookup JMS <span class="emphasis"><em>Administered
+                Objects</em></span> (that's JMS Queue, Topic and ConnectionFactory instances) from
+            JNDI, in some cases a JNDI server is not available and you still want to use JMS, or you
+            just think "Why do I need JNDI? Why can't I just instantiate these objects
+            directly?"</p><p>With HornetQ you can do exactly that. HornetQ supports the direct instantiation of JMS
+            Queue, Topic and ConnectionFactory instances, so you don't have to use JNDI at
+            all.</p><p>For a full working example of direct instantiation please see the JMS examples in
+                <a href="examples.html" title="Chapter&nbsp;11.&nbsp;Examples">Chapter&nbsp;11, <i>Examples</i></a>.</p><p>Here's our simple example, rewritten to not use JNDI at all:</p><p>We create the JMS ConnectionFactory object via the HornetQJMSClient Utility class,
+            note we need to provide connection parameters and specify which transport we are using,
+            for more information on connectors please see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>.</p><pre class="programlisting">              
+TransportConfiguration transportConfiguration = 
+                     new TransportConfiguration(NettyConnectorFactory.class.getName());                
+ConnectionFactory cf = HornetQJMSClient.createConnectionFactory(transportConfiguration);
+        </pre><p>We also create the JMS Queue object via the HornetQJMSClient Utility class:</p><pre class="programlisting">Queue orderQueue = HornetQJMSClient.createQueue("OrderQueue");</pre><p>Next we create a JMS connection using the connection factory:</p><pre class="programlisting">Connection connection = cf.createConnection();</pre><p>And we create a non transacted JMS Session, with AUTO_ACKNOWLEDGE acknowledge
+            mode:</p><pre class="programlisting">Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);</pre><p>We create a MessageProducer that will send orders to the queue:</p><pre class="programlisting">MessageProducer producer = session.createProducer(orderQueue);</pre><p>And we create a MessageConsumer which will consume orders from the queue:</p><pre class="programlisting">MessageConsumer consumer = session.createConsumer(orderQueue);</pre><p>We make sure we start the connection, or delivery won't occur on it:</p><pre class="programlisting">connection.start();</pre><p>We create a simple TextMessage and send it:</p><pre class="programlisting">TextMessage message = session.createTextMessage("This is an order");
+producer.send(message);</pre><p>And we consume the message:</p><pre class="programlisting">TextMessage receivedMessage = (TextMessage)consumer.receive();
+System.out.println("Got order: " + receivedMessage.getText());
+        </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="using-jms.clientid"></a>7.6.&nbsp;Setting The Client ID</h2></div></div><div></div></div><p>This represents the client id for a JMS client and is needed for creating durable
+            subscriptions. It is possible to configure this on the connection factory and can be set
+            via the <tt class="literal">client-id</tt> element. Any connection created by this connection
+            factory will have this set as its client id.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="using-jms.dupsokbatchsize"></a>7.7.&nbsp;Setting The Batch Size for DUPS_OK </h2></div></div><div></div></div><p>When the JMS acknowledge mode is set to <tt class="literal">DUPS_OK</tt> it is possible to
+            configure the consumer so that it sends acknowledgements in batches rather that one at a
+            time, saving valuable bandwidth. This can be configured via the connection factory via
+            the <tt class="literal">dups-ok-batch-size</tt> element and is set in bytes. The default is
+            1024 * 1024 bytes = 1 MiB.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="using-jms.txbatchsize"></a>7.8.&nbsp;Setting The Transaction Batch Size</h2></div></div><div></div></div><p>When receiving messages in a transaction it is possible to configure the consumer to
+            send acknowledgements in batches rather than individually saving valuable bandwidth.
+            This can be configured on the connection factory via the <tt class="literal">transaction-batch-size</tt> element and is set in bytes. The default is 1024 *
+            1024.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="using-server.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="using-core.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;6.&nbsp;Using the Server&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;8.&nbsp;Using Core</td></tr></table></div></body></html>

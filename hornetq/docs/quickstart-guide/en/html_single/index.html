@@ -1,0 +1,255 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>HornetQ Quickstart Guide</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="d0e18"></a>HornetQ Quickstart Guide</h1></div><div><h2 class="subtitle">Putting the buzz in messaging</h2></div></div><div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#notice">1. Legal Notice</a></span></dt><dt><span class="chapter"><a href="#about">2. About HornetQ</a></span></dt><dt><span class="chapter"><a href="#introduction">3. Getting Started</a></span></dt><dt><span class="chapter"><a href="#download">4. Download</a></span></dt><dd><dl><dt><span class="section"><a href="#download.software">4.1. Software Download</a></span></dt><dt><span class="section"><a href="#download.svn">4.2. Project Information</a></span></dt></dl></dd><dt><span class="chapter"><a href="#installation">5. Installation</a></span></dt><dd><dl><dt><span class="section"><a href="#installation.prerequisites">5.1. Prerequisites</a></span></dt><dt><span class="section"><a href="#installation.standalone">5.2. Stand-alone HornetQ Server</a></span></dt><dt><span class="section"><a href="#installation.jboss.as5">5.3. HornetQ In JBoss Application Server 5.x</a></span></dt><dt><span class="section"><a href="#installation.jboss.as4">5.4. HornetQ In JBoss Application Server 4.x</a></span></dt></dl></dd><dt><span class="chapter"><a href="#running">6. Starting The Server</a></span></dt><dd><dl><dt><span class="section"><a href="#running.standalone">6.1. Standalone HornetQ</a></span></dt><dt><span class="section"><a href="#running.jboss.as5">6.2. HornetQ In JBoss AS 5.x</a></span></dt><dt><span class="section"><a href="#running.jboss.as4">6.3. HornetQ In JBoss AS 4.x</a></span></dt><dt><span class="section"><a href="#running.jboss.as6">6.4. HornetQ In JBoss AS 6.0</a></span></dt></dl></dd><dt><span class="chapter"><a href="#examples">7. Running the Examples</a></span></dt><dd><dl><dt><span class="section"><a href="#examples.jms">7.1. The JMS examples</a></span></dt><dt><span class="section"><a href="#examples.messaging">7.2. The Java EE Examples</a></span></dt></dl></dd></dl></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="notice"></a>Chapter&nbsp;1.&nbsp;Legal Notice</h2></div></div><div></div></div><p>Copyright &copy; 2010 Red Hat, Inc. and others.</p><p>The text of and illustrations in this document are licensed by Red Hat under
+            a Creative Commons Attribution&#8211;Share Alike 3.0 Unported license ("CC-BY-SA").</p><p>An explanation of CC-BY-SA is available at 
+            <a href="http://creativecommons.org/licenses/by-sa/3.0/" target="_top">http://creativecommons.org/licenses/by-sa/3.0/</a>. 
+            In accordance with CC-BY-SA, if you distribute this document or an adaptation
+            of it, you must provide the URL for the original version.</p><p>Red Hat, as the licensor of this document, waives the right to enforce, 
+            and agrees not to assert, Section 4d of CC-BY-SA to the fullest extent 
+            permitted by applicable law.</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="about"></a>Chapter&nbsp;2.&nbsp;About HornetQ</h2></div></div><div></div></div><p>What is HornetQ?</p><div class="itemizedlist"><ul type="disc"><li><p>HornetQ is an open source project to build a multi-protocol, embeddable, very high
+                performance, clustered, asynchronous messaging system.</p></li><li><p>For answers to more questions about what HornetQ is and what it isn't please visit
+                the <a href="http://www.jboss.org/community/wiki/HornetQGeneralFAQs" target="_top">FAQs wiki
+                    page</a>.</p></li></ul></div><p>Why use HornetQ? Here are just a few of the reasons:</p><div class="itemizedlist"><ul type="disc"><li><p>100% open source software. HornetQ is licenced using the Apache Software License v2.0
+                to minimise barriers to adoption.</p></li><li><p>HornetQ is designed with usability in mind.</p></li><li><p>Written in Java. Runs on any platform with a Java 6+ runtime, that's everything
+                from Windows desktops to IBM mainframes.</p></li><li><p>Amazing performance. Our class beating high performance journal provides persistent
+                messaging performance at rates normally seen for non persistent messaging, our non
+                persistent messaging performance rocks the boat too.</p></li><li><p>Full feature set. All the features you'd expect in any serious messaging system,
+                and others you won't find anywhere else.</p></li><li><p>Elegant, clean-cut design with minimal third party dependencies. Run HornetQ
+                stand-alone, run it in integrated in your favourite JEE application server, or run
+                it embedded inside your own product. It's up to you.</p></li><li><p>Seamless high availability. We provide a HA solution with automatic client
+                failover so you can guarantee zero message loss or duplication in event of server
+                failure.</p></li><li><p>Hugely flexible clustering. Create clusters of servers that know how to load
+                balance messages. Link geographically distributed clusters over unreliable
+                connections to form a global network. Configure routing of messages in a highly
+                flexible way.</p></li><li><p>For a full list of features, please see the <a href="http://www.jboss.org/community/wiki/HornetQFeatures" target="_top">features wiki
+                page</a> .</p></li></ul></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="introduction"></a>Chapter&nbsp;3.&nbsp;Getting Started</h2></div></div><div></div></div><p>This short guide explains how to download, install and quickly get started with
+        HornetQ.</p><p>After downloading and installing we highly recommend you run the examples to get
+        acquainted with HornetQ. We ship with over 70 examples demonstrating most of the
+        features.</p><p>This guide is not intended to be a replacement for the user manual. The user manual goes
+        into much more depth, so please consult that for further information.</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="download"></a>Chapter&nbsp;4.&nbsp;Download</h2></div></div><div></div></div><p>The official HornetQ project page is <a href="http://hornetq.org/" target="_top">http://hornetq.org/</a>.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="download.software"></a>4.1.&nbsp;Software Download</h2></div></div><div></div></div><p>The software can be download from the Download page:<a href="http://hornetq.org/downloads.html/" target="_top">http://hornetq.org/downloads.html</a></p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="download.svn"></a>4.2.&nbsp;Project Information</h2></div></div><div></div></div><p>
+         </p><div class="itemizedlist"><ul type="disc"><li><p>Please take a look at our project <a href="http://www.jboss.org/community/wiki/HornetQ" target="_top">wiki</a></p></li><li><p>If you have any user questions please use our <a href="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=312" target="_top">user
+                     forum</a></p></li><li><p>If you have development related questions, please use our <a href="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=313" target="_top">developer forum</a></p></li><li><p>Pop in and chat to us in our <a href="irc://irc.freenode.net:6667/hornetq" target="_top">IRC channel</a></p></li><li><p>Our project <a href="http://hornetq.blogspot.com/" target="_top">blog</a></p></li><li><p>Follow us on <a href="http://twitter.com/hornetq" target="_top">twitter</a></p></li><li><p>HornetQ Subversion trunk is <a href="http://anonsvn.jboss.org/repos/hornetq/trunk" target="_top">http://anonsvn.jboss.org/repos/hornetq/trunk</a></p></li><li><p>All release tags are availble from <a href="http://anonsvn.jboss.org/repos/hornetq/tags" target="_top">http://anonsvn.jboss.org/repos/hornetq/tags</a></p></li></ul></div><p>
+      </p></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="installation"></a>Chapter&nbsp;5.&nbsp;Installation</h2></div></div><div></div></div><p>This section describes how to install HornetQ. </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.prerequisites"></a>5.1.&nbsp;Prerequisites</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>HornetQ only runs on Java 6 or later.</p></div><p>By default, HornetQ server runs with 1GiB of memory. If your computer has less memory,
+         or you want to run it with more available RAM, modify the value in <tt class="literal">bin/run.sh</tt> accordingly.</p><p>For persistence, HornetQ uses its own fast journal, which you can configure to use
+         libaio (which is the default when running on Linux) or Java NIO. In order to use the libaio
+         module on Linux, you'll need to install libaio, if it's not already installed.</p><p>If you're not running on Linux then you don't need to worry about this.</p><p>You can install libaio using the following steps as the root user:</p><p>Using yum, (e.g. on Fedora or Red Hat Enterprise Linux):</p><pre class="programlisting">yum install libaio</pre><p>Using aptitude, (e.g. on Ubuntu or Debian system):</p><pre class="programlisting">apt-get install libaio</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.standalone"></a>5.2.&nbsp;Stand-alone HornetQ Server</h2></div></div><div></div></div><p>After downloading the distribution, unzip it into your chosen directory. At this point
+         it should be possible to <a href="#running.standalone" title="6.1.&nbsp;Standalone HornetQ">run straight out of the
+            box</a>, the following describes the directory structure: </p><pre class="programlisting">
+         |___ bin
+         |
+         |___ config
+         |      |___ jboss-as-4
+         |      |___ jboss-as-5
+         |      |___ stand-alone
+         |
+         |___ docs
+         |      |___ api
+         |      |___ quickstart-guide
+         |      |___ user-manual
+         |
+         |___ examples
+         |      |___ core
+         |      |___ javaee
+         |      |___ jms
+         |
+         |___ lib
+         |
+         |___ licenses
+         |
+         |___ schemas
+      </pre><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">bin</tt> -- binaries and scripts needed to run HornetQ.</p></li><li><p><tt class="literal">config</tt> -- configuration files needed to configure HornetQ. This
+               contains configurations to run HornetQ either in stand-alone or inside JBoss AS 4 and 5.
+               Please refer to the reference guide for details on configuration. </p></li><li><p><tt class="literal">docs</tt> -- guides and javadocs for HornetQ </p></li><li><p><tt class="literal">examples</tt> -- JMS and Java EE examples. Please refer to the
+               'running examples' chapter for details on how to run them. </p></li><li><p><tt class="literal">lib</tt> -- jars and libraries needed to run HornetQ </p></li><li><p><tt class="literal">licenses</tt> -- licenses for HornetQ </p></li><li><p><tt class="literal">schemas</tt> -- XML Schemas used to validate HornetQ configuration
+               files</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as5"></a>5.3.&nbsp;HornetQ In JBoss Application Server 5.x</h2></div></div><div></div></div><p>HornetQ can also be deployed in <a href="http://www.jboss.org/jbossas/" target="_top">JBoss AS
+            5</a>. It is not currently shipped by default with the application server (it is
+         scheduled to be shipped as default JMS provider in JBoss Application Server 6.0), so you
+         will need to create new AS 5 profiles to run AS 5 with HornetQ.</p><p>To create AS 5 profiles:</p><div class="orderedlist"><ol type="1"><li><p>Download JBoss AS 5</p></li><li><p>Set the environment property <tt class="literal">JBOSS_HOME</tt> to point to the
+               directory where you installed JBoss AS 5</p></li><li><p>run <tt class="literal">./build.sh</tt> (or <tt class="literal">build.bat</tt> if you are on
+               Windows) in HornetQ <tt class="literal">config/jboss-as-5</tt> directory</p></li></ol></div><p>This will create 2 new profiles in <tt class="literal">$JBOSS_HOME/server</tt>:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- it corresponds to AS 5 <tt class="literal">default</tt> profile with HornetQ as its JMS provider. In this profile,
+               HornetQ is <span class="emphasis"><em>non-clustered</em></span></p></li><li><p><tt class="literal">all-with-hornetq</tt> -- it corresponds to AS 5 <tt class="literal">all</tt> profile with HornetQ as its JMS provider. In this profile, HornetQ
+               is <span class="emphasis"><em>clustered</em></span></p></li></ul></div><p>You can then start JBoss AS 5 using one of these profiles, e.g. :</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as4"></a>5.4.&nbsp;HornetQ In JBoss Application Server 4.x</h2></div></div><div></div></div><p>As in AS 4, it is not shipped by default with the application server, so you will need
+         to create new AS 4 profiles to run AS 4 with HornetQ.</p><p>To create AS 4 profiles:</p><div class="orderedlist"><ol type="1"><li><p>Download JBoss AS 4</p></li><li><p>Set the environment property <tt class="literal">JBOSS_HOME</tt> to point to the
+               directory where you installed JBoss AS 4</p></li><li><p>run <tt class="literal">./build.sh</tt> (or <tt class="literal">build.bat as4</tt> if you
+                  are on Windows) in HornetQ <tt class="literal">config/jboss-as-4</tt>
+               directory</p></li></ol></div><p>This will create 2 new profiles in <tt class="literal">$JBOSS_HOME/server</tt>:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- it corresponds to AS 4 <tt class="literal">default</tt> profile with HornetQ as its JMS provider. In this profile,
+               HornetQ is <span class="emphasis"><em>non-clustered</em></span></p></li><li><p><tt class="literal">all-with-hornetq</tt> -- it corresponds to AS 4 <tt class="literal">all</tt> profile with HornetQ as its JMS provider. In this profile, HornetQ
+               is <span class="emphasis"><em>clustered</em></span></p></li></ul></div><p>You can then start JBoss AS 4 using one of these profiles:</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="running"></a>Chapter&nbsp;6.&nbsp;Starting The Server</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.standalone"></a>6.1.&nbsp;Standalone HornetQ</h2></div></div><div></div></div><p>To run a stand-alone server, open up a shell or command prompt and navigate into the
+            <tt class="literal">bin</tt> directory. Then execute <tt class="literal">./run.sh</tt> (or <tt class="literal">run.bat</tt> on Windows) and you should see the following output </p><pre class="programlisting">
+         bin$ ./run.sh
+         
+         15:05:54,108 INFO  @main [HornetQBootstrapServer] Starting HornetQ server
+         ...
+         15:06:02,566 INFO  @main [HornetQServerImpl] HornetQ Server version 
+         2.0.0.CR3 (yellowjacket, 111) started
+      </pre><p>HornetQ is now running.</p><p>Both the run and the stop scripts use the config under <tt class="literal">config/stand-alone/non-clustered</tt> by default. The configuration can be changed
+         by running <tt class="literal">./run.sh ../config/stand-alone/clustered</tt> or another config of
+         your choosing. This is the same for the stop script and the windows bat files.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as5"></a>6.2.&nbsp;HornetQ In JBoss AS 5.x</h2></div></div><div></div></div><p>To run HornetQ in JBoss AS 5, you need to create the <a href="#installation.jboss.as5" title="5.3.&nbsp;HornetQ In JBoss Application Server 5.x">AS 5 profiles for HornetQ</a> first. Then run JBoss
+         AS 5 with one these profiles. For example, to run JBoss AS 5 with a
+            <span class="emphasis"><em>non-clustered</em></span> HornetQ server, got to <tt class="literal">$JBOSS_HOME/bin</tt> directory and type:</p><pre class="programlisting">
+        bin$ ./run.sh -c default-with-hornetq
+        
+        15:18:35,460 INFO  [ServerImpl] Starting JBoss (Microcontainer)...
+        15:18:35,462 INFO  [ServerImpl] Release ID: JBoss (Microcontainer) [5.1.0.GA (build: SVNTag=
+        JBoss_5_1_0_GA date=200905221053)
+        ...
+        15:19:30,305 INFO  [HornetQServerImpl] HornetQ Server version 
+        2.0.0.CR3 (yellowjacket, 111) started
+        ...
+        15:19:43,601 INFO  [ServerImpl] JBoss (Microcontainer) [5.1.0.GA (build: SVNTag=
+        JBoss_5_1_0_GA date=200905221053)]Started in 1m:14s:556ms
+      </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as4"></a>6.3.&nbsp;HornetQ In JBoss AS 4.x</h2></div></div><div></div></div><p>To run HornetQ in JBoss AS 4 you must follow the same steps described for AS5 without
+         forgetting to create the <a href="#installation.jboss.as4" title="5.4.&nbsp;HornetQ In JBoss Application Server 4.x">AS 4 profiles for
+            HornetQ</a> first. </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as6"></a>6.4.&nbsp;HornetQ In JBoss AS 6.0</h2></div></div><div></div></div><p>From JBoss AS 6.0 M3 onwards, HornetQ is the default (built-in) JMS provider in JBoss AS, so there's no need to install it - it's already there.</p></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="examples"></a>Chapter&nbsp;7.&nbsp;Running the Examples</h2></div></div><div></div></div><p>In the directory <tt class="literal">examples</tt> there are 2 sets of examples, these are </p><div class="itemizedlist"><ul type="disc"><li><p>JMS Examples - these demonstrate functionality while sending and consumng JMS
+            messages.</p></li><li><p>Java EE Examples - these demonstrate application server integration, e.g. MDBs, EJBs,
+            Servlets, etc.</p></li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.jms"></a>7.1.&nbsp;The JMS examples</h2></div></div><div></div></div><p>The JMS Examples all follow the same format. Each examples is contained in its own
+         directory which contains the following.</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">build.xml</tt></p><p>This is the ant build file used to run the example</p></li><li><p><tt class="literal">src</tt> directory</p><p>This contains the source code for the example</p></li><li><p><tt class="literal">server0</tt> configuration directory</p><p>This contains the configuration files needed to run the server for the example.
+               There may be multiple configuration directories <tt class="literal">server0</tt>, <tt class="literal">server1</tt> etc for clustered examples etc.</p></li></ul></div><p>Each example will start one or more stand-alone servers and stop them after the example
+         has completed.</p><p>As a quick start we'll run the queue example. For all other examples refer to the main
+         user manual.</p><p>Firstly open a Shell or a Command prompt and navigate to the <tt class="literal">examples/jms/queue</tt> directory.</p><p>Type the command <tt class="literal">./build.sh</tt> (or <tt class="literal">build.bat</tt> if you
+         are running on Windows), and you should see the following output:</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+     [echo] src.example.dir=/home/andy/projects/hornetq/trunk/examples/jms/queue/src
+    [javac] Compiling 5 source files to /home/andy/projects/hornetq/trunk/examples/jms/queue
+/build/classes
+
+runExample:
+     [java] 10:41:04,149 INFO  @main [JMSExample] hornetq.example.runServer is true
+     [java] 10:41:04,149 INFO  @main [JMSExample] starting server with config 'server0'
+ logServerOutput true
+     [java] 10:41:04,149 INFO  @main [JMSExample] and vm args: -Xms512M,-Xmx512M,-XX:+U
+seParallelGC,-XX:+AggressiveOpts,-XX:+UseFastAccessorMethods,-Djava.util.logging.config.
+file=/home/andy/projects/hornetq/trunk/examples/jms/common/../../../src/config/stand-alone/no
+n-clustered/logging.properties
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 INFO  @main [Journal
+StorageManager] AIO journal selected
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Journal
+StorageManager] AIO wasn't located on this platform, it will fall back to using pure Jav
+a NIO. If your platform is Linux, install LibAIO to enable the AIO journal
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Securit
+yStoreImpl] It has been detected that the cluster admin password which is used to replic
+ate management operation from one node to the other has not had its password changed fro
+m the installation default. Please see the HornetQ user guide for instructions o
+n how to do this.
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/ConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/XAConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [Messagi
+ngServerImpl] HornetQ Server version 2.0.0.BETA5 (buzz-buzz, 107) started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [HornetQBoot
+strapServer] HornetQ server started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:STARTED::
+     [java] 10:41:11,276 INFO  @main [JMSExample] using server0/client-jndi.properties f
+or jndi
+     [java] Sent message: This is a text message
+     [java] Received message: This is a text message
+     [java] 
+     [java] #####################
+     [java] ###    SUCCESS!   ###
+     [java] #####################
+
+BUILD SUCCESSFUL
+Total time: 13 seconds
+</pre><p>Congratulations! You have successfully run your first HornetQ example. Try some of the
+         others.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.messaging"></a>7.2.&nbsp;The Java EE Examples</h2></div></div><div></div></div><p>The Java EE Examples are examples that require a JEE application server to run. They
+         include MDB, Servlet, EJB examples etc. For this you will need the JBoss Application Server
+         installed. How to do this is explained in the previous chapters.</p><p>We'll use the MDB example for the purposes of this guide. For the other examples refer
+         to the user guide. Before going any further ensure that the JBoss Application Server is
+         running.</p><p>Like the other Java EE examples the MDB example is a JEE Application which first needs
+         deploying in the JBoss Application Server. The first thing we need to do is set the
+            <tt class="literal">JBOSS_HOME</tt> environment property to the location of the JBoss
+         Application Server, in a Linux shell this would be something like:</p><pre class="programlisting">export JBOSS_HOME=/home/jbossas5.1/build/output/jboss-5.1.0.GA</pre><p>Once set we can then deploy the application, from inside the <tt class="literal">examples/javaee/mdb</tt> directory run the command:</p><pre class="programlisting">./build.sh deploy</pre><p>This will make a copy of the messaging profile in the JBoss Application server and start
+         the server.</p><p>In the shell window you should see something like the following output:</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+deploy:
+
+deploy-resources:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+
+init:
+
+compile:
+
+jar:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.jar
+
+ear:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.ear
+
+deploy-ear:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+
+     .......
+
+
+     [exec] 16:01:04,607 INFO  [JBossASKernel] 	Class:javax.jms.MessageListener
+     [exec] 16:01:04,607 INFO  [JBossASKernel] Added bean(jboss.j2ee:ear=mdb-example.ear,
+     jar=mdb-example.jar,name=MessageMDBExample,service=EJB3) to KernelDeployment of: 
+     mdb-example.jar
+     [exec] 16:01:04,702 INFO  [EJBContainer] STARTED EJB: org.hornetq.javaee.example.server
+     .MDBExample ejbName: MessageMDBExample
+     [exec] 16:01:09,496 INFO  [TomcatDeployment] deploy, ctxPath=/mdb-example
+     [exec] 16:01:09,812 WARNING [config] Unable to process deployment descriptor for cont
+     ext '/mdb-example'
+     [exec] 16:01:09,812 INFO  [config] Initializing Mojarra (1.2_12-b01-FCS) for context 
+     '/mdb-example'
+     [exec] 16:01:09,958 INFO  [Http11Protocol] Starting Coyote HTTP/1.1 on http-127.0.0.1-
+     8080
+     [exec] 16:01:09,990 INFO  [AjpProtocol] Starting Coyote AJP/1.3 on ajp-127.0.0.1-8009
+     [exec] 16:01:10,001 INFO  [ServerImpl] JBoss (Microcontainer) [5.1.0.GA (build: SVNTag
+     =JBoss_5_1_0_GA date=200905151005)] Started in 6m:21s:797ms
+
+</pre><p>We can now run the example, do this by running the following command from within the
+            <tt class="literal">mdb</tt> directory.</p><pre class="programlisting">./build.sh</pre><p>You should see some output similar to the following:</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+
+runExample:
+     [java] Sent message: This is a text message
+
+BUILD SUCCESSFUL
+Total time: 7 seconds</pre><p>You may also see some output from the JBoss Application Server, in this instance it
+         is:</p><pre class="programlisting">16:27:54,703 INFO  [STDOUT] message This is a text message received</pre><p>The application can then be undeployed by running the following command from within the
+            <tt class="literal">mdb</tt> directory.</p><pre class="programlisting">./build.sh undeploy</pre><p>This should so some output similar to the following:</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+undeploy:
+
+undeploy-misc:
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/mdb-example.ear
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-queues.xml
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-jms.xml
+
+BUILD SUCCESSFUL
+Total time: 1 second
+</pre><p>You can verify that the application has been undeployed by checking the output from the
+         JBoss Application Server, in this instance it will be something like:</p><pre class="programlisting">16:36:45,277 INFO  [EJBContainer] STOPPED EJB: org.jboss.javaee.example.server.MDBExample 
+         ejbName: MessageMDBExample
+</pre><p>Congratulations! you have successfully deployed and run a Java EE example.</p></div></div></div></body></html>

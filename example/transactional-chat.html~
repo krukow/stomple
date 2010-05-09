@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Stomp test</title>
+    
+    <!--  INIT -->
+    <script type="text/javascript" src="../src/stomple.js"></script>    
+</head>
+<body><p>
+	<label for="inputText">Message: </label>
+		<input type="text" id="inputText" onkeydown='handleKeyDown(arguments[0]);'>
+	<br>
+	<button id="sendBtn" onclick='sendMsg();'>Send</button>
+	<button id="resetBtn" onclick='reset();'>Reset</button>
+	<button id="beginBtn" onclick='begin();'>Begin transaction</button>
+	<button id="commitBtn" onclick='commit();'>Commit transaction</button>
+	<button id="abortBtn" onclick='abort();'>Abort transaction</button>
+	<p>
+	Chat:<br>
+	<div id="content"></div>
+	<script type="text/javascript">
+
+
+	  function begin() {
+		client.begin({});
+	  }
+	  function commit() {
+		client.commit({});
+	  }
+	  function abort() {
+		  client.abort({});
+	  }
+	  function reset() {
+		  document.getElementById('inputText').value = '';
+		  document.getElementById('content').innerHTML = '';
+	  }
+      var handleKeyDown = function (e) {
+		 e = e || window.event;
+		 var kc = e.keyCode,
+		 	 ki = e.keyIdentifier;
+		 if ((ki && ki.toLowerCase() === "enter") || (kc === 13)) {
+			sendMsg();
+			document.getElementById('inputText').value = '';
+	     }
+      }
+	  function sendMsg() {
+		var i = document.getElementById('inputText');
+		client.send({
+			body: client.session+": "+i.value,
+		});
+	  }
+	  if (!Stomple) {
+		  document.getElementById('content').innerHTML = "Your browser doesn't support Stomple";
+		  document.getElementById('sendBtn').disabled = true;
+		  document.getElementById('resetBtn').disabled = true;
+		  document.getElementById('beginBtn').disabled = true;
+		  document.getElementById('commitBtn').disabled = true;
+		  document.getElementById('abortBtn').disabled = true;
+		  document.getElementById('inputText').readonly = true;
+		  handleKeyDown = function(){};
+	  } else {
+		  var client = Stomple.create_client({
+			  url: "ws://localhost:61614/stomp",
+			  destination: "jms.topic.chat",
+			  login: "guest",
+			  passcode: "guest"
+		  });
+		  var msgHandler = {
+				fn: function(msg) {
+				  	var c = document.getElementById('content');
+					c.innerHTML = c.innerHTML + '<br>' + msg.body;
+				}
+		  };
+		  client.subscribe({
+			handler: msgHandler.fn,
+			scope: msgHandler,
+			
+			success: function() {//did subscription succeed?
+				console.log("sub ok..");
+			},
+			failure: function() {//did subscription fail?
+				console.log("sub fail");
+			} 
+		  });
+		  document.getElementById('inputText').focus();
+
+	  }
+
+	  
+	  
+	</script>    
+</body>
+</html>

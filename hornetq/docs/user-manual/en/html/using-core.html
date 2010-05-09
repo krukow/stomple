@@ -1,0 +1,97 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;8.&nbsp;Using Core</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="using-jms.html" title="Chapter&nbsp;7.&nbsp;Using JMS"><link rel="next" href="jms-core-mapping.html" title="Chapter&nbsp;9.&nbsp;Mapping JMS Concepts to the Core API"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;8.&nbsp;Using Core</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="using-jms.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="jms-core-mapping.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="using-core"></a>Chapter&nbsp;8.&nbsp;Using Core</h2></div></div><div></div></div><p>HornetQ core is a completely JMS-agnostic messaging system with its own non-JMS API. We
+        call this the <span class="emphasis"><em>core API</em></span>.</p><p>If you don't want to use JMS you can use the core API directly. The core API provides all
+        the functionality of JMS but without much of the complexity. It also provides features that
+        are not available using JMS.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1294"></a>8.1.&nbsp;Core Messaging Concepts</h2></div></div><div></div></div><p>Some of the core messaging concepts are similar to JMS concepts, but core messaging
+            concepts differ in some ways. In general the core messaging API is simpler than the JMS
+            API, since we remove distinctions between queues, topics and subscriptions. We'll
+            discuss each of the major core messaging concepts in turn, but to see the API in detail,
+            please consult the Javadoc.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1299"></a>8.1.1.&nbsp;Message</h3></div></div><div></div></div><div class="itemizedlist"><ul type="disc"><li><p>A message is the unit of data which is sent between clients and
+                        servers.</p></li><li><p>A message has a body which is a buffer containing convenient methods for
+                        reading and writing data into it.</p></li><li><p>A message has a set of properties which are key-value pairs. Each property
+                        key is a string and property values can be of type integer, long, short,
+                        byte, byte[], String, double, float or boolean.</p></li><li><p>A message has an <span class="emphasis"><em>address</em></span> it is being sent to. When
+                        the message arrives on the server it is routed to any queues that are bound
+                        to the address - if the queues are bound with any filter, the message will
+                        only be routed to that queue if the filter matches. An address may have many
+                        queues bound to it or even none. There may also be entities other than
+                        queues, like <span class="italic">diverts</span> bound to
+                        addresses.</p></li><li><p>Messages can be either durable or non durable. Durable messages in a
+                        durable queue will survive a server crash or restart. Non durable messages
+                        will never survive a server crash or restart.</p></li><li><p>Messages can be specified with a priority value between 0 and 9. 0
+                        represents the lowest priority and 9 represents the highest. HornetQ will
+                        attempt to deliver higher priority messages before lower priority
+                        ones.</p></li><li><p>Messages can be specified with an optional expiry time. HornetQ will not
+                        deliver messages after its expiry time has been exceeded.</p></li><li><p>Messages also have an optional timestamp which represents the time the
+                        message was sent.</p></li><li><p>HornetQ also supports the sending/consuming of very large messages - much
+                        larger than can fit in available RAM at any one time.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1336"></a>8.1.2.&nbsp;Address</h3></div></div><div></div></div><p>A server maintains a mapping between an address and a set of queues. Zero or more
+                queues can be bound to a single address. Each queue can be bound with an optional
+                message filter. When a message is routed, it is routed to the set of queues bound to
+                the message's address. If any of the queues are bound with a filter expression, then
+                the message will only be routed to the subset of bound queues which match that
+                filter expression.</p><p>Other entities, such as <span class="italic">diverts</span> can also be
+                bound to an address and messages will also be routed there.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>In core, there is no concept of a Topic, Topic is a JMS only term. Instead, in
+                    core, we just deal with <span class="emphasis"><em>addresses</em></span> and
+                        <span class="emphasis"><em>queues</em></span>.</p><p>For example, a JMS topic would implemented by a single address to which many
+                    queues are bound. Each queue represents a subscription of the topic. A JMS Queue
+                    would be implemented as a single address to which one queue is bound - that
+                    queue represents the JMS queue.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1357"></a>8.1.3.&nbsp;Queue</h3></div></div><div></div></div><p>Queues can be durable, meaning the messages they contain survive a server crash or
+                restart, as long as the messages in them are durable. Non durable queues do not
+                survive a server restart or crash even if the messages they contain are
+                durable.</p><p>Queues can also be temporary, meaning they are automatically deleted when the
+                client connection is closed, if they are not explicitly deleted before that.</p><p>Queues can be bound with an optional filter expression. If a filter expression is
+                supplied then the server will only route messages that match that filter expression
+                to any queues bound to the address.</p><p>Many queues can be bound to a single address. A particular queue is only bound to
+                a maximum of one address.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1368"></a>8.1.4.&nbsp;ClientSessionFactory</h3></div></div><div></div></div><p>Clients use <tt class="literal">ClientSessionFactory</tt> instances to create <tt class="literal">ClientSession</tt> instances. <tt class="literal">ClientSessionFactory</tt>
+                instances know how to connect to the server to create sessions, and are configurable
+                with many settings.</p><p><tt class="literal">ClientSessionFactory</tt> instances are created using the <tt class="literal">HornetQClient</tt> factory class.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1389"></a>8.1.5.&nbsp;ClientSession</h3></div></div><div></div></div><p>A client uses a ClientSession for consuming and producing messages and for
+                grouping them in transactions. ClientSession instances can support both
+                transactional and non transactional semantics and also provide an <tt class="literal">XAResource</tt> interface so messaging operations can be performed as part
+                of a <a href="http://java.sun.com/javaee/technologies/jta/index.jsp" target="_top">JTA</a>
+                transaction.</p><p>ClientSession instances group ClientConsumers and ClientProducers.</p><p>ClientSession instances can be registered with an optional <tt class="literal">SendAcknowledgementHandler</tt>. This allows your client code to be
+                notified asynchronously when sent messages have successfully reached the server.
+                This unique HornetQ feature, allows you to have full guarantees that sent messages
+                have reached the server without having to block on each message sent until a
+                response is received. Blocking on each messages sent is costly since it requires a
+                network round trip for each message sent. By not blocking and receiving send
+                acknowledgements asynchronously you can create true end to end asynchronous systems
+                which is not possible using the standard JMS API. For more information on this
+                advanced feature please see the section <a href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits">Chapter&nbsp;20, <i>Guarantees of sends and commits</i></a>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1409"></a>8.1.6.&nbsp;ClientConsumer</h3></div></div><div></div></div><p>Clients use <tt class="literal">ClientConsumer</tt> instances to consume messages from a
+                queue. Core Messaging supports both synchronous and asynchronous message consumption
+                semantics. <tt class="literal">ClientConsumer</tt> instances can be configured with an
+                optional filter expression and will only consume messages which match that
+                expression.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1420"></a>8.1.7.&nbsp;ClientProducer</h3></div></div><div></div></div><p>Clients create <tt class="literal">ClientProducer</tt> instances on <tt class="literal">ClientSession</tt> instances so they can send messages. ClientProducer
+                instances can specify an address to which all sent messages are routed, or they can
+                have no specified address, and the address is specified at send time for the
+                message.</p></div><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>Please note that ClientSession, ClientProducer and ClientConsumer instances are
+                <span class="emphasis"><em>designed to be re-used</em></span>.</p><p>It's an anti-pattern to create new ClientSession, ClientProducer and ClientConsumer instances
+                for each message you produce or consume. If you do this, your application will
+                perform very poorly. This is discussed further in the section on performance tuning
+                <a href="perf-tuning.html" title="Chapter&nbsp;46.&nbsp;Performance Tuning">Chapter&nbsp;46, <i>Performance Tuning</i></a>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e1441"></a>8.2.&nbsp;A simple example of using Core</h2></div></div><div></div></div><p>Here's a very simple program using the core messaging API to send and receive a
+            message:</p><pre class="programlisting">
+ClientSessionFactory factory =  HornetQClient.createClientSessionFactory(
+                                        new TransportConfiguration(
+                                           InVMConnectorFactory.class.getName()));
+
+ClientSession session = factory.createSession();
+
+session.createQueue("example", "example", true);
+
+ClientProducer producer = session.createProducer("example");
+
+ClientMessage message = session.createMessage(true);
+
+message.getBodyBuffer().writeString("Hello");
+
+producer.send(message);
+
+session.start();
+
+ClientConsumer consumer = session.createConsumer("example");
+
+ClientMessage msgReceived = consumer.receive();
+
+System.out.println("message = " + msgReceived.getBodyBuffer().readString());
+
+session.close();</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="using-jms.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="jms-core-mapping.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;7.&nbsp;Using JMS&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;9.&nbsp;Mapping JMS Concepts to the Core API</td></tr></table></div></body></html>

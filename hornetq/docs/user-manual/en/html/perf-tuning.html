@@ -1,0 +1,129 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;46.&nbsp;Performance Tuning</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="interoperability.html" title="Chapter&nbsp;45.&nbsp;Interoperability"><link rel="next" href="configuration-index.html" title="Chapter&nbsp;47.&nbsp;Configuration Reference"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;46.&nbsp;Performance Tuning</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="interoperability.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="configuration-index.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="perf-tuning"></a>Chapter&nbsp;46.&nbsp;Performance Tuning</h2></div></div><div></div></div><p>In this chapter we'll discuss how to tune HornetQ for optimum performance.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11040"></a>46.1.&nbsp;Tuning persistence</h2></div></div><div></div></div><div class="itemizedlist"><ul type="disc"><li><p>Put the message journal on its own physical volume. If the disk is shared with
+                    other processes e.g. transaction co-ordinator, database or other journals which
+                    are also reading and writing from it, then this may greatly reduce performance
+                    since the disk head may be skipping all over the place between the different
+                    files. One of the advantages of an append only journal is that disk head
+                    movement is minimised - this advantage is destroyed if the disk is shared. If
+                    you're using paging or large messages make sure they're ideally put on separate
+                    volumes too.</p></li><li><p>Minimum number of journal files. Set <tt class="literal">journal-min-files</tt> to a
+                    number of files that would fit your average sustainable rate. If you see new
+                    files being created on the journal data directory too often, i.e. lots of data
+                    is being persisted, you need to increase the minimal number of files, this way
+                    the journal would reuse more files instead of creating new data files.</p></li><li><p>Journal file size. The journal file size should be aligned to the capacity of
+                    a cylinder on the disk. The default value 10MiB should be enough on most
+                    systems.</p></li><li><p>Use AIO journal. If using Linux, try to keep your journal type as AIO. AIO
+                    will scale better than Java NIO.</p></li><li><p>Tune <tt class="literal">journal-buffer-timeout</tt>. The timeout can be increased
+                    to increase throughput at the expense of latency.</p></li><li><p>If you're running AIO you might be able to get some better performance by
+                    increasing <tt class="literal">journal-max-io</tt>. DO NOT change this parameter if
+                    you are running NIO.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11071"></a>46.2.&nbsp;Tuning JMS</h2></div></div><div></div></div><p>There are a few areas where some tweaks can be done if you are using the JMS
+            API</p><div class="itemizedlist"><ul type="disc"><li><p>Disable message id. Use the <tt class="literal">setDisableMessageID()</tt> method on
+                    the <tt class="literal">MessageProducer</tt> class to disable message ids if you don't
+                    need them. This decreases the size of the message and also avoids the overhead
+                    of creating a unique ID.</p></li><li><p>Disable message timestamp. Use the <tt class="literal">setDisableMessageTimeStamp()</tt> method on the <tt class="literal">MessageProducer</tt> class to disable message timestamps if you don't
+                    need them.</p></li><li><p>Avoid <tt class="literal">ObjectMessage</tt>. <tt class="literal">ObjectMessage</tt> is
+                    convenient but it comes at a cost. The body of a <tt class="literal">ObjectMessage</tt> uses Java serialization to serialize it to bytes.
+                    The Java serialized form of even small objects is very verbose so takes up a lot
+                    of space on the wire, also Java serialization is slow compared to custom
+                    marshalling techniques. Only use <tt class="literal">ObjectMessage</tt> if you really
+                    can't use one of the other message types, i.e. if you really don't know the type
+                    of the payload until run-time.</p></li><li><p>Avoid <tt class="literal">AUTO_ACKNOWLEDGE</tt>. <tt class="literal">AUTO_ACKNOWLEDGE</tt>
+                    mode requires an acknowledgement to be sent from the server for each message
+                    received on the client, this means more traffic on the network. If you can, use
+                        <tt class="literal">DUPS_OK_ACKNOWLEDGE</tt> or use <tt class="literal">CLIENT_ACKNOWLEDGE</tt> or a transacted session and batch up many
+                    acknowledgements with one acknowledge/commit. </p></li><li><p>Avoid durable messages. By default JMS messages are durable. If you don't
+                    really need durable messages then set them to be non-durable. Durable messages
+                    incur a lot more overhead in persisting them to storage.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11128"></a>46.3.&nbsp;Other Tunings</h2></div></div><div></div></div><p>There are various other places in HornetQ where we can perform some tuning:</p><div class="itemizedlist"><ul type="disc"><li><p>Use Asynchronous Send Acknowledgements. If you need to send durable messages
+                    non transactionally and you need a guarantee that they have reached the server
+                    by the time the call to send() returns, don't set durable messages to be sent
+                    blocking, instead use asynchronous send acknowledgements to get your
+                    acknowledgements of send back in a separate stream, see <a href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits">Chapter&nbsp;20, <i>Guarantees of sends and commits</i></a> for more information on this.</p></li><li><p>Use pre-acknowledge mode. With pre-acknowledge mode, messages are acknowledged
+                        <tt class="literal">before</tt> they are sent to the client. This reduces the
+                    amount of acknowledgement traffic on the wire. For more information on this, see
+                        <a href="pre-acknowledge.html" title="Chapter&nbsp;29.&nbsp;Pre-Acknowledge Mode">Chapter&nbsp;29, <i>Pre-Acknowledge Mode</i></a>.</p></li><li><p>Disable security. You may get a small performance boost by disabling security
+                    by setting the <tt class="literal">security-enabled</tt> parameter to <tt class="literal">false</tt> in <tt class="literal">hornetq-configuration.xml</tt>.</p></li><li><p>Disable persistence. If you don't need message persistence, turn it off
+                    altogether by setting <tt class="literal">persistence-enabled</tt> to false in
+                        <tt class="literal">hornetq-configuration.xml</tt>.</p></li><li><p>Sync transactions lazily. Setting <tt class="literal">journal-sync-transactional</tt> to <tt class="literal">false</tt> in
+                        <tt class="literal">hornetq-configuration.xml</tt> can give you better
+                    transactional persistent performance at the expense of some possibility of loss
+                    of transactions on failure. See <a href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits">Chapter&nbsp;20, <i>Guarantees of sends and commits</i></a> for more
+                    information.</p></li><li><p>Sync non transactional lazily. Setting <tt class="literal">journal-sync-non-transactional</tt> to <tt class="literal">false</tt> in
+                        <tt class="literal">hornetq-configuration.xml</tt> can give you better
+                    non-transactional persistent performance at the expense of some possibility of
+                    loss of durable messages on failure. See <a href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits">Chapter&nbsp;20, <i>Guarantees of sends and commits</i></a> for
+                    more information.</p></li><li><p>Send messages non blocking. Setting <tt class="literal">block-on-durable-send</tt>
+                    and <tt class="literal">block-on-non-durable-send</tt> to <tt class="literal">false</tt> in
+                        <tt class="literal">hornetq-jms.xml</tt> (if you're using JMS and JNDI) or
+                    directly on the ClientSessionFactory. This means you don't have to wait a whole
+                    network round trip for every message sent. See <a href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits">Chapter&nbsp;20, <i>Guarantees of sends and commits</i></a>
+                    for more information.</p></li><li><p>Socket NIO vs Socket Old IO. By default HornetQ uses Socket NIO on the server
+                    and old (blocking) IO on the client side (see the chapter on configuring
+                    transports for more information <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>). NIO
+                    is much more scalable but can give you some latency hit compared to old blocking
+                    IO. If you expect to be able to service many thousands of connections on the
+                    server, then continue to use NIO on the server. However, if don't expect many
+                    thousands of connections on the server you can configure the server acceptors to
+                    use old IO, and might get a small performance advantage.</p></li><li><p>Use the core API not JMS. Using the JMS API you will have slightly lower
+                    performance than using the core API, since all JMS operations need to be
+                    translated into core operations before the server can handle them. If using the
+                    core API try to use methods that take <tt class="literal">SimpleString</tt> as much as
+                    possible. <tt class="literal">SimpleString</tt>, unlike java.lang.String does not
+                    require copying before it is written to the wire, so if you re-use <tt class="literal">SimpleString</tt> instances between calls then you can avoid some
+                    unnecessary copying.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11230"></a>46.4.&nbsp;Tuning Transport Settings</h2></div></div><div></div></div><div class="itemizedlist"><ul type="disc"><li><p>Enable <a href="http://en.wikipedia.org/wiki/Nagle's_algorithm" target="_top">Nagle's
+                        algorithm</a>. If you are sending many small messages, such that more
+                    than one can fit in a single IP packet thus providing better performance. This
+                    is done by setting <tt class="literal">tcp-no-delay</tt> to false with the Netty
+                    transports. See <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a> for more information on
+                    this. </p><p>Enabling Nagle's algorithm can make a very big difference in performance and
+                    is highly recommended if you're sending a lot of asynchronous traffice.</p></li><li><p>TCP buffer sizes. If you have a fast network and fast machines you may get a
+                    performance boost by increasing the TCP send and receive buffer sizes. See the
+                        <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a> for more information on this.
+                </p></li><li><p>Increase limit on file handles on the server. If you expect a lot of
+                    concurrent connections on your servers, or if clients are rapidly opening and
+                    closing connections, you should make sure the user running the server has
+                    permission to create sufficient file handles.</p><p>This varies from operating system to operating system. On Linux systems you
+                    can increase the number of allowable open file handles in the file <tt class="literal">/etc/security/limits.conf</tt> e.g. add the lines
+                    </p><pre class="programlisting">
+serveruser     soft    nofile  20000
+serveruser     hard    nofile  20000                   
+                </pre><p>
+                    This would allow up to 20000 file handles to be open by the user <tt class="literal">serveruser</tt>. </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11266"></a>46.5.&nbsp;Tuning the VM</h2></div></div><div></div></div><p>We highly recommend you use the latest Java JVM for the best performance. We test internally using the
+            Sun JVM, so some of these tunings won't apply to JDKs from other providers (e.g. IBM or
+            JRockit)</p><div class="itemizedlist"><ul type="disc"><li><p>Garbage collection. For smooth server operation we recommend using a parallel
+                    garbage collection algorithm, e.g. using the JVM argument <tt class="literal">-XX:+UseParallelGC</tt> on Sun JDKs.</p></li><li><p><a name="perf-tuning.memory"></a>Memory settings. Give as much memory as you can to the server. HornetQ can run
+                    in low memory by using paging (described in <a href="paging.html" title="Chapter&nbsp;24.&nbsp;Paging">Chapter&nbsp;24, <i>Paging</i></a>) but if it
+                    can run with all queues in RAM this will improve performance. The amount of
+                    memory you require will depend on the size and number of your queues and the
+                    size and number of your messages. Use the JVM arguments <tt class="literal">-Xms</tt>
+                    and <tt class="literal">-Xmx</tt> to set server available RAM. We recommend setting
+                    them to the same high value.</p><p>HornetQ will regularly sample JVM memory and reports if the available memory
+                    is below a configurable threshold. Use this information to properly set JVM
+                    memory and paging. The sample is disabled by default. To enabled it, configure
+                    the sample frequency by setting <tt class="literal">memory-measure-interval</tt> in
+                        <tt class="literal">hornetq-configuration.xml</tt> (in milliseconds). When the
+                    available memory goes below the configured threshold, a warning is logged. The
+                    threshold can be also configured by setting <tt class="literal">memory-warning-threshold</tt> in <tt class="literal">hornetq-configuration.xml</tt> (default is 25%).</p></li><li><p>Aggressive options. Different JVMs provide different sets of JVM tuning
+                    parameters, for the Sun Hotspot JVM the full list of options is available <a href="http://java.sun.com/javase/technologies/hotspot/vmoptions.jsp" target="_top">here</a>. We recommend at least using <tt class="literal">-XX:+AggressiveOpts</tt> and<tt class="literal">
+                        -XX:+UseFastAccessorMethods</tt>. You may get some mileage with the
+                    other tuning parameters depending on your OS platform and application usage
+                    patterns.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11315"></a>46.6.&nbsp;Avoiding Anti-Patterns</h2></div></div><div></div></div><div class="itemizedlist"><ul type="disc"><li><p>Re-use connections / sessions / consumers / producers. Probably the most
+                    common messaging anti-pattern we see is users who create a new
+                    connection/session/producer for every message they send or every message they
+                    consume. This is a poor use of resources. These objects take time to create and
+                    may involve several network round trips. Always re-use them.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Some popular libraries such as the Spring JMS Template are known to use
+                        these anti-patterns. If you're using Spring JMS Template and you're getting
+                        poor performance you know why. Don't blame HornetQ!</p></div></li><li><p>Avoid fat messages. Verbose formats such as XML take up a lot of space on the
+                    wire and performance will suffer as result. Avoid XML in message bodies if you
+                    can.</p></li><li><p>Don't create temporary queues for each request. This common anti-pattern
+                    involves the temporary queue request-response pattern. With the temporary queue
+                    request-response pattern a message is sent to a target and a reply-to header is
+                    set with the address of a local temporary queue. When the recipient receives the
+                    message they process it then send back a response to the address specified in
+                    the reply-to. A common mistake made with this pattern is to create a new
+                    temporary queue on each message sent. This will drastically reduce performance.
+                    Instead the temporary queue should be re-used for many requests.</p></li><li><p>Don't use Message-Driven Beans for the sake of it. As soon as you start using
+                    MDBs you are greatly increasing the codepath for each message received compared
+                    to a straightforward message consumer, since a lot of extra application server
+                    code is executed. Ask yourself do you really need MDBs? Can you accomplish the
+                    same task using just a normal message consumer?</p></li></ul></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="interoperability.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="configuration-index.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;45.&nbsp;Interoperability&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;47.&nbsp;Configuration Reference</td></tr></table></div></body></html>

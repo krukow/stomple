@@ -1,0 +1,56 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;21.&nbsp;Message Redelivery and Undelivered Messages</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="send-guarantees.html" title="Chapter&nbsp;20.&nbsp;Guarantees of sends and commits"><link rel="next" href="message-expiry.html" title="Chapter&nbsp;22.&nbsp;Message Expiry"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;21.&nbsp;Message Redelivery and Undelivered Messages</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="send-guarantees.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="message-expiry.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="undelivered-messages"></a>Chapter&nbsp;21.&nbsp;Message Redelivery and Undelivered Messages</h2></div></div><div></div></div><p>Messages can be delivered unsuccessfully (e.g. if the transacted session used to consume
+      them is rolled back). Such a message goes back to its queue ready to be redelivered. However,
+      this means it is possible for a message to be delivered again and again without any success
+      and remain in the queue, clogging the system.</p><p>There are 2 ways to deal with these undelivered messages:</p><div class="itemizedlist"><ul type="disc"><li><p>Delayed redelivery.</p><p>It is possible to delay messages redelivery to let the client some time to recover
+            from transient failures and not overload its network or CPU resources</p></li><li><p>Dead Letter Address.</p><p>It is also possible to configure a dead letter address so that after a specified
+            number of unsuccessful deliveries, messages are removed from the queue and will not be
+            delivered again</p></li></ul></div><p>Both options can be combined for maximum flexibility.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4020"></a>21.1.&nbsp;Delayed Redelivery</h2></div></div><div></div></div><p>Delaying redelivery can often be useful in the case that clients regularly fail or
+         rollback. Without a delayed redelivery, the system can get into a "thrashing" state, with
+         delivery being attempted, the client rolling back, and delivery being re-attempted ad
+         infinitum in quick succession, consuming valuable CPU and network resources.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="undelivered-messages.delay"></a>21.1.1.&nbsp;Configuring Delayed Redelivery</h3></div></div><div></div></div><p>Delayed redelivery is defined in the address-setting configuration:</p><pre class="programlisting">
+     &lt;!-- delay redelivery of messages for 5s --&gt;
+     &lt;address-setting match="jms.queue.exampleQueue"&gt;
+        &lt;redelivery-delay&gt;5000&lt;/redelivery-delay&gt;
+     &lt;/address-setting&gt;
+             </pre><p>If a <tt class="literal">redelivery-delay</tt> is specified, HornetQ will wait this delay
+            before redelivering the messages</p><p>By default, there is no redelivery delay (<tt class="literal">redelivery-delay</tt>is set
+            to 0).</p><p>Address wildcards can be used to configure redelivery delay for a set of addresses
+            (see <a href="wildcard-syntax.html" title="Chapter&nbsp;13.&nbsp;Understanding the HornetQ Wildcard Syntax">Chapter&nbsp;13, <i>Understanding the HornetQ Wildcard Syntax</i></a>), so you don't have to specify redelivery delay
+            individually for each address.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e4046"></a>21.1.2.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.delayed-redelivery" title="11.1.12.&nbsp;Delayed Redelivery">Section&nbsp;11.1.12, &#8220;Delayed Redelivery&#8221;</a> for an example which shows how
+            delayed redelivery is configured and used with JMS.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4053"></a>21.2.&nbsp;Dead Letter Addresses</h2></div></div><div></div></div><p>To prevent a client infinitely receiving the same undelivered message (regardless of
+         what is causing the unsuccessful deliveries), messaging systems define <span class="italic">dead letter addresses</span>: after a specified unsuccessful delivery
+         attempts, the message is removed from the queue and send instead to a dead letter address. </p><p>Any such messages can then be diverted to queue(s) where they can later be perused by
+         the system administrator for action to be taken.</p><p>HornetQ's addresses can be assigned a dead letter address. Once the messages have be
+         unsuccessfully delivered for a given number of attempts, they are removed from the queue
+         and sent to the dead letter address. These <span class="emphasis"><em>dead letter</em></span> messages can
+         later be consumed for further inspection.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="undelivered-messages.configuring"></a>21.2.1.&nbsp;Configuring Dead Letter Addresses</h3></div></div><div></div></div><p>Dead letter address is defined in the address-setting configuration:</p><pre class="programlisting">
+     &lt;!-- undelivered messages in exampleQueue will be sent to the dead letter address 
+        deadLetterQueue after 3 unsuccessful delivery attempts
+      --&gt;
+     &lt;address-setting match="jms.queue.exampleQueue"&gt;
+        &lt;dead-letter-address&gt;jms.queue.deadLetterQueue&lt;/dead-letter-address&gt;
+        &lt;max-delivery-attempts&gt;3&lt;/max-delivery-attempts&gt;
+     &lt;/address-setting&gt;
+             </pre><p>If a <tt class="literal">dead-letter-address</tt> is not specified, messages will removed
+            after <tt class="literal">max-delivery-attempts</tt> unsuccessful attempts.</p><p>By default, messages are redelivered 10 times at the maximum. Set <tt class="literal">max-delivery-attempts</tt> to -1 for infinite redeliveries.</p><p>For example, a dead letter can be set globally for a set of matching addresses and
+            you can set <tt class="literal">max-delivery-attempts</tt> to -1 for a specific address
+            setting to allow infinite redeliveries only for this address.</p><p>Address wildcards can be used to configure dead letter settings for a set of
+            addresses (see <a href="wildcard-syntax.html" title="Chapter&nbsp;13.&nbsp;Understanding the HornetQ Wildcard Syntax">Chapter&nbsp;13, <i>Understanding the HornetQ Wildcard Syntax</i></a>).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e4097"></a>21.2.2.&nbsp;Dead Letter Properties</h3></div></div><div></div></div><p>Dead letter messages which are consumed from a dead letter address have the following
+            property:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">_HQ_ORIG_ADDRESS</tt></p><p>a String property containing the <span class="emphasis"><em>original address</em></span> of
+                  the dead letter message </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e4112"></a>21.2.3.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.dead-letter" title="11.1.11.&nbsp;Dead Letter">Section&nbsp;11.1.11, &#8220;Dead Letter&#8221;</a> for an example which shows how dead letter
+            is configured and used with JMS.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="configuring.delivery.count.persistence"></a>21.3.&nbsp;Delivery Count Persistence</h2></div></div><div></div></div><p>In normal use, HornetQ does not update delivery count <span class="emphasis"><em>persistently</em></span>
+         until a message is rolled back (i.e. the delivery count is not updated
+            <span class="emphasis"><em>before</em></span> the message is delivered to the consumer). In most messaging
+         use cases, the messages are consumed, acknowledged and forgotten as soon as they are
+         consumed. In these cases, updating the delivery count persistently before delivering the
+         message would add an extra persistent step <span class="emphasis"><em>for each message delivered</em></span>,
+         implying a significant performance penalty.</p><p>However, if the delivery count is not updated persistently before the message delivery
+         happens, in the event of a server crash, messages might have been delivered but that will
+         not have been reflected in the delivery count. During the recovery phase, the server will
+         not have knowledge of that and will deliver the message with <tt class="literal">redelivered</tt>
+         set to <tt class="literal">false</tt> while it should be <tt class="literal">true</tt>. </p><p>As this behavior breaks strict JMS semantics, HornetQ allows to persist delivery count
+         before message delivery but disabled it by default for performance implications.</p><p>To enable it, set <tt class="literal">persist-delivery-count-before-delivery</tt> to <tt class="literal">true</tt> in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+&lt;persist-delivery-count-before-delivery&gt;true&lt;/persist-delivery-count-before-delivery&gt;
+      </pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="send-guarantees.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="message-expiry.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;20.&nbsp;Guarantees of sends and commits&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;22.&nbsp;Message Expiry</td></tr></table></div></body></html>

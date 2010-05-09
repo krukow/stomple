@@ -1,0 +1,48 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;5.&nbsp;Installation</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ Quickstart Guide"><link rel="up" href="index.html" title="HornetQ Quickstart Guide"><link rel="previous" href="download.html" title="Chapter&nbsp;4.&nbsp;Download"><link rel="next" href="running.html" title="Chapter&nbsp;6.&nbsp;Starting The Server"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;5.&nbsp;Installation</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="download.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="running.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="installation"></a>Chapter&nbsp;5.&nbsp;Installation</h2></div></div><div></div></div><p>This section describes how to install HornetQ. </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.prerequisites"></a>5.1.&nbsp;Prerequisites</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>HornetQ only runs on Java 6 or later.</p></div><p>By default, HornetQ server runs with 1GiB of memory. If your computer has less memory,
+         or you want to run it with more available RAM, modify the value in <tt class="literal">bin/run.sh</tt> accordingly.</p><p>For persistence, HornetQ uses its own fast journal, which you can configure to use
+         libaio (which is the default when running on Linux) or Java NIO. In order to use the libaio
+         module on Linux, you'll need to install libaio, if it's not already installed.</p><p>If you're not running on Linux then you don't need to worry about this.</p><p>You can install libaio using the following steps as the root user:</p><p>Using yum, (e.g. on Fedora or Red Hat Enterprise Linux):</p><pre class="programlisting">yum install libaio</pre><p>Using aptitude, (e.g. on Ubuntu or Debian system):</p><pre class="programlisting">apt-get install libaio</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.standalone"></a>5.2.&nbsp;Stand-alone HornetQ Server</h2></div></div><div></div></div><p>After downloading the distribution, unzip it into your chosen directory. At this point
+         it should be possible to <a href="running.html#running.standalone" title="6.1.&nbsp;Standalone HornetQ">run straight out of the
+            box</a>, the following describes the directory structure: </p><pre class="programlisting">
+         |___ bin
+         |
+         |___ config
+         |      |___ jboss-as-4
+         |      |___ jboss-as-5
+         |      |___ stand-alone
+         |
+         |___ docs
+         |      |___ api
+         |      |___ quickstart-guide
+         |      |___ user-manual
+         |
+         |___ examples
+         |      |___ core
+         |      |___ javaee
+         |      |___ jms
+         |
+         |___ lib
+         |
+         |___ licenses
+         |
+         |___ schemas
+      </pre><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">bin</tt> -- binaries and scripts needed to run HornetQ.</p></li><li><p><tt class="literal">config</tt> -- configuration files needed to configure HornetQ. This
+               contains configurations to run HornetQ either in stand-alone or inside JBoss AS 4 and 5.
+               Please refer to the reference guide for details on configuration. </p></li><li><p><tt class="literal">docs</tt> -- guides and javadocs for HornetQ </p></li><li><p><tt class="literal">examples</tt> -- JMS and Java EE examples. Please refer to the
+               'running examples' chapter for details on how to run them. </p></li><li><p><tt class="literal">lib</tt> -- jars and libraries needed to run HornetQ </p></li><li><p><tt class="literal">licenses</tt> -- licenses for HornetQ </p></li><li><p><tt class="literal">schemas</tt> -- XML Schemas used to validate HornetQ configuration
+               files</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as5"></a>5.3.&nbsp;HornetQ In JBoss Application Server 5.x</h2></div></div><div></div></div><p>HornetQ can also be deployed in <a href="http://www.jboss.org/jbossas/" target="_top">JBoss AS
+            5</a>. It is not currently shipped by default with the application server (it is
+         scheduled to be shipped as default JMS provider in JBoss Application Server 6.0), so you
+         will need to create new AS 5 profiles to run AS 5 with HornetQ.</p><p>To create AS 5 profiles:</p><div class="orderedlist"><ol type="1"><li><p>Download JBoss AS 5</p></li><li><p>Set the environment property <tt class="literal">JBOSS_HOME</tt> to point to the
+               directory where you installed JBoss AS 5</p></li><li><p>run <tt class="literal">./build.sh</tt> (or <tt class="literal">build.bat</tt> if you are on
+               Windows) in HornetQ <tt class="literal">config/jboss-as-5</tt> directory</p></li></ol></div><p>This will create 2 new profiles in <tt class="literal">$JBOSS_HOME/server</tt>:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- it corresponds to AS 5 <tt class="literal">default</tt> profile with HornetQ as its JMS provider. In this profile,
+               HornetQ is <span class="emphasis"><em>non-clustered</em></span></p></li><li><p><tt class="literal">all-with-hornetq</tt> -- it corresponds to AS 5 <tt class="literal">all</tt> profile with HornetQ as its JMS provider. In this profile, HornetQ
+               is <span class="emphasis"><em>clustered</em></span></p></li></ul></div><p>You can then start JBoss AS 5 using one of these profiles, e.g. :</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as4"></a>5.4.&nbsp;HornetQ In JBoss Application Server 4.x</h2></div></div><div></div></div><p>As in AS 4, it is not shipped by default with the application server, so you will need
+         to create new AS 4 profiles to run AS 4 with HornetQ.</p><p>To create AS 4 profiles:</p><div class="orderedlist"><ol type="1"><li><p>Download JBoss AS 4</p></li><li><p>Set the environment property <tt class="literal">JBOSS_HOME</tt> to point to the
+               directory where you installed JBoss AS 4</p></li><li><p>run <tt class="literal">./build.sh</tt> (or <tt class="literal">build.bat as4</tt> if you
+                  are on Windows) in HornetQ <tt class="literal">config/jboss-as-4</tt>
+               directory</p></li></ol></div><p>This will create 2 new profiles in <tt class="literal">$JBOSS_HOME/server</tt>:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- it corresponds to AS 4 <tt class="literal">default</tt> profile with HornetQ as its JMS provider. In this profile,
+               HornetQ is <span class="emphasis"><em>non-clustered</em></span></p></li><li><p><tt class="literal">all-with-hornetq</tt> -- it corresponds to AS 4 <tt class="literal">all</tt> profile with HornetQ as its JMS provider. In this profile, HornetQ
+               is <span class="emphasis"><em>clustered</em></span></p></li></ul></div><p>You can then start JBoss AS 4 using one of these profiles:</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="download.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="running.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;4.&nbsp;Download&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;6.&nbsp;Starting The Server</td></tr></table></div></body></html>

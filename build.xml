@@ -1,0 +1,12 @@
+<project>
+        <taskdef name="jslint"
+	           classname="com.googlecode.jslint4java.ant.JSLintTask"
+	           classpath="dev/jslint4java-1.3.3.jar" />
+	<target name="jslint">
+	  <jslint options="undef,browser,eqeqeq,evil,forin" encoding="utf-8">
+	    <predef>WebSocket,console</predef>
+	    <formatter type="plain" />
+	    <fileset dir="src" includes="**/*.js" />
+	  </jslint>
+ 	</target>
+</project>

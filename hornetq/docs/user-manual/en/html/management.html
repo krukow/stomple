@@ -1,0 +1,349 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;30.&nbsp;Management</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="pre-acknowledge.html" title="Chapter&nbsp;29.&nbsp;Pre-Acknowledge Mode"><link rel="next" href="security.html" title="Chapter&nbsp;31.&nbsp;Security"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;30.&nbsp;Management</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="pre-acknowledge.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="security.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="management"></a>Chapter&nbsp;30.&nbsp;Management</h2></div></div><div></div></div><p>HornetQ has an extensive management API that allows a user to modify a server
+      configuration, create new resources (e.g. JMS queues and topics), inspect these resources
+      (e.g. how many messages are currently held in a queue) and interact with it (e.g. to remove
+      messages from a queue). All the operations allows a client to <span class="emphasis"><em>manage</em></span>
+      HornetQ. It also allows clients to subscribe to management notifications.</p><p>There are 3 ways to manage HornetQ:</p><div class="itemizedlist"><ul type="disc"><li><p>Using JMX -- JMX is the standard way to manage Java applications</p></li><li><p>Using the core API -- management operations are sent to HornetQ server using
+               <span class="emphasis"><em>core messages</em></span></p></li><li><p>Using the JMS API -- management operations are sent to HornetQ server using
+               <span class="emphasis"><em>JMS messages</em></span></p></li></ul></div><p>Although there are 3 different ways to manage HornetQ each API supports the same
+      functionality. If it is possible to manage a resource using JMX it is also possible to achieve
+      the same result using Core messages or JMS messages.</p><p>This choice depends on your requirements, your application settings and your environment to
+      decide which way suits you best.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e5363"></a>30.1.&nbsp;The Management API</h2></div></div><div></div></div><p>Regardless of the way you <span class="emphasis"><em>invoke</em></span> management operations, the
+         management API is the same.</p><p>For each <span class="emphasis"><em>managed resource</em></span>, there exists a Java interface describing
+         what can be invoked for this type of resource.</p><p>HornetQ exposes its managed resources in 2 packages:</p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>Core</em></span> resources are located in the <tt class="literal">org.hornetq.api.core.management</tt> package</p></li><li><p><span class="emphasis"><em>JMS</em></span> resources are located in the <tt class="literal">org.hornetq.api.jms.management</tt> package</p></li></ul></div><p>The way to invoke a <span class="emphasis"><em>management operations</em></span> depends whether JMX, core
+         messages, or JMS messages are used.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>A few management operations requires a <tt class="literal">filter</tt> parameter to chose
+            which messages are involved by the operation. Passing <tt class="literal">null</tt> or an
+            empty string means that the management operation will be performed on <span class="emphasis"><em>all
+               messages</em></span>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e5412"></a>30.1.1.&nbsp;Core Management API</h3></div></div><div></div></div><p>HornetQ defines a core management API to manage core resources. For full details of
+            the API please consult the javadoc. In summary:</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5417"></a>30.1.1.1.&nbsp;Core Server Management</h4></div></div><div></div></div><div class="itemizedlist"><ul type="disc"><li><p>Listing, creating, deploying and destroying queues</p><p>A list of deployed core queues can be retrieved using the <tt class="literal">getQueueNames()</tt> method.</p><p>Core queues can be created or destroyed using the management operations
+                        <tt class="literal">createQueue()</tt> or <tt class="literal">deployQueue()</tt> or
+                        <tt class="literal">destroyQueue()</tt>)on the <tt class="literal">HornetQServerControl</tt> (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=Server</tt> or the resource name <tt class="literal">core.server</tt>)</p><p><tt class="literal">createQueue</tt> will fail if the queue already exists while
+                        <tt class="literal">deployQueue</tt> will do nothing.</p></li><li><p>Pausing and resuming Queues</p><p>The <tt class="literal">QueueControl</tt> can pause and resume the underlying
+                     queue. When a queue is paused, it will receive messages but will not deliver
+                     them. When it's resumed, it'll begin delivering the queued messages, if any.
+                  </p></li><li><p>Listing and closing remote connections</p><p>Client's remote addresses can be retrieved using <tt class="literal">listRemoteAddresses()</tt>. It is also possible to close the
+                     connections associated with a remote address using the <tt class="literal">closeConnectionsForAddress()</tt> method.</p><p>Alternatively, connection IDs can be listed using <tt class="literal">listConnectionIDs()</tt> and all the sessions for a given connection
+                     ID can be listed using <tt class="literal">listSessions()</tt>.</p></li><li><p>Transaction heuristic operations</p><p>In case of a server crash, when the server restarts, it it possible that
+                     some transaction requires manual intervention. The <tt class="literal">listPreparedTransactions()</tt> method lists the transactions which
+                     are in the prepared states (the transactions are represented as opaque Base64
+                     Strings.) To commit or rollback a given prepared transaction, the <tt class="literal">commitPreparedTransaction</tt>() or <tt class="literal">rollbackPreparedTransaction()</tt> method can be used to resolve
+                     heuristic transactions. Heuristically completed transactions can be listed
+                     using the <tt class="literal">listHeuristicCommittedTransactions()</tt> and <tt class="literal">listHeuristicRolledBackTransactions</tt> methods.</p></li><li><p>Enabling and resetting Message counters</p><p>Message counters can be enabled or disabled using the <tt class="literal">enableMessageCounters()</tt> or <tt class="literal">disableMessageCounters()</tt> method. To reset message counters, it is
+                     possible to invoke <tt class="literal">resetAllMessageCounters()</tt> and <tt class="literal">resetAllMessageCounterHistories()</tt> methods.</p></li><li><p>Retrieving the server configuration and attributes</p><p>The <tt class="literal">HornetQServerControl</tt> exposes HornetQ server
+                     configuration through all its attributes (e.g. <tt class="literal">getVersion()</tt>
+                     method to retrieve the server's version, etc.)</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5531"></a>30.1.1.2.&nbsp;Core Address Management</h4></div></div><div></div></div><p>Core addresses can be managed using the <tt class="literal">AddressControl</tt> class
+               (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=Address,name="&lt;the
+                  address name&gt;"</tt> or the resource name <tt class="literal">core.address.&lt;the
+                  address name&gt;</tt>). </p><div class="itemizedlist"><ul type="disc"><li><p>Modifying roles and permissions for an address</p><p>You can add or remove roles associated to a queue using the <tt class="literal">addRole()</tt> or. <tt class="literal">removeRole()</tt> methods. You can
+                     list all the roles associated to the queue with the <tt class="literal">getRoles()</tt> method</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5560"></a>30.1.1.3.&nbsp;Core Queue Management</h4></div></div><div></div></div><p>The bulk of the core management API deals with core queues. The <tt class="literal">QueueControl</tt> class defines the Core queue management operations (with
+               the ObjectName <tt class="literal">org.hornetq:module=Core,type=Queue,address="&lt;the bound
+                  address&gt;",name="&lt;the queue name&gt;"</tt> or the resource name <tt class="literal">core.queue.&lt;the queue name&gt;</tt>).</p><p>Most of the management operations on queues take either a single message ID (e.g.
+               to remove a single message) or a filter (e.g. to expire all messages with a given
+               property.)</p><div class="itemizedlist"><ul type="disc"><li><p>Expiring, sending to a dead letter address and moving messages</p><p>Messages can be expired from a queue by using the <tt class="literal">expireMessages()</tt> method. If an expiry address is defined,
+                     messages will be be sent to it, otherwise they are discarded. The queue's
+                     expiry address can be set with the <tt class="literal">setExpiryAddress()</tt>
+                     method.</p><p>Messages can also be sent to a dead letter address with the <tt class="literal">sendMessagesToDeadLetterAddress()</tt> method. It returns the number
+                     of messages which are sent to the dead letter address. If a dead letter address
+                     is not defined, message are removed from the queue and discarded. The queue's
+                     dead letter address can be set with the <tt class="literal">setDeadLetterAddress()</tt> method.</p><p>Messages can also be moved from a queue to another queue by using the
+                        <tt class="literal">moveMessages()</tt> method.</p></li><li><p>Listing and removing messages</p><p>Messages can be listed from a queue by using the <tt class="literal">listMessages()</tt> method which returns an array of <tt class="literal">Map</tt>, one <tt class="literal">Map</tt> for each message.</p><p>Messages can also be removed from the queue by using the <tt class="literal">removeMessages()</tt> method which returns a <tt class="literal">boolean</tt> for the single message ID variant or the number of
+                     removed messages for the filter variant. The <tt class="literal">removeMessages()</tt> method takes a <tt class="literal">filter</tt>
+                     argument to remove only filtered messages. Setting the filter to an empty
+                     string will in effect remove all messages.</p></li><li><p>Counting messages</p><p>The number of messages in a queue is returned by the <tt class="literal">getMessageCount()</tt> method. Alternatively, the <tt class="literal">countMessages()</tt> will return the number of messages in the queue
+                     which <span class="emphasis"><em>match a given filter</em></span></p></li><li><p>Changing message priority</p><p>The message priority can be changed by using the <tt class="literal">changeMessagesPriority()</tt> method which returns a <tt class="literal">boolean</tt> for the single message ID variant or the number of
+                     updated messages for the filter variant.</p></li><li><p>Message counters</p><p>Message counters can be listed for a queue with the <tt class="literal">listMessageCounter()</tt> and <tt class="literal">listMessageCounterHistory()</tt> methods (see <a href="management.html#management.message-counters" title="30.6.&nbsp;Message Counters">Section&nbsp;30.6, &#8220;Message Counters&#8221;</a>). The message counters can also be
+                     reset for a single queue using the <tt class="literal">resetMessageCounter()</tt>
+                     method.</p></li><li><p>Retrieving the queue attributes</p><p>The <tt class="literal">QueueControl</tt> exposes Core queue settings through its
+                     attributes (e.g. <tt class="literal">getFilter()</tt> to retrieve the queue's filter
+                     if it was created with one, <tt class="literal">isDurable()</tt> to know whether the
+                     queue is durable or not, etc.)</p></li><li><p>Pausing and resuming Queues</p><p>The <tt class="literal">QueueControl</tt> can pause and resume the underlying
+                     queue. When a queue is paused, it will receive messages but will not deliver
+                     them. When it's resume, it'll begin delivering the queued messages, if any.
+                  </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5691"></a>30.1.1.4.&nbsp;Other Core Resources Management</h4></div></div><div></div></div><p>HornetQ allows to start and stop its remote resources (acceptors, diverts,
+               bridges, etc.) so that a server can be taken off line for a given period of time
+               without stopping it completely (e.g. if other management operations must be performed
+               such as resolving heuristic transactions). These resources are:</p><div class="itemizedlist"><ul type="disc"><li><p>Acceptors</p><p>They can be started or stopped using the <tt class="literal">start()</tt> or.
+                        <tt class="literal">stop()</tt> method on the <tt class="literal">AcceptorControl</tt>
+                     class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=Acceptor,name="&lt;the acceptor
+                        name&gt;"</tt> or the resource name <tt class="literal">core.acceptor.&lt;the
+                        address name&gt;</tt>). The acceptors parameters can be retrieved using
+                     the <tt class="literal">AcceptorControl</tt> attributes (see <a href="configuring-transports.html#configuring-transports.acceptors" title="16.1.&nbsp;Understanding Acceptors">Section&nbsp;16.1, &#8220;Understanding Acceptors&#8221;</a>)</p></li><li><p>Diverts</p><p>They can be started or stopped using the <tt class="literal">start()</tt> or
+                        <tt class="literal">stop()</tt> method on the <tt class="literal">DivertControl</tt>
+                     class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=Divert,name=&lt;the divert name&gt;</tt>
+                     or the resource name <tt class="literal">core.divert.&lt;the divert name&gt;</tt>).
+                     Diverts parameters can be retrieved using the <tt class="literal">DivertControl</tt>
+                     attributes (see <a href="diverts.html" title="Chapter&nbsp;35.&nbsp;Diverting and Splitting Message Flows">Chapter&nbsp;35, <i>Diverting and Splitting Message Flows</i></a>)</p></li><li><p>Bridges</p><p>They can be started or stopped using the <tt class="literal">start()</tt> (resp.
+                        <tt class="literal">stop()</tt>) method on the <tt class="literal">BridgeControl</tt>
+                     class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=Bridge,name="&lt;the bridge
+                        name&gt;"</tt> or the resource name <tt class="literal">core.bridge.&lt;the bridge
+                        name&gt;</tt>). Bridges parameters can be retrieved using the <tt class="literal">BridgeControl</tt> attributes (see <a href="core-bridges.html" title="Chapter&nbsp;36.&nbsp;Core Bridges">Chapter&nbsp;36, <i>Core Bridges</i></a>)</p></li><li><p>Broadcast groups</p><p>They can be started or stopped using the <tt class="literal">start()</tt> or
+                        <tt class="literal">stop()</tt> method on the <tt class="literal">BroadcastGroupControl</tt> class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=BroadcastGroup,name="&lt;the broadcast group
+                        name&gt;"</tt> or the resource name <tt class="literal">core.broadcastgroup.&lt;the broadcast group name&gt;</tt>). Broadcast
+                     groups parameters can be retrieved using the <tt class="literal">BroadcastGroupControl</tt> attributes (see <a href="clusters.html#clusters.broadcast-groups" title="38.2.1.&nbsp;Broadcast Groups">Section&nbsp;38.2.1, &#8220;Broadcast Groups&#8221;</a>)</p></li><li><p>Discovery groups</p><p>They can be started or stopped using the <tt class="literal">start()</tt> or
+                        <tt class="literal">stop()</tt> method on the <tt class="literal">DiscoveryGroupControl</tt> class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=DiscoveryGroup,name="&lt;the discovery group
+                        name&gt;"</tt> or the resource name <tt class="literal">core.discovery.&lt;the
+                        discovery group name&gt;</tt>). Discovery groups parameters can be
+                     retrieved using the <tt class="literal">DiscoveryGroupControl</tt> attributes (see
+                        <a href="clusters.html#clusters.discovery-groups" title="38.2.2.&nbsp;Discovery Groups">Section&nbsp;38.2.2, &#8220;Discovery Groups&#8221;</a>)</p></li><li><p>Cluster connections</p><p>They can be started or stopped using the <tt class="literal">start()</tt> or
+                        <tt class="literal">stop()</tt> method on the <tt class="literal">ClusterConnectionControl</tt> class (with the ObjectName <tt class="literal">org.hornetq:module=Core,type=ClusterConnection,name="&lt;the cluster
+                        connection name&gt;"</tt> or the resource name <tt class="literal">core.clusterconnection.&lt;the cluster connection name&gt;</tt>).
+                     Cluster connections parameters can be retrieved using the <tt class="literal">ClusterConnectionControl</tt> attributes (see <a href="clusters.html#clusters.cluster-connections" title="38.3.1.&nbsp;Configuring Cluster Connections">Section&nbsp;38.3.1, &#8220;Configuring Cluster Connections&#8221;</a>)</p></li></ul></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e5847"></a>30.1.2.&nbsp;JMS Management API</h3></div></div><div></div></div><p>HornetQ defines a JMS Management API to manage JMS <span class="emphasis"><em>administrated
+               objects</em></span> (i.e. JMS queues, topics and connection factories).</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5855"></a>30.1.2.1.&nbsp;JMS Server Management</h4></div></div><div></div></div><p>JMS Resources (connection factories and destinations) can be created using the
+                  <tt class="literal">JMSServerControl</tt> class (with the ObjectName <tt class="literal">org.hornetq:module=JMS,type=Server</tt> or the resource name <tt class="literal">jms.server</tt>).</p><div class="itemizedlist"><ul type="disc"><li><p>Listing, creating, destroying connection factories</p><p>Names of the deployed connection factories can be retrieved by the <tt class="literal">getConnectionFactoryNames()</tt> method.</p><p>JMS connection factories can be created or destroyed using the <tt class="literal">createConnectionFactory()</tt> methods or <tt class="literal">destroyConnectionFactory()</tt> methods. These connection factories
+                     are bound to JNDI so that JMS clients can look them up. If a graphical console
+                     is used to create the connection factories, the transport parameters are
+                     specified in the text fied input as a comma-separated list of key=value (e.g.
+                        <tt class="literal">key1=10, key2="value", key3=false</tt>). If there are multiple
+                     transports defined, you need to enclose the key/value pairs between curly
+                     braces. For example <tt class="literal">{key=10}, {key=20}</tt>. In that case, the
+                     first <tt class="literal">key</tt> will be associated to the first transport
+                     configuration and the second <tt class="literal">key</tt> will be associated to the
+                     second transport configuration (see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>
+                     for a list of the transport parameters)</p></li><li><p>Listing, creating, destroying queues</p><p>Names of the deployed JMS queues can be retrieved by the <tt class="literal">getQueueNames()</tt> method.</p><p>JMS queues can be created or destroyed using the <tt class="literal">createQueue()</tt> methods or <tt class="literal">destroyQueue()</tt>
+                     methods. These queues are bound to JNDI so that JMS clients can look them
+                     up</p></li><li><p>Listing, creating/destroying topics</p><p>Names of the deployed topics can be retrieved by the <tt class="literal">getTopicNames()</tt> method.</p><p>JMS topics can be created or destroyed using the <tt class="literal">createTopic()</tt> or <tt class="literal">destroyTopic()</tt> methods. These
+                     topics are bound to JNDI so that JMS clients can look them up</p></li><li><p>Listing and closing remote connections</p><p>JMS Clients remote addresses can be retrieved using <tt class="literal">listRemoteAddresses()</tt>. It is also possible to close the
+                     connections associated with a remote address using the <tt class="literal">closeConnectionsForAddress()</tt> method.</p><p>Alternatively, connection IDs can be listed using <tt class="literal">listConnectionIDs()</tt> and all the sessions for a given connection
+                     ID can be listed using <tt class="literal">listSessions()</tt>.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5951"></a>30.1.2.2.&nbsp;JMS ConnectionFactory Management</h4></div></div><div></div></div><p>JMS Connection Factories can be managed using the <tt class="literal">ConnectionFactoryControl</tt> class (with the ObjectName <tt class="literal">org.hornetq:module=JMS,type=ConnectionFactory,name="&lt;the connection factory
+                  name&gt;"</tt> or the resource name <tt class="literal">jms.connectionfactory.&lt;the
+                  connection factory name&gt;</tt>).</p><div class="itemizedlist"><ul type="disc"><li><p>Retrieving connection factory attributes</p><p>The <tt class="literal">ConnectionFactoryControl</tt> exposes JMS
+                     ConnectionFactory configuration through its attributes (e.g. <tt class="literal">getConsumerWindowSize()</tt> to retrieve the consumer window size for
+                     flow control, <tt class="literal">isBlockOnNonDurableSend()</tt> to know wether the
+                     producers created from the connection factory will block or not when sending
+                     non-durable messages, etc.)</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5980"></a>30.1.2.3.&nbsp;JMS Queue Management</h4></div></div><div></div></div><p>JMS queues can be managed using the <tt class="literal">JMSQueueControl</tt> class (with
+               the ObjectName <tt class="literal">org.hornetq:module=JMS,type=Queue,name="&lt;the queue
+                  name&gt;"</tt> or the resource name <tt class="literal">jms.queue.&lt;the queue
+                  name&gt;</tt>). </p><p><span class="emphasis"><em>The management operations on a JMS queue are very similar to the
+                  operations on a core queue. </em></span></p><div class="itemizedlist"><ul type="disc"><li><p>Expiring, sending to a dead letter address and moving messages</p><p>Messages can be expired from a queue by using the <tt class="literal">expireMessages()</tt> method. If an expiry address is defined,
+                     messages will be be sent to it, otherwise they are discarded. The queue's
+                     expiry address can be set with the <tt class="literal">setExpiryAddress()</tt>
+                     method.</p><p>Messages can also be sent to a dead letter address with the <tt class="literal">sendMessagesToDeadLetterAddress()</tt> method. It returns the number
+                     of messages which are sent to the dead letter address. If a dead letter address
+                     is not defined, message are removed from the queue and discarded. The queue's
+                     dead letter address can be set with the <tt class="literal">setDeadLetterAddress()</tt> method.</p><p>Messages can also be moved from a queue to another queue by using the
+                        <tt class="literal">moveMessages()</tt> method.</p></li><li><p>Listing and removing messages</p><p>Messages can be listed from a queue by using the <tt class="literal">listMessages()</tt> method which returns an array of <tt class="literal">Map</tt>, one <tt class="literal">Map</tt> for each message.</p><p>Messages can also be removed from the queue by using the <tt class="literal">removeMessages()</tt> method which returns a <tt class="literal">boolean</tt> for the single message ID variant or the number of
+                     removed messages for the filter variant. The <tt class="literal">removeMessages()</tt> method takes a <tt class="literal">filter</tt>
+                     argument to remove only filtered messages. Setting the filter to an empty
+                     string will in effect remove all messages.</p></li><li><p>Counting messages</p><p>The number of messages in a queue is returned by the <tt class="literal">getMessageCount()</tt> method. Alternatively, the <tt class="literal">countMessages()</tt> will return the number of messages in the queue
+                     which <span class="emphasis"><em>match a given filter</em></span></p></li><li><p>Changing message priority</p><p>The message priority can be changed by using the <tt class="literal">changeMessagesPriority()</tt> method which returns a <tt class="literal">boolean</tt> for the single message ID variant or the number of
+                     updated messages for the filter variant.</p></li><li><p>Message counters</p><p>Message counters can be listed for a queue with the <tt class="literal">listMessageCounter()</tt> and <tt class="literal">listMessageCounterHistory()</tt> methods (see <a href="management.html#management.message-counters" title="30.6.&nbsp;Message Counters">Section&nbsp;30.6, &#8220;Message Counters&#8221;</a>)</p></li><li><p>Retrieving the queue attributes</p><p>The <tt class="literal">JMSQueueControl</tt> exposes JMS queue settings through
+                     its attributes (e.g. <tt class="literal">isTemporary()</tt> to know wether the queue
+                     is temporary or not, <tt class="literal">isDurable()</tt> to know wether the queue is
+                     durable or not, etc.)</p></li><li><p>Pausing and resuming queues</p><p>The <tt class="literal">JMSQueueControl</tt> can pause and resume the underlying
+                     queue. When the queue is paused it will continue to receive messages but will
+                     not deliver them. When resumed again it will deliver the enqueued messages, if
+                     any. </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e6109"></a>30.1.2.4.&nbsp;JMS Topic Management</h4></div></div><div></div></div><p>JMS Topics can be managed using the <tt class="literal">TopicControl</tt> class (with
+               the ObjectName <tt class="literal">org.hornetq:module=JMS,type=Topic,name="&lt;the topic
+                  name&gt;"</tt> or the resource name <tt class="literal">jms.topic.&lt;the topic
+                  name&gt;</tt>).</p><div class="itemizedlist"><ul type="disc"><li><p>Listing subscriptions and messages</p><p>JMS topics subscriptions can be listed using the <tt class="literal">listAllSubscriptions()</tt>, <tt class="literal">listDurableSubscriptions()</tt>, <tt class="literal">listNonDurableSubscriptions()</tt> methods. These methods return
+                     arrays of <tt class="literal">Object</tt> representing the subscriptions information
+                     (subscription name, client ID, durability, message count, etc.). It is also
+                     possible to list the JMS messages for a given subscription with the <tt class="literal">listMessagesForSubscription()</tt> method.</p></li><li><p>Dropping subscriptions</p><p>Durable subscriptions can be dropped from the topic using the <tt class="literal">dropDurableSubscription()</tt> method.</p></li><li><p>Counting subscriptions messages</p><p>The <tt class="literal">countMessagesForSubscription()</tt> method can be used to
+                     know the number of messages held for a given subscription (with an optional
+                     message selector to know the number of messages matching the selector)</p></li></ul></div></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="management.jmx"></a>30.2.&nbsp;Using Management Via JMX</h2></div></div><div></div></div><p>HornetQ can be managed using <a href="http://java.sun.com/javase/technologies/core/mntr-mgmt/javamanagement/" target="_top">JMX</a>. </p><p>The management API is exposed by HornetQ using MBeans interfaces. HornetQ registers its
+         resources with the domain <tt class="literal">org.hornetq</tt>.</p><p>For example, the <tt class="literal">ObjectName</tt> to manage a JMS Queue <tt class="literal">exampleQueue</tt> is:</p><pre class="programlisting">
+   org.hornetq:module=JMS,type=Queue,name="exampleQueue"   
+      </pre><p>and the MBean is:</p><pre class="programlisting">
+   org.hornetq.api.jms.management.JMSQueueControl   
+      </pre><p>The MBean's <tt class="literal">ObjectName</tt> are built using the helper class <tt class="literal">org.hornetq.api.core.management.ObjectNameBuilder</tt>. You can also use <tt class="literal">jconsole</tt> to find the <tt class="literal">ObjectName</tt> of the MBeans you want to
+         manage. </p><p>Managing HornetQ using JMX is identical to management of any Java Applications using
+         JMX. It can be done by reflection or by creating proxies of the MBeans.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="management.jmx.configuration"></a>30.2.1.&nbsp;Configuring JMX</h3></div></div><div></div></div><p>By default, JMX is enabled to manage HornetQ. It can be disabled by setting <tt class="literal">jmx-management-enabled</tt> to <tt class="literal">false</tt> in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+&lt;!-- false to disable JMX management for HornetQ --&gt;
+&lt;jmx-management-enabled&gt;false&lt;/jmx-management-enabled&gt;            
+         </pre><p>If JMX is enabled, HornetQ can be managed locally using <tt class="literal">jconsole</tt>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Remote connections to JMX are not enabled by default for security reasons. Please refer
+            to <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html#remote" target="_top">Java Management guide</a> to configure the server for remote management (system
+            properties must be set in <tt class="literal">run.sh</tt> or <tt class="literal">run.bat</tt>
+            scripts).</p></div><p>By default, HornetQ server uses the JMX domain "org.hornetq". To manage several
+            HornetQ servers from the <span class="emphasis"><em>same</em></span> MBeanServer, the JMX domain can be
+            configured for each individual HornetQ server by setting <tt class="literal">jmx-domain</tt>
+            in <tt class="literal">hornetq-configuration.xml</tt>: </p><pre class="programlisting">
+&lt;!-- use a specific JMX domain for HornetQ MBeans --&gt;
+&lt;jmx-domain&gt;my.org.hornetq&lt;/jmx-domain&gt;            
+         </pre><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e6249"></a>30.2.1.1.&nbsp;MBeanServer configuration</h4></div></div><div></div></div><p>When HornetQ is run in standalone, it uses the Java Virtual Machine's <tt class="literal">Platform MBeanServer</tt> to register its MBeans. This is configured in
+               JBoss Microcontainer Beans file (see <a href="using-server.html#server.microcontainer.configuration" title="6.7.&nbsp;JBoss Microcontainer Beans File">Section&nbsp;6.7, &#8220;JBoss Microcontainer Beans File&#8221;</a>):</p><pre class="programlisting">&lt;!-- MBeanServer --&gt;
+&lt;bean name="MBeanServer" class="javax.management.MBeanServer"&gt;
+   &lt;constructor factoryClass="java.lang.management.ManagementFactory"
+                         factoryMethod="getPlatformMBeanServer" /&gt;
+&lt;/bean&gt;            
+            </pre><p>When it is integrated in JBoss AS 5+, it uses the Application Server's own MBean
+               Server so that it can be managed using AS 5's jmx-console:</p><pre class="programlisting">&lt;!-- MBeanServer --&gt;
+&lt;bean name="MBeanServer" class="javax.management.MBeanServer"&gt;
+   &lt;constructor factoryClass="org.jboss.mx.util.MBeanServerLocator"
+                         factoryMethod="locateJBoss" /&gt;
+&lt;/bean&gt;            
+            </pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6265"></a>30.2.2.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.jmx" title="11.1.21.&nbsp;JMX Management">Section&nbsp;11.1.21, &#8220;JMX Management&#8221;</a> for an example which shows how to use a remote
+            connection to JMX and MBean proxies to manage HornetQ.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e6272"></a>30.3.&nbsp;Using Management Via Core API</h2></div></div><div></div></div><p>The core management API in HornetQ is called by sending Core messages to a special
+         address, the <span class="emphasis"><em>management address</em></span>.</p><p><span class="emphasis"><em>Management messages</em></span> are regular Core messages with well-known
+         properties that the server needs to understand to interact with the management API:</p><div class="itemizedlist"><ul type="disc"><li><p>The name of the managed resource</p></li><li><p>The name of the management operation</p></li><li><p>The parameters of the management operation</p></li></ul></div><p>When such a management message is sent to the management address, HornetQ server will
+         handle it, extract the information, invoke the operation on the managed resources and send
+         a <span class="emphasis"><em>management reply</em></span> to the management message's reply-to address
+         (specified by <tt class="literal">ClientMessageImpl.REPLYTO_HEADER_NAME</tt>). </p><p>A <tt class="literal">ClientConsumer</tt> can be used to consume the management reply and
+         retrieve the result of the operation (if any) stored in the reply's body. For portability,
+         results are returned as a <a href="http://json.org" target="_top">JSON</a> String rather than Java
+         Serialization (the <tt class="literal">org.hornetq.api.core.management.ManagementHelper</tt> can
+         be used to convert the JSON string to Java objects).</p><p>These steps can be simplified to make it easier to invoke management operations using
+         Core messages:</p><div class="orderedlist"><ol type="1"><li><p>Create a <tt class="literal">ClientRequestor</tt> to send messages to the management
+               address and receive replies</p></li><li><p>Create a <tt class="literal">ClientMessage</tt></p></li><li><p>Use the helper class <tt class="literal">org.hornetq.api.core.management.ManagementHelper</tt> to fill the message
+               with the management properties</p></li><li><p>Send the message using the <tt class="literal">ClientRequestor</tt></p></li><li><p>Use the helper class <tt class="literal">org.hornetq.api.core.management.ManagementHelper</tt> to retrieve the
+               operation result from the management reply</p></li></ol></div><p>For example, to find out the number of messages in the core queue <tt class="literal">exampleQueue</tt>:</p><pre class="programlisting">
+   ClientSession session = ...
+   ClientRequestor requestor = new ClientRequestor(session, "jms.queue.hornetq.management");
+   ClientMessage message = session.createMessage(false);
+   ManagementHelper.putAttribute(message, "core.queue.exampleQueue", "messageCount");
+   ClientMessage reply = requestor.request(m);
+   int count = (Integer) ManagementHelper.getResult(reply);
+   System.out.println("There are " + count + " messages in exampleQueue");
+      </pre><p>Management operation name and parameters must conform to the Java interfaces defined in
+         the <tt class="literal">management</tt> packages.</p><p>Names of the resources are built using the helper class <tt class="literal">org.hornetq.api.core.management.ResourceNames</tt> and are straightforward
+            (<tt class="literal">core.queue.exampleQueue</tt> for the Core Queue <tt class="literal">exampleQueue</tt>, <tt class="literal">jms.topic.exampleTopic</tt> for the JMS Topic
+            <tt class="literal">exampleTopic</tt>, etc.).</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="management.core.configuration"></a>30.3.1.&nbsp;Configuring Core Management</h3></div></div><div></div></div><p>The management address to send management messages is configured in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+   &lt;management-address&gt;jms.queue.hornetq.management&lt;/management-address&gt;
+         </pre><p>By default, the address is <tt class="literal">jms.queue.hornetq.management</tt> (it is
+            prepended by "jms.queue" so that JMS clients can also send management messages).</p><p>The management address requires a <span class="emphasis"><em>special</em></span> user permission
+               <tt class="literal">manage</tt> to be able to receive and handle management messages. This
+            is also configured in hornetq-configuration.xml:</p><pre class="programlisting">
+   &lt;!-- users with the admin role will be allowed to manage --&gt; 
+   &lt;!-- HornetQ using management messages        --&gt;
+   &lt;security-setting match="jms.queue.hornetq.management"&gt;
+      &lt;permission type="manage" roles="admin" /&gt;
+   &lt;/security-setting&gt;
+         </pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="management.jms"></a>30.4.&nbsp;Using Management Via JMS</h2></div></div><div></div></div><p>Using JMS messages to manage HornetQ is very similar to using core API.</p><p>An important difference is that JMS requires a JMS queue to send the messages to
+         (instead of an address for the core API).</p><p>The <span class="emphasis"><em>management queue</em></span> is a special queue and needs to be
+         instantiated directly by the client:</p><pre class="programlisting">
+   Queue managementQueue = HornetQJMSClient.createQueue("hornetq.management");
+      </pre><p>All the other steps are the same than for the Core API but they use JMS API
+         instead:</p><div class="orderedlist"><ol type="1"><li><p>create a <tt class="literal">QueueRequestor</tt> to send messages to the management
+               address and receive replies</p></li><li><p>create a <tt class="literal">Message</tt></p></li><li><p>use the helper class <tt class="literal">org.hornetq.api.jms.management.JMSManagementHelper</tt> to fill the message
+               with the management properties</p></li><li><p>send the message using the <tt class="literal">QueueRequestor</tt></p></li><li><p>use the helper class <tt class="literal">org.hornetq.api.jms.management.JMSManagementHelper</tt> to retrieve the
+               operation result from the management reply</p></li></ol></div><p>For example, to know the number of messages in the JMS queue <tt class="literal">exampleQueue</tt>:</p><pre class="programlisting">
+   Queue managementQueue = HornetQJMSClient.createQueue("hornetq.management");   
+   
+   QueueSession session = ...      
+   QueueRequestor requestor = new QueueRequestor(session, managementQueue);
+   connection.start();
+   Message message = session.createMessage();
+   JMSManagementHelper.putAttribute(message, "jms.queue.exampleQueue", "messageCount");
+   Message reply = requestor.request(message);
+   int count = (Integer)JMSManagementHelper.getResult(reply);
+   System.out.println("There are " + count + " messages in exampleQueue");
+      </pre><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6450"></a>30.4.1.&nbsp;Configuring JMS Management</h3></div></div><div></div></div><p>Whether JMS or the core API is used for management, the configuration steps are the
+            same (see <a href="management.html#management.core.configuration" title="30.3.1.&nbsp;Configuring Core Management">Section&nbsp;30.3.1, &#8220;Configuring Core Management&#8221;</a>).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6457"></a>30.4.2.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.management" title="11.1.25.&nbsp;Management">Section&nbsp;11.1.25, &#8220;Management&#8221;</a> for an example which shows how to use JMS
+            messages to manage HornetQ server.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="management.notifications"></a>30.5.&nbsp;Management Notifications</h2></div></div><div></div></div><p>HornetQ emits <span class="emphasis"><em>notifications</em></span> to inform listeners of potentially
+         interesting events (creation of new resources, security violation, etc.).</p><p>These notifications can be received by 3 different ways:</p><div class="itemizedlist"><ul type="disc"><li><p>JMX notifications</p></li><li><p>Core messages</p></li><li><p>JMS messages</p></li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6484"></a>30.5.1.&nbsp;JMX Notifications</h3></div></div><div></div></div><p>If JMX is enabled (see <a href="management.html#management.jmx.configuration" title="30.2.1.&nbsp;Configuring JMX">Section&nbsp;30.2.1, &#8220;Configuring JMX&#8221;</a>), JMX
+            notifications can be received by subscribing to 2 MBeans:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">org.hornetq:module=Core,type=Server</tt> for notifications on
+                     <span class="emphasis"><em>Core</em></span> resources</p></li><li><p><tt class="literal">org.hornetq:module=JMS,type=Server</tt> for notifications on
+                     <span class="emphasis"><em>JMS</em></span> resources</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6508"></a>30.5.2.&nbsp;Core Messages Notifications</h3></div></div><div></div></div><p>HornetQ defines a special <span class="emphasis"><em>management notification address</em></span>. Core
+            queues can be bound to this address so that clients will receive management
+            notifications as Core messages</p><p>A Core client which wants to receive management notifications must create a core
+            queue bound to the management notification address. It can then receive the
+            notifications from its queue.</p><p>Notifications messages are regular core messages with additional properties
+            corresponding to the notification (its type, when it occurred, the resources which were
+            concerned, etc.).</p><p>Since notifications are regular core messages, it is possible to use message
+            selectors to filter out notifications and receives only a subset of all the
+            notifications emitted by the server.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="management.notifications.core.configuration"></a>30.5.2.1.&nbsp;Configuring The Core Management Notification Address</h4></div></div><div></div></div><p>the management notification address to receive management notifications is
+               configured in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+               &lt;management-notification-address&gt;hornetq.notifications&lt;/management-notification-address&gt;
+            </pre><p>By default, the address is <tt class="literal">hornetq.notifications</tt>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6537"></a>30.5.3.&nbsp;JMS Messages Notifications</h3></div></div><div></div></div><p>HornetQ's notifications can also be received using JMS messages.</p><p>It is similar to receiving notifications using Core API but an important difference
+            is that JMS requires a JMS Destination to receive the messages (preferably a
+            Topic).</p><p>To use a JMS Destination to receive management notifications, you must change the server's
+            management notification address to start with <tt class="literal">jms.queue</tt> if it is a JMS Queue
+            or <tt class="literal">jms.topic</tt> if it is a JMS Topic:</p><pre class="programlisting">
+            &lt;!-- notifications will be consumed from "notificationsTopic" JMS Topic --&gt; 
+            &lt;management-notification-address&gt;jms.topic.notificationsTopic&lt;/management-notification-address&gt;
+         </pre><p>Once the notification topic is created, you can receive messages from it or set a
+               <tt class="literal">MessageListener</tt>:</p><pre class="programlisting">
+   Topic notificationsTopic = HornetQJMSClient.createTopic("notificationsTopic");
+
+   Session session = ...
+   MessageConsumer notificationConsumer = session.createConsumer(notificationsTopic);
+      notificationConsumer.setMessageListener(new MessageListener()
+      {
+         public void onMessage(Message notif)
+         {
+            System.out.println("------------------------");
+            System.out.println("Received notification:");
+            try
+            {
+               Enumeration propertyNames = notif.getPropertyNames();
+               while (propertyNames.hasMoreElements())
+               {
+                  String propertyName = (String)propertyNames.nextElement();
+                  System.out.format("  %s: %s\n", propertyName, notif.getObjectProperty(propertyName));
+               }
+            }
+            catch (JMSException e)
+            {
+            }
+            System.out.println("------------------------");
+         }            
+      });            
+         </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6561"></a>30.5.4.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.management-notifications" title="11.1.26.&nbsp;Management Notification">Section&nbsp;11.1.26, &#8220;Management Notification&#8221;</a> for an example which shows
+            how to use a JMS <tt class="literal">MessageListener</tt> to receive management notifications
+            from HornetQ server.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="management.message-counters"></a>30.6.&nbsp;Message Counters</h2></div></div><div></div></div><p>Message counters can be used to obtain information on queues <span class="emphasis"><em>over
+            time</em></span> as HornetQ keeps a history on queue metrics.</p><p>They can be used to show <span class="emphasis"><em>trends</em></span> on queues. For example, using the
+         management API, it would be possible to query the number of messages in a queue at regular
+         interval. However, this would not be enough to know if the queue is used: the number of
+         messages can remain constant because nobody is sending or receiving messages from the queue
+         or because there are as many messages sent to the queue than messages consumed from it. The
+         number of messages in the queue remains the same in both cases but its use is widely
+         different.</p><p>Message counters gives additional information about the queues:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">count</tt></p><p>The <span class="emphasis"><em>total</em></span> number of messages added to the queue since the
+               server was started</p></li><li><p><tt class="literal">countDelta</tt></p><p>the number of messages added to the queue <span class="emphasis"><em>since the last message counter
+                  update</em></span></p></li><li><p><tt class="literal">depth</tt></p><p>The <span class="emphasis"><em>current</em></span> number of messages in the queue</p></li><li><p><tt class="literal">depthDelta</tt></p><p>The <span class="emphasis"><em>overall</em></span> number of messages added/removed from the queue
+                  <span class="emphasis"><em>since the last message counter update</em></span>. For example, if
+                  <tt class="literal">depthDelta</tt> is equal to <tt class="literal">-10</tt> this means that
+               overall 10 messages have been removed from the queue (e.g. 2 messages were added and
+               12 were removed)</p></li><li><p><tt class="literal">lastAddTimestamp</tt></p><p>The timestamp of the last time a message was added to the queue</p></li><li><p><tt class="literal">udpateTimestamp</tt></p><p>The timestamp of the last message counter update</p></li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="configuring.message.counters"></a>30.6.1.&nbsp;Configuring Message Counters</h3></div></div><div></div></div><p>By default, message counters are disabled as it might have a small negative effect on
+            memory.</p><p>To enable message counters, you can set it to <tt class="literal">true</tt> in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+&lt;message-counter-enabled&gt;true&lt;/message-counter-enabled&gt;
+         </pre><p>Message counters keeps a history of the queue metrics (10 days by default) and
+            samples all the queues at regular interval (10 seconds by default). If message counters
+            are enabled, these values should be configured to suit your messaging use case in
+               <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+&lt;!-- keep history for a week --&gt;
+&lt;message-counter-max-day-history&gt;7&lt;/message-counter-max-day-history&gt;            
+&lt;!-- sample the queues every minute (60000ms) --&gt;
+&lt;message-counter-sample-period&gt;60000&lt;/message-counter-sample-period&gt;
+         </pre><p>Message counters can be retrieved using the Management API. For example, to retrieve
+            message counters on a JMS Queue using JMX:</p><pre class="programlisting">
+// retrieve a connection to HornetQ's MBeanServer
+MBeanServerConnection mbsc = ...
+JMSQueueControlMBean queueControl = (JMSQueueControl)MBeanServerInvocationHandler.newProxyInstance(mbsc,
+   on,
+   JMSQueueControl.class,
+   false);
+// message counters are retrieved as a JSON String                                                                                                      
+String counters = queueControl.listMessageCounter();
+// use the MessageCounterInfo helper class to manipulate message counters more easily
+MessageCounterInfo messageCounter = MessageCounterInfo.fromJSON(counters);         
+System.out.format("%s message(s) in the queue (since last sample: %s)\n",
+   counter.getDepth(),
+   counter.getDepthDelta());
+         </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6669"></a>30.6.2.&nbsp;Example</h3></div></div><div></div></div><p>See <a href="examples.html#examples.message-counters" title="11.1.27.&nbsp;Message Counter">Section&nbsp;11.1.27, &#8220;Message Counter&#8221;</a> for an example which shows how to use
+            message counters to retrieve information on a JMS <tt class="literal">Queue</tt>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e6679"></a>30.7.&nbsp;Administering HornetQ Resources Using The JBoss AS Admin Console</h2></div></div><div></div></div><p>Its possible to create and configure HornetQ resources via the admin console within the JBoss Application Server.</p><p>The Admin Console will allow you to create destinations (JMS Topics and Queues) and JMS Connection Factories.</p><p>Once logged in to the admin console you will see a JMS Manager item in the left hand tree. All HornetQ resources
+      will be configured via this. This will have a child items for JMS Queues, Topics and Connection Factories, clicking
+         on each node will reveal which resources are currently available. The following sections explain how to create
+         and configure each resource in turn.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6688"></a>30.7.1.&nbsp;JMS Queues</h3></div></div><div></div></div><p>To create a new JMS Queue click on the JMS Queues item to reveal the available queues. On the right hand
+            panel you will see an add a new resource button, click on this and then choose the default(JMS Queue) template
+         and click continue. The important things to fill in here are the name of the queue and the JNDI name of the
+            queue. The JNDI name is what you will use to look up the queue in JNDI from your client. For most queues this
+            will be the only info you will need to provide as sensible defaults are provided for the others. You will also
+            see a security roles section near the bottom. If you do not provide any roles for this queue then the servers
+         default security configuration will be used, after you have created the queue these will be shown in the configuration.
+         All configuration values, except the name and JNDI name, can be changed via the configuration tab after clicking
+            on the queue in the admin console. The following section explains these in more detail</p><p>After highlighting the configuration you will see the following screen</p><p>
+            </p><div align="center"><img src="images/console1.png" align="middle"></div><p>
+        </p><p>The name and JNDI name cant be changed, if you want to change these recreate the queue with the appropriate
+         settings. The rest of the configuration options, apart from security roles, relate to address settings for a particular
+         address. The default address settings are picked up from the servers configuration, if you change any of these
+         settings or create a queue via the console a new Address Settings enrty will be added. For a full explanation on
+         Address Settings see <a href="queue-attributes.html#queue-attributes.address-settings" title="25.3.&nbsp;Configuring Queues Via Address Settings">Section&nbsp;25.3, &#8220;Configuring Queues Via Address Settings&#8221;</a></p><p>To delete a queue simply click on the delete button beside the queue name in the main JMS Queues screen.
+         This will also delete any address settings or security settings previously created for the queues address</p><p>The last part of the configuration options are security roles. If non are provided on creation then the
+            servers default security settings will be shown. If these are changed or updated then new securty settings are
+         created for the address of this queue. For more information on securuty setting see <a href="security.html" title="Chapter&nbsp;31.&nbsp;Security">Chapter&nbsp;31, <i>Security</i></a> </p><p>It is also possible via the metrics tab to view statistics for this queue. This will show statistics such
+            as message count, consumer count etc.</p><p>Operations can be performed on a queue via the control tab. This will allow you to start and stop the queue,
+         list,move,expire and delete messages from the queue and other useful operations. To invoke an operation click on
+         the button for the operation you want, this will take you to a screen where you can parameters for the opertion can be set.
+         Once set clicking the ok button will invoke the operation, results appear at the bottom of the screen.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6712"></a>30.7.2.&nbsp;JMS Topics</h3></div></div><div></div></div><p>Creating and configuring JMS Topics is almost identical to creating queues. The only difference is that the
+         configuration will be applied to the queue representing a subscription.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6717"></a>30.7.3.&nbsp;JMS Connection Factories</h3></div></div><div></div></div><p>The format for creating connection factories is the same as for JMS Queues and topics apart frm the configuration
+         being different. For as list of all the connection factory settings see the configuration index </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pre-acknowledge.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="security.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;29.&nbsp;Pre-Acknowledge Mode&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;31.&nbsp;Security</td></tr></table></div></body></html>

@@ -1,0 +1,70 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="jms-bridge.html" title="Chapter&nbsp;33.&nbsp;The JMS Bridge"><link rel="next" href="diverts.html" title="Chapter&nbsp;35.&nbsp;Diverting and Splitting Message Flows"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="jms-bridge.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="diverts.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="client-reconnection"></a>Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment</h2></div></div><div></div></div><p>HornetQ clients can be configured to automatically reconnect or re-attach to the server in
+        the event that a failure is detected in the connection between the client and the server. </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8223"></a>34.1.&nbsp;100% Transparent session re-attachment</h2></div></div><div></div></div><p>If the failure was due to some transient failure such as a temporary network failure,
+            and the target server was not restarted, then the sessions will still be existent on the
+            server, asssuming the client hasn't been disconnected for more than connection-ttl <a href="connection-ttl.html" title="Chapter&nbsp;17.&nbsp;Detecting Dead Connections">Chapter&nbsp;17, <i>Detecting Dead Connections</i></a>.</p><p>In this scenario, HornetQ will automatically re-attach the client sessions to the
+            server sessions when the connection reconnects. This is done 100% transparently and the
+            client can continue exactly as if nothing had happened.</p><p>The way this works is as follows:</p><p>As HornetQ clients send commands to their servers they store each sent command in an
+            in-memory buffer. In the case that connection failure occurs and the client subsequently
+            reattaches to the same server, as part of the reattachment protocol the server informs
+            the client during reattachment with the id of the last command it successfully received
+            from that client.</p><p>If the client has sent more commands than were received before failover it can replay
+            any sent commands from its buffer so that the client and server can reconcile their
+            states.</p><p>The size of this buffer is configured by the <tt class="literal">ConfirmationWindowSize</tt>
+            parameter, when the server has received <tt class="literal">ConfirmationWindowSize</tt> bytes
+            of commands and processed them it will send back a command confirmation to the client,
+            and the client can then free up space in the buffer.</p><p>If you are using JMS and you're using the JMS service on the server to load your JMS
+            connection factory instances into JNDI then this parameter can be configured in <tt class="literal">hornetq-jms.xml</tt> using the element <tt class="literal">confirmation-window-size</tt> a. If you're using JMS but not using JNDI then
+            you can set these values directly on the <tt class="literal">HornetQConnectionFactory</tt>
+            instance using the appropriate setter method.</p><p>If you're using core you can set these values directly on the <tt class="literal">ClientSessionFactory</tt> instance using the appropriate setter method.</p><p>The window is specified in bytes.</p><p>Setting this parameter to <tt class="literal">-1</tt> disables any buffering and prevents
+            any re-attachment from occurring, forcing reconnect instead. The default value for this
+            parameter is <tt class="literal">-1</tt>. (Which means by default no auto re-attachment will occur)</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8272"></a>34.2.&nbsp;Session reconnection</h2></div></div><div></div></div><p>Alternatively, the server might have actually been restarted after crashing or being
+            stopped. In this case any sessions will no longer be existent on the server and it won't
+            be possible to 100% transparently re-attach to them.</p><p>In this case, HornetQ will automatically reconnect the connection and <span class="italic">recreate</span> any sessions and consumers on the server
+            corresponding to the sessions and consumers on the client. This process is exactly the
+            same as what happens during failover onto a backup server.</p><p>Client reconnection is also used internally by components such as core bridges to
+            allow them to reconnect to their target servers.</p><p>Please see the section on failover <a href="ha.html#ha.automatic.failover" title="39.2.1.&nbsp;Automatic Client Failover">Section&nbsp;39.2.1, &#8220;Automatic Client Failover&#8221;</a> to get a
+            full understanding of how transacted and non-transacted sessions are reconnected during
+            failover/reconnect and what you need to do to maintain <span class="italic">once and
+                only once </span>delivery guarantees.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8291"></a>34.3.&nbsp;Configuring reconnection/reattachment attributes</h2></div></div><div></div></div><p>Client reconnection is configured using the following parameters:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">retry-interval</tt>. This optional parameter determines the
+                    period in milliseconds between subsequent reconnection attempts, if the
+                    connection to the target server has failed. The default value is <tt class="literal">2000</tt> milliseconds.</p></li><li><p><tt class="literal">retry-interval-multiplier</tt>. This optional parameter
+                    determines determines a multiplier to apply to the time since the last retry to
+                    compute the time to the next retry.</p><p>This allows you to implement an <span class="emphasis"><em>exponential backoff</em></span>
+                    between retry attempts.</p><p>Let's take an example:</p><p>If we set <tt class="literal">retry-interval</tt> to <tt class="literal">1000</tt> ms and
+                    we set <tt class="literal">retry-interval-multiplier</tt> to <tt class="literal">2.0</tt>,
+                    then, if the first reconnect attempt fails, we will wait <tt class="literal">1000</tt>
+                    ms then <tt class="literal">2000</tt> ms then <tt class="literal">4000</tt> ms between
+                    subsequent reconnection attempts.</p><p>The default value is <tt class="literal">1.0</tt> meaning each reconnect attempt is
+                    spaced at equal intervals.</p></li><li><p><tt class="literal">max-retry-interval</tt>. This optional parameter determines the
+                    maximum retry interval that will be used. When setting <tt class="literal">retry-interval-multiplier</tt> it would otherwise be possible that
+                    subsequent retries exponentially increase to ridiculously large values. By
+                    setting this parameter you can set an upper limit on that value. The default
+                    value is <tt class="literal">2000</tt> milliseconds.</p></li><li><p><tt class="literal">reconnect-attempts</tt>. This optional parameter determines the
+                    total number of reconnect attempts to make before giving up and shutting down. A
+                    value of <tt class="literal">-1</tt> signifies an unlimited number of attempts. The
+                    default value is <tt class="literal">0</tt>.</p></li></ul></div><p>If you're using JMS, and you're using the JMS Service on the server to load your JMS
+            connection factory instances directly into JNDI, then you can specify these parameters
+            in the xml configuration in <tt class="literal">hornetq-jms.xml</tt>, for example:</p><pre class="programlisting">
+&lt;connection-factory name="ConnectionFactory"&gt;
+&lt;connectors&gt;
+   &lt;connector-ref connector-name="netty"/&gt;
+&lt;/connectors&gt;
+&lt;entries&gt;
+   &lt;entry name="ConnectionFactory"/&gt;
+   &lt;entry name="XAConnectionFactory"/&gt;
+&lt;/entries&gt;
+&lt;retry-interval&gt;1000&lt;/retry-interval&gt;
+&lt;retry-interval-multiplier&gt;1.5&lt;/retry-interval-multiplier&gt;
+&lt;max-retry-interval&gt;60000&lt;/max-retry-interval&gt;
+&lt;reconnect-attempts&gt;1000&lt;/reconnect-attempts&gt;
+&lt;/connection-factory&gt;          
+    </pre><p>If you're using JMS, but instantiating your JMS connection factory directly, you can
+            specify the parameters using the appropriate setter methods on the <tt class="literal">HornetQConnectionFactory</tt> immediately after creating it.</p><p>If you're using the core API and instantiating the <tt class="literal">ClientSessionFactory</tt> instance directly you can also specify the
+            parameters using the appropriate setter methods on the <tt class="literal">ClientSessionFactory</tt> immediately after creating it.</p><p>If your client does manage to reconnect but the session is no longer available on the
+            server, for instance if the server has been restarted or it has timed out, then the
+            client won't be able to re-attach, and any <tt class="literal">ExceptionListener</tt> or
+                <tt class="literal">FailureListener</tt> instances registered on the connection or session
+            will be called.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="client-reconnection.exceptionlistener"></a>34.4.&nbsp;ExceptionListeners and SessionFailureListeners</h2></div></div><div></div></div><p>Please note, that when a client reconnects or re-attaches, any registered JMS <tt class="literal">ExceptionListener</tt> or core API <tt class="literal">SessionFailureListener</tt>
+            will be called.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="jms-bridge.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="diverts.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;33.&nbsp;The JMS Bridge&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;35.&nbsp;Diverting and Splitting Message Flows</td></tr></table></div></body></html>

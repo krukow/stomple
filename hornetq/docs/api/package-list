@@ -1,0 +1,10 @@
+org.hornetq.api.core
+org.hornetq.api.core.client
+org.hornetq.api.core.client.loadbalance
+org.hornetq.api.core.management
+org.hornetq.api.jms
+org.hornetq.api.jms.management
+org.hornetq.spi.core.logging
+org.hornetq.spi.core.protocol
+org.hornetq.spi.core.remoting
+org.hornetq.spi.core.security

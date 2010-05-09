@@ -1,0 +1,14 @@
+A robust full-featured Stomple client for JavaScript
+
+Introduction in blog post:
+
+http://blog.higher-order.net/2010/05/09/stomple-jms-via-websockets
+
+Quick Demo:
+1) Start hornetq 
+krukow:~/Projects/private/stomple$ ./hornetq/bin/run.sh ./hornetq/examples/jms/stomp-websockets/server0
+
+Open example in a browser that supports WebSockets (e.g., Chrome)
+2) open example/transactional-chat.html
+
+More info to come...

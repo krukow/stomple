@@ -1,0 +1,70 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;25.&nbsp;Queue Attributes</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="paging.html" title="Chapter&nbsp;24.&nbsp;Paging"><link rel="next" href="scheduled-messages.html" title="Chapter&nbsp;26.&nbsp;Scheduled Messages"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;25.&nbsp;Queue Attributes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="paging.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="scheduled-messages.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="queue-attributes"></a>Chapter&nbsp;25.&nbsp;Queue Attributes</h2></div></div><div></div></div><p>Queue attributes can be set in one of two ways. Either by configuring them using the
+        configuration file or by using the core API. This chapter will explain how to configure each
+        attribute and what effect the attribute has.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="predefined.queues"></a>25.1.&nbsp;Predefined Queues</h2></div></div><div></div></div><p>Queues can be predefined via configuration at a core level or at a JMS level. Firstly
+            lets look at a JMS level.</p><p>The following shows a queue predefined in the <tt class="literal">hornetq-jms.xml</tt>
+            configuration file.</p><pre class="programlisting">&lt;queue name="selectorQueue"&gt;
+      &lt;entry name="/queue/selectorQueue"/&gt;
+      &lt;selector string="color='red'"/&gt;
+      &lt;durable&gt;true&lt;/durable&gt;
+&lt;/queue&gt;</pre><p>This name attribute of queue defines the name of the queue. When we do this at a jms
+            level we follow a naming convention so the actual name of the core queue will be
+                <tt class="literal">jms.queue.selectorQueue</tt>.</p><p>The entry element configures the name that will be used to bind the queue to JNDI.
+            This is a mandatory element and the queue can contain multiple of these to bind the same
+            queue to different names.</p><p>The selector element defines what JMS message selector the predefined queue will have.
+            Only messages that match the selector will be added to the queue. This is an optional
+            element with a default of null when omitted.</p><p>The durable element specifies whether the queue will be persisted. This again is
+            optional and defaults to true if omitted.</p><p>Secondly a queue can be predefined at a core level in the <tt class="literal">hornetq-configuration.xml</tt> file. The following is an example.</p><pre class="programlisting">&lt;queues&gt;     
+   	&lt;queue name="jms.queue.selectorQueue"&gt;
+   	    &lt;address&gt;jms.queue.selectorQueue&lt;/address&gt;
+   	    &lt;filter string="color='red'"/&gt;
+       &lt;durable&gt;true&lt;/durable&gt;
+   	&lt;/queue&gt;
+&lt;/queues&gt;</pre><p>This is very similar to the JMS configuration, with 3 real differences which
+            are.</p><div class="orderedlist"><ol type="1"><li><p>The name attribute of queue is the actual name used for the queue with no
+                    naming convention as in JMS.</p></li><li><p>The address element defines what address is used for routing messages.</p></li><li><p>There is no entry element.</p></li><li><p>The filter uses the <span class="emphasis"><em>Core filter syntax</em></span> (described in
+                        <a href="filter-expressions.html" title="Chapter&nbsp;14.&nbsp;Filter Expressions">Chapter&nbsp;14, <i>Filter Expressions</i></a>), <span class="emphasis"><em>not</em></span> the JMS
+                    selector syntax.</p></li></ol></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4833"></a>25.2.&nbsp;Using the API</h2></div></div><div></div></div><p>Queues can also be created using the core API or the management API.</p><p>For the core API, queues can be created via the <tt class="literal">org.hornetq.api.core.client.ClientSession</tt> interface. There are multiple
+                <tt class="literal">createQueue</tt> methods that support setting all of the previously
+            mentioned attributes. There is one extra attribute that can be set via this API which is
+                <tt class="literal">temporary</tt>. setting this to true means that the queue will be
+            deleted once the session is disconnected.</p><p>Take a look at <a href="management.html" title="Chapter&nbsp;30.&nbsp;Management">Chapter&nbsp;30, <i>Management</i></a> for a description of the management API
+            for creating queues.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="queue-attributes.address-settings"></a>25.3.&nbsp;Configuring Queues Via Address Settings</h2></div></div><div></div></div><p>There are some attributes that are defined against an address wildcard rather than a
+            specific queue. Here an example of an <tt class="literal">address-setting</tt> entry that
+            would be found in the <tt class="literal">hornetq-configuration.xml</tt> file.</p><pre class="programlisting">&lt;address-settings&gt;
+    &lt;address-setting match="jms.queue.exampleQueue"&gt;
+        &lt;dead-letter-address&gt;jms.queue.deadLetterQueue&lt;/dead-letter-address&gt;
+        &lt;max-delivery-attempts&gt;3&lt;/max-delivery-attempts&gt;
+        &lt;redelivery-delay&gt;5000&lt;/redelivery-delay&gt;
+        &lt;expiry-address&gt;jms.queue.expiryQueue&lt;/expiry-address&gt;
+        &lt;last-value-queue&gt;true&lt;/last-value-queue&gt;        
+        &lt;max-size-bytes&gt;100000&lt;/max-size-bytes&gt;
+        &lt;page-size-bytes&gt;20000&lt;/page-size-bytes&gt;
+        &lt;redistribution-delay&gt;0&lt;/redistribution-delay&gt;
+        &lt;send-to-dla-on-no-route&gt;true&lt;/send-to-dla-on-no-route&gt;
+        &lt;address-full-policy&gt;PAGE&lt;/address-full-policy&gt;
+     &lt;/address-setting&gt;
+&lt;/address-settings&gt;</pre><p>The idea with address settings, is you can provide a block of settings which will be
+            applied against any adresses that match the string in the <tt class="literal">match</tt> attribute. In the
+            above example the settings would only be applied to any addresses which exactly match
+            the address <tt class="literal">jms.queue.exampleQueue</tt>, but you can also use wildcards to apply sets of
+            configuration against many addresses. The wildcard syntax used is described <a href="wildcard-syntax.html" title="Chapter&nbsp;13.&nbsp;Understanding the HornetQ Wildcard Syntax">here</a>.</p><p>For example, if you used the <tt class="literal">match</tt> string <tt class="literal">jms.queue.#</tt> the settings would be applied
+        to all addresses which start with <tt class="literal">jms.queue.</tt> which would be all JMS queues.</p><p>The meaning of the specific settings are explained fully throughout the user manual, however here is a brief
+            description with a link to the appropriate chapter if available. </p><p><tt class="literal">max-delivery-attempts</tt> defines how many time a cancelled message can
+            be redelivered before sending to the <tt class="literal">dead-letter-address</tt>. A full
+            explanation can be found <a href="undelivered-messages.html#undelivered-messages.configuring" title="21.2.1.&nbsp;Configuring Dead Letter Addresses">here</a>.</p><p><tt class="literal">redelivery-delay</tt> defines how long to wait before attempting
+            redelivery of a cancelled message. see <a href="undelivered-messages.html#undelivered-messages.delay" title="21.1.1.&nbsp;Configuring Delayed Redelivery">here</a>.</p><p><tt class="literal">expiry-address</tt> defines where to send a message that has expired.
+            see <a href="message-expiry.html#message-expiry.configuring" title="22.2.&nbsp;Configuring Expiry Addresses">here</a>.</p><p><tt class="literal">last-value-queue</tt> defines whether a queue only uses last values or
+            not. see <a href="last-value-queues.html" title="Chapter&nbsp;27.&nbsp;Last-Value Queues">here</a>.</p><p><tt class="literal">max-size-bytes</tt> and <tt class="literal">page-size-bytes</tt> are used to
+            set paging on an address. This is explained <a href="paging.html" title="Chapter&nbsp;24.&nbsp;Paging">here</a>.</p><p><tt class="literal">redistribution-delay</tt> defines how long to wait when the last
+            consumer is closed on a queue before redistributing any messages. see <a href="clusters.html#clusters.message-redistribution" title="38.6.&nbsp;Message Redistribution">here</a>.</p><p><tt class="literal">send-to-dla-on-no-route</tt>. If a message is sent to an address, but the server does not route it to any queues,
+        for example, there might be no queues bound to that address, or none of the queues have filters that match, then normally that message
+        would be discarded. However if this parameter is set to true for that address, if the message is not routed to any queues it will instead
+        be sent to the dead letter address (DLA) for that address, if it exists.</p><p><tt class="literal">address-full-policy</tt>. This attribute can have one of the following values: PAGE, DROP or BLOCK and determines what happens when
+            an address where <tt class="literal">max-size-bytes</tt> is specified becomes full. The default value is PAGE. If the value is PAGE then further messages will be paged to disk.
+            If the value is DROP then further messages will be silently dropped. 
+            If the value is BLOCK then client message producers will block when they try and send further messages.
+        
+        See the following chapters for more info <a href="flow-control.html" title="Chapter&nbsp;19.&nbsp;Flow Control">Chapter&nbsp;19, <i>Flow Control</i></a>, <a href="paging.html" title="Chapter&nbsp;24.&nbsp;Paging">Chapter&nbsp;24, <i>Paging</i></a>.
+        </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="paging.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="scheduled-messages.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;24.&nbsp;Paging&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;26.&nbsp;Scheduled Messages</td></tr></table></div></body></html>

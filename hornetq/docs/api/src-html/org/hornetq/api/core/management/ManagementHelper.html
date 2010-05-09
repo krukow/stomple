@@ -1,0 +1,537 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * Copyright 2009 Red Hat, Inc.<a name="line.2"></a>
+<FONT color="green">003</FONT>     * Red Hat licenses this file to you under the Apache License, version<a name="line.3"></a>
+<FONT color="green">004</FONT>     * 2.0 (the "License"); you may not use this file except in compliance<a name="line.4"></a>
+<FONT color="green">005</FONT>     * with the License.  You may obtain a copy of the License at<a name="line.5"></a>
+<FONT color="green">006</FONT>     *    http://www.apache.org/licenses/LICENSE-2.0<a name="line.6"></a>
+<FONT color="green">007</FONT>     * Unless required by applicable law or agreed to in writing, software<a name="line.7"></a>
+<FONT color="green">008</FONT>     * distributed under the License is distributed on an "AS IS" BASIS,<a name="line.8"></a>
+<FONT color="green">009</FONT>     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or<a name="line.9"></a>
+<FONT color="green">010</FONT>     * implied.  See the License for the specific language governing<a name="line.10"></a>
+<FONT color="green">011</FONT>     * permissions and limitations under the License.<a name="line.11"></a>
+<FONT color="green">012</FONT>     */<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>    package org.hornetq.api.core.management;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>    import java.util.Collections;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import java.util.HashMap;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import java.util.Iterator;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import java.util.Map;<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>    import org.hornetq.api.core.Message;<a name="line.21"></a>
+<FONT color="green">022</FONT>    import org.hornetq.api.core.SimpleString;<a name="line.22"></a>
+<FONT color="green">023</FONT>    import org.hornetq.core.logging.Logger;<a name="line.23"></a>
+<FONT color="green">024</FONT>    import org.hornetq.utils.json.JSONArray;<a name="line.24"></a>
+<FONT color="green">025</FONT>    import org.hornetq.utils.json.JSONObject;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>    /**<a name="line.27"></a>
+<FONT color="green">028</FONT>     * Helper class to use HornetQ Core messages to manage server resources.<a name="line.28"></a>
+<FONT color="green">029</FONT>     * <a name="line.29"></a>
+<FONT color="green">030</FONT>     * @author &lt;a href="mailto:jmesnil@redhat.com"&gt;Jeff Mesnil&lt;/a&gt;<a name="line.30"></a>
+<FONT color="green">031</FONT>     * @author &lt;a href="mailto:tim.fox@jboss.com"&gt;Tim Fox&lt;/a&gt;<a name="line.31"></a>
+<FONT color="green">032</FONT>     * <a name="line.32"></a>
+<FONT color="green">033</FONT>     * @version &lt;tt&gt;$Revision$&lt;/tt&gt;<a name="line.33"></a>
+<FONT color="green">034</FONT>     */<a name="line.34"></a>
+<FONT color="green">035</FONT>    public class ManagementHelper<a name="line.35"></a>
+<FONT color="green">036</FONT>    {<a name="line.36"></a>
+<FONT color="green">037</FONT>       // Constants -----------------------------------------------------<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>       private static final Logger log = Logger.getLogger(ManagementHelper.class);<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>       public static final SimpleString HDR_RESOURCE_NAME = new SimpleString("_HQ_ResourceName");<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>       public static final SimpleString HDR_ATTRIBUTE = new SimpleString("_HQ_Attribute");<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>       public static final SimpleString HDR_OPERATION_NAME = new SimpleString("_HQ_OperationName");<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>       public static final SimpleString HDR_OPERATION_SUCCEEDED = new SimpleString("_HQ_OperationSucceeded");<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>       public static final SimpleString HDR_NOTIFICATION_TYPE = new SimpleString("_HQ_NotifType");<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>       public static final SimpleString HDR_NOTIFICATION_TIMESTAMP = new SimpleString("_HQ_NotifTimestamp");<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>       public static final SimpleString HDR_ROUTING_NAME = new SimpleString("_HQ_RoutingName");<a name="line.53"></a>
+<FONT color="green">054</FONT>    <a name="line.54"></a>
+<FONT color="green">055</FONT>       public static final SimpleString HDR_CLUSTER_NAME = new SimpleString("_HQ_ClusterName");<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>       public static final SimpleString HDR_ADDRESS = new SimpleString("_HQ_Address");<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>       public static final SimpleString HDR_BINDING_ID = new SimpleString("_HQ_Binding_ID");<a name="line.59"></a>
+<FONT color="green">060</FONT>    <a name="line.60"></a>
+<FONT color="green">061</FONT>       public static final SimpleString HDR_BINDING_TYPE = new SimpleString("_HQ_Binding_Type");<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>       public static final SimpleString HDR_FILTERSTRING = new SimpleString("_HQ_FilterString");<a name="line.63"></a>
+<FONT color="green">064</FONT>    <a name="line.64"></a>
+<FONT color="green">065</FONT>       public static final SimpleString HDR_DISTANCE = new SimpleString("_HQ_Distance");<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>       public static final SimpleString HDR_CONSUMER_COUNT = new SimpleString("_HQ_ConsumerCount");<a name="line.67"></a>
+<FONT color="green">068</FONT>    <a name="line.68"></a>
+<FONT color="green">069</FONT>       public static final SimpleString HDR_USER = new SimpleString("_HQ_User");<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>       public static final SimpleString HDR_CHECK_TYPE = new SimpleString("_HQ_CheckType");<a name="line.71"></a>
+<FONT color="green">072</FONT>    <a name="line.72"></a>
+<FONT color="green">073</FONT>       public static final SimpleString HDR_PROPOSAL_GROUP_ID = new SimpleString("_JBM_ProposalGroupId");<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>       public static final SimpleString HDR_PROPOSAL_VALUE = new SimpleString("_JBM_ProposalValue");<a name="line.75"></a>
+<FONT color="green">076</FONT>    <a name="line.76"></a>
+<FONT color="green">077</FONT>       public static final SimpleString HDR_PROPOSAL_ALT_VALUE = new SimpleString("_JBM_ProposalAltValue");<a name="line.77"></a>
+<FONT color="green">078</FONT>    <a name="line.78"></a>
+<FONT color="green">079</FONT>       // Attributes ----------------------------------------------------<a name="line.79"></a>
+<FONT color="green">080</FONT>    <a name="line.80"></a>
+<FONT color="green">081</FONT>       // Static --------------------------------------------------------<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>       /**<a name="line.83"></a>
+<FONT color="green">084</FONT>        * Stores a resource attribute in a message to retrieve the value from the server resource.<a name="line.84"></a>
+<FONT color="green">085</FONT>        * <a name="line.85"></a>
+<FONT color="green">086</FONT>        * @param message message<a name="line.86"></a>
+<FONT color="green">087</FONT>        * @param resourceName the name of the resource<a name="line.87"></a>
+<FONT color="green">088</FONT>        * @param attribute the name of the attribute<a name="line.88"></a>
+<FONT color="green">089</FONT>        * <a name="line.89"></a>
+<FONT color="green">090</FONT>        * @see ResourceNames<a name="line.90"></a>
+<FONT color="green">091</FONT>        */<a name="line.91"></a>
+<FONT color="green">092</FONT>       public static void putAttribute(final Message message, final String resourceName, final String attribute)<a name="line.92"></a>
+<FONT color="green">093</FONT>       {<a name="line.93"></a>
+<FONT color="green">094</FONT>          message.putStringProperty(ManagementHelper.HDR_RESOURCE_NAME, new SimpleString(resourceName));<a name="line.94"></a>
+<FONT color="green">095</FONT>          message.putStringProperty(ManagementHelper.HDR_ATTRIBUTE, new SimpleString(attribute));<a name="line.95"></a>
+<FONT color="green">096</FONT>       }<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>       /**<a name="line.98"></a>
+<FONT color="green">099</FONT>        * Stores a operation invocation in a message to invoke the corresponding operation the value from the server resource.<a name="line.99"></a>
+<FONT color="green">100</FONT>        * <a name="line.100"></a>
+<FONT color="green">101</FONT>        * @param message  message<a name="line.101"></a>
+<FONT color="green">102</FONT>        * @param resourceName the name of the resource<a name="line.102"></a>
+<FONT color="green">103</FONT>        * @param operationName the name of the operation to invoke on the resource<a name="line.103"></a>
+<FONT color="green">104</FONT>        *<a name="line.104"></a>
+<FONT color="green">105</FONT>        * @see ResourceNames<a name="line.105"></a>
+<FONT color="green">106</FONT>        */<a name="line.106"></a>
+<FONT color="green">107</FONT>       public static void putOperationInvocation(final Message message,<a name="line.107"></a>
+<FONT color="green">108</FONT>                                                 final String resourceName,<a name="line.108"></a>
+<FONT color="green">109</FONT>                                                 final String operationName) throws Exception<a name="line.109"></a>
+<FONT color="green">110</FONT>       {<a name="line.110"></a>
+<FONT color="green">111</FONT>          ManagementHelper.putOperationInvocation(message, resourceName, operationName, (Object[])null);<a name="line.111"></a>
+<FONT color="green">112</FONT>       }<a name="line.112"></a>
+<FONT color="green">113</FONT>    <a name="line.113"></a>
+<FONT color="green">114</FONT>       /**<a name="line.114"></a>
+<FONT color="green">115</FONT>        * Stores a operation invocation in a  message to invoke the corresponding operation the value from the server resource.<a name="line.115"></a>
+<FONT color="green">116</FONT>        * <a name="line.116"></a>
+<FONT color="green">117</FONT>        * @param message  message<a name="line.117"></a>
+<FONT color="green">118</FONT>        * @param resourceName the name of the server resource<a name="line.118"></a>
+<FONT color="green">119</FONT>        * @param operationName the name of the operation to invoke on the server resource<a name="line.119"></a>
+<FONT color="green">120</FONT>        * @param parameters the parameters to use to invoke the server resource<a name="line.120"></a>
+<FONT color="green">121</FONT>        *<a name="line.121"></a>
+<FONT color="green">122</FONT>        * @see ResourceNames<a name="line.122"></a>
+<FONT color="green">123</FONT>        */<a name="line.123"></a>
+<FONT color="green">124</FONT>       public static void putOperationInvocation(final Message message,<a name="line.124"></a>
+<FONT color="green">125</FONT>                                                 final String resourceName,<a name="line.125"></a>
+<FONT color="green">126</FONT>                                                 final String operationName,<a name="line.126"></a>
+<FONT color="green">127</FONT>                                                 final Object... parameters) throws Exception<a name="line.127"></a>
+<FONT color="green">128</FONT>       {<a name="line.128"></a>
+<FONT color="green">129</FONT>          // store the name of the operation in the headers<a name="line.129"></a>
+<FONT color="green">130</FONT>          message.putStringProperty(ManagementHelper.HDR_RESOURCE_NAME, new SimpleString(resourceName));<a name="line.130"></a>
+<FONT color="green">131</FONT>          message.putStringProperty(ManagementHelper.HDR_OPERATION_NAME, new SimpleString(operationName));<a name="line.131"></a>
+<FONT color="green">132</FONT>    <a name="line.132"></a>
+<FONT color="green">133</FONT>          // and the params go in the body, since might be too large for header<a name="line.133"></a>
+<FONT color="green">134</FONT>    <a name="line.134"></a>
+<FONT color="green">135</FONT>          String paramString;<a name="line.135"></a>
+<FONT color="green">136</FONT>    <a name="line.136"></a>
+<FONT color="green">137</FONT>          if (parameters != null)<a name="line.137"></a>
+<FONT color="green">138</FONT>          {<a name="line.138"></a>
+<FONT color="green">139</FONT>             JSONArray jsonArray = ManagementHelper.toJSONArray(parameters);<a name="line.139"></a>
+<FONT color="green">140</FONT>    <a name="line.140"></a>
+<FONT color="green">141</FONT>             paramString = jsonArray.toString();<a name="line.141"></a>
+<FONT color="green">142</FONT>          }<a name="line.142"></a>
+<FONT color="green">143</FONT>          else<a name="line.143"></a>
+<FONT color="green">144</FONT>          {<a name="line.144"></a>
+<FONT color="green">145</FONT>             paramString = null;<a name="line.145"></a>
+<FONT color="green">146</FONT>          }<a name="line.146"></a>
+<FONT color="green">147</FONT>    <a name="line.147"></a>
+<FONT color="green">148</FONT>          message.getBodyBuffer().writeNullableString(paramString);<a name="line.148"></a>
+<FONT color="green">149</FONT>       }<a name="line.149"></a>
+<FONT color="green">150</FONT>    <a name="line.150"></a>
+<FONT color="green">151</FONT>       private static JSONArray toJSONArray(final Object[] array) throws Exception<a name="line.151"></a>
+<FONT color="green">152</FONT>       {<a name="line.152"></a>
+<FONT color="green">153</FONT>          JSONArray jsonArray = new JSONArray();<a name="line.153"></a>
+<FONT color="green">154</FONT>    <a name="line.154"></a>
+<FONT color="green">155</FONT>          for (Object parameter : array)<a name="line.155"></a>
+<FONT color="green">156</FONT>          {<a name="line.156"></a>
+<FONT color="green">157</FONT>             if (parameter instanceof Map)<a name="line.157"></a>
+<FONT color="green">158</FONT>             {<a name="line.158"></a>
+<FONT color="green">159</FONT>                Map&lt;String, Object&gt; map = (Map&lt;String, Object&gt;)parameter;<a name="line.159"></a>
+<FONT color="green">160</FONT>    <a name="line.160"></a>
+<FONT color="green">161</FONT>                JSONObject jsonObject = new JSONObject();<a name="line.161"></a>
+<FONT color="green">162</FONT>    <a name="line.162"></a>
+<FONT color="green">163</FONT>                for (Map.Entry&lt;String, Object&gt; entry : map.entrySet())<a name="line.163"></a>
+<FONT color="green">164</FONT>                {<a name="line.164"></a>
+<FONT color="green">165</FONT>                   String key = entry.getKey();<a name="line.165"></a>
+<FONT color="green">166</FONT>    <a name="line.166"></a>
+<FONT color="green">167</FONT>                   Object val = entry.getValue();<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>                   if (val != null)<a name="line.169"></a>
+<FONT color="green">170</FONT>                   {<a name="line.170"></a>
+<FONT color="green">171</FONT>                      if (val.getClass().isArray())<a name="line.171"></a>
+<FONT color="green">172</FONT>                      {<a name="line.172"></a>
+<FONT color="green">173</FONT>                         val = ManagementHelper.toJSONArray((Object[])val);<a name="line.173"></a>
+<FONT color="green">174</FONT>                      }<a name="line.174"></a>
+<FONT color="green">175</FONT>                      else<a name="line.175"></a>
+<FONT color="green">176</FONT>                      {<a name="line.176"></a>
+<FONT color="green">177</FONT>                         ManagementHelper.checkType(val);<a name="line.177"></a>
+<FONT color="green">178</FONT>                      }<a name="line.178"></a>
+<FONT color="green">179</FONT>                   }<a name="line.179"></a>
+<FONT color="green">180</FONT>    <a name="line.180"></a>
+<FONT color="green">181</FONT>                   jsonObject.put(key, val);<a name="line.181"></a>
+<FONT color="green">182</FONT>                }<a name="line.182"></a>
+<FONT color="green">183</FONT>    <a name="line.183"></a>
+<FONT color="green">184</FONT>                jsonArray.put(jsonObject);<a name="line.184"></a>
+<FONT color="green">185</FONT>             }<a name="line.185"></a>
+<FONT color="green">186</FONT>             else<a name="line.186"></a>
+<FONT color="green">187</FONT>             {<a name="line.187"></a>
+<FONT color="green">188</FONT>                if (parameter != null)<a name="line.188"></a>
+<FONT color="green">189</FONT>                {<a name="line.189"></a>
+<FONT color="green">190</FONT>                   Class clz = parameter.getClass();<a name="line.190"></a>
+<FONT color="green">191</FONT>    <a name="line.191"></a>
+<FONT color="green">192</FONT>                   if (clz.isArray())<a name="line.192"></a>
+<FONT color="green">193</FONT>                   {<a name="line.193"></a>
+<FONT color="green">194</FONT>                      Object[] innerArray = (Object[])parameter;<a name="line.194"></a>
+<FONT color="green">195</FONT>    <a name="line.195"></a>
+<FONT color="green">196</FONT>                      jsonArray.put(ManagementHelper.toJSONArray(innerArray));<a name="line.196"></a>
+<FONT color="green">197</FONT>                   }<a name="line.197"></a>
+<FONT color="green">198</FONT>                   else<a name="line.198"></a>
+<FONT color="green">199</FONT>                   {<a name="line.199"></a>
+<FONT color="green">200</FONT>                      ManagementHelper.checkType(parameter);<a name="line.200"></a>
+<FONT color="green">201</FONT>    <a name="line.201"></a>
+<FONT color="green">202</FONT>                      jsonArray.put(parameter);<a name="line.202"></a>
+<FONT color="green">203</FONT>                   }<a name="line.203"></a>
+<FONT color="green">204</FONT>                }<a name="line.204"></a>
+<FONT color="green">205</FONT>                else<a name="line.205"></a>
+<FONT color="green">206</FONT>                {<a name="line.206"></a>
+<FONT color="green">207</FONT>                   jsonArray.put((Object)null);<a name="line.207"></a>
+<FONT color="green">208</FONT>                }<a name="line.208"></a>
+<FONT color="green">209</FONT>             }<a name="line.209"></a>
+<FONT color="green">210</FONT>          }<a name="line.210"></a>
+<FONT color="green">211</FONT>    <a name="line.211"></a>
+<FONT color="green">212</FONT>          return jsonArray;<a name="line.212"></a>
+<FONT color="green">213</FONT>       }<a name="line.213"></a>
+<FONT color="green">214</FONT>    <a name="line.214"></a>
+<FONT color="green">215</FONT>       private static Object[] fromJSONArray(final JSONArray jsonArray) throws Exception<a name="line.215"></a>
+<FONT color="green">216</FONT>       {<a name="line.216"></a>
+<FONT color="green">217</FONT>          Object[] array = new Object[jsonArray.length()];<a name="line.217"></a>
+<FONT color="green">218</FONT>    <a name="line.218"></a>
+<FONT color="green">219</FONT>          for (int i = 0; i &lt; jsonArray.length(); i++)<a name="line.219"></a>
+<FONT color="green">220</FONT>          {<a name="line.220"></a>
+<FONT color="green">221</FONT>             Object val = jsonArray.get(i);<a name="line.221"></a>
+<FONT color="green">222</FONT>    <a name="line.222"></a>
+<FONT color="green">223</FONT>             if (val instanceof JSONArray)<a name="line.223"></a>
+<FONT color="green">224</FONT>             {<a name="line.224"></a>
+<FONT color="green">225</FONT>                Object[] inner = ManagementHelper.fromJSONArray((JSONArray)val);<a name="line.225"></a>
+<FONT color="green">226</FONT>    <a name="line.226"></a>
+<FONT color="green">227</FONT>                array[i] = inner;<a name="line.227"></a>
+<FONT color="green">228</FONT>             }<a name="line.228"></a>
+<FONT color="green">229</FONT>             else if (val instanceof JSONObject)<a name="line.229"></a>
+<FONT color="green">230</FONT>             {<a name="line.230"></a>
+<FONT color="green">231</FONT>                JSONObject jsonObject = (JSONObject)val;<a name="line.231"></a>
+<FONT color="green">232</FONT>    <a name="line.232"></a>
+<FONT color="green">233</FONT>                Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();<a name="line.233"></a>
+<FONT color="green">234</FONT>    <a name="line.234"></a>
+<FONT color="green">235</FONT>                Iterator&lt;String&gt; iter = jsonObject.keys();<a name="line.235"></a>
+<FONT color="green">236</FONT>    <a name="line.236"></a>
+<FONT color="green">237</FONT>                while (iter.hasNext())<a name="line.237"></a>
+<FONT color="green">238</FONT>                {<a name="line.238"></a>
+<FONT color="green">239</FONT>                   String key = iter.next();<a name="line.239"></a>
+<FONT color="green">240</FONT>    <a name="line.240"></a>
+<FONT color="green">241</FONT>                   Object innerVal = jsonObject.get(key);<a name="line.241"></a>
+<FONT color="green">242</FONT>    <a name="line.242"></a>
+<FONT color="green">243</FONT>                   if (innerVal instanceof JSONArray)<a name="line.243"></a>
+<FONT color="green">244</FONT>                   {<a name="line.244"></a>
+<FONT color="green">245</FONT>                      innerVal = ManagementHelper.fromJSONArray(((JSONArray)innerVal));<a name="line.245"></a>
+<FONT color="green">246</FONT>                   }<a name="line.246"></a>
+<FONT color="green">247</FONT>                   else if (innerVal instanceof JSONObject)<a name="line.247"></a>
+<FONT color="green">248</FONT>                   {<a name="line.248"></a>
+<FONT color="green">249</FONT>                      Map&lt;String, Object&gt; innerMap = new HashMap&lt;String, Object&gt;();<a name="line.249"></a>
+<FONT color="green">250</FONT>                      JSONObject o = (JSONObject)innerVal;<a name="line.250"></a>
+<FONT color="green">251</FONT>                      Iterator it = o.keys();<a name="line.251"></a>
+<FONT color="green">252</FONT>                      while (it.hasNext())<a name="line.252"></a>
+<FONT color="green">253</FONT>                      {<a name="line.253"></a>
+<FONT color="green">254</FONT>                         String k = (String)it.next();<a name="line.254"></a>
+<FONT color="green">255</FONT>                         innerMap.put(k, o.get(k));<a name="line.255"></a>
+<FONT color="green">256</FONT>                      }<a name="line.256"></a>
+<FONT color="green">257</FONT>                      innerVal = innerMap;<a name="line.257"></a>
+<FONT color="green">258</FONT>                   }<a name="line.258"></a>
+<FONT color="green">259</FONT>                   else if (innerVal instanceof Integer)<a name="line.259"></a>
+<FONT color="green">260</FONT>                   {<a name="line.260"></a>
+<FONT color="green">261</FONT>                      innerVal = ((Integer)innerVal).longValue();<a name="line.261"></a>
+<FONT color="green">262</FONT>                   }<a name="line.262"></a>
+<FONT color="green">263</FONT>    <a name="line.263"></a>
+<FONT color="green">264</FONT>                   map.put(key, innerVal);<a name="line.264"></a>
+<FONT color="green">265</FONT>                }<a name="line.265"></a>
+<FONT color="green">266</FONT>    <a name="line.266"></a>
+<FONT color="green">267</FONT>                array[i] = map;<a name="line.267"></a>
+<FONT color="green">268</FONT>             }<a name="line.268"></a>
+<FONT color="green">269</FONT>             else<a name="line.269"></a>
+<FONT color="green">270</FONT>             {<a name="line.270"></a>
+<FONT color="green">271</FONT>                if (val == JSONObject.NULL)<a name="line.271"></a>
+<FONT color="green">272</FONT>                {<a name="line.272"></a>
+<FONT color="green">273</FONT>                   array[i] = null;<a name="line.273"></a>
+<FONT color="green">274</FONT>                }<a name="line.274"></a>
+<FONT color="green">275</FONT>                else<a name="line.275"></a>
+<FONT color="green">276</FONT>                {<a name="line.276"></a>
+<FONT color="green">277</FONT>                   array[i] = val;<a name="line.277"></a>
+<FONT color="green">278</FONT>                }<a name="line.278"></a>
+<FONT color="green">279</FONT>             }<a name="line.279"></a>
+<FONT color="green">280</FONT>          }<a name="line.280"></a>
+<FONT color="green">281</FONT>    <a name="line.281"></a>
+<FONT color="green">282</FONT>          return array;<a name="line.282"></a>
+<FONT color="green">283</FONT>       }<a name="line.283"></a>
+<FONT color="green">284</FONT>    <a name="line.284"></a>
+<FONT color="green">285</FONT>       private static void checkType(final Object param)<a name="line.285"></a>
+<FONT color="green">286</FONT>       {<a name="line.286"></a>
+<FONT color="green">287</FONT>          if (param instanceof Integer == false &amp;&amp; param instanceof Long == false &amp;&amp;<a name="line.287"></a>
+<FONT color="green">288</FONT>              param instanceof Double == false &amp;&amp;<a name="line.288"></a>
+<FONT color="green">289</FONT>              param instanceof String == false &amp;&amp;<a name="line.289"></a>
+<FONT color="green">290</FONT>              param instanceof Boolean == false &amp;&amp;<a name="line.290"></a>
+<FONT color="green">291</FONT>              param instanceof Map == false &amp;&amp;<a name="line.291"></a>
+<FONT color="green">292</FONT>              param instanceof Byte == false &amp;&amp;<a name="line.292"></a>
+<FONT color="green">293</FONT>              param instanceof Short == false)<a name="line.293"></a>
+<FONT color="green">294</FONT>          {<a name="line.294"></a>
+<FONT color="green">295</FONT>             throw new IllegalArgumentException("Params for management operations must be of the following type: " + "int long double String boolean Map or array thereof " +<a name="line.295"></a>
+<FONT color="green">296</FONT>                                                " but found " +<a name="line.296"></a>
+<FONT color="green">297</FONT>                                                param.getClass().getName());<a name="line.297"></a>
+<FONT color="green">298</FONT>          }<a name="line.298"></a>
+<FONT color="green">299</FONT>       }<a name="line.299"></a>
+<FONT color="green">300</FONT>    <a name="line.300"></a>
+<FONT color="green">301</FONT>       /**<a name="line.301"></a>
+<FONT color="green">302</FONT>        * Used by HornetQ management service.<a name="line.302"></a>
+<FONT color="green">303</FONT>        */<a name="line.303"></a>
+<FONT color="green">304</FONT>       public static Object[] retrieveOperationParameters(final Message message) throws Exception<a name="line.304"></a>
+<FONT color="green">305</FONT>       {<a name="line.305"></a>
+<FONT color="green">306</FONT>          String jsonString = message.getBodyBuffer().readNullableString();<a name="line.306"></a>
+<FONT color="green">307</FONT>    <a name="line.307"></a>
+<FONT color="green">308</FONT>          if (jsonString != null)<a name="line.308"></a>
+<FONT color="green">309</FONT>          {<a name="line.309"></a>
+<FONT color="green">310</FONT>             JSONArray jsonArray = new JSONArray(jsonString);<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>             return ManagementHelper.fromJSONArray(jsonArray);<a name="line.312"></a>
+<FONT color="green">313</FONT>          }<a name="line.313"></a>
+<FONT color="green">314</FONT>          else<a name="line.314"></a>
+<FONT color="green">315</FONT>          {<a name="line.315"></a>
+<FONT color="green">316</FONT>             return null;<a name="line.316"></a>
+<FONT color="green">317</FONT>          }<a name="line.317"></a>
+<FONT color="green">318</FONT>       }<a name="line.318"></a>
+<FONT color="green">319</FONT>    <a name="line.319"></a>
+<FONT color="green">320</FONT>       /**<a name="line.320"></a>
+<FONT color="green">321</FONT>        * Returns whether the JMS message corresponds to the result of a management operation invocation.<a name="line.321"></a>
+<FONT color="green">322</FONT>        */<a name="line.322"></a>
+<FONT color="green">323</FONT>       public static boolean isOperationResult(final Message message)<a name="line.323"></a>
+<FONT color="green">324</FONT>       {<a name="line.324"></a>
+<FONT color="green">325</FONT>          return message.containsProperty(ManagementHelper.HDR_OPERATION_SUCCEEDED);<a name="line.325"></a>
+<FONT color="green">326</FONT>       }<a name="line.326"></a>
+<FONT color="green">327</FONT>    <a name="line.327"></a>
+<FONT color="green">328</FONT>       /**<a name="line.328"></a>
+<FONT color="green">329</FONT>        * Returns whether the JMS message corresponds to the result of a management attribute value.<a name="line.329"></a>
+<FONT color="green">330</FONT>        */<a name="line.330"></a>
+<FONT color="green">331</FONT>       public static boolean isAttributesResult(final Message message)<a name="line.331"></a>
+<FONT color="green">332</FONT>       {<a name="line.332"></a>
+<FONT color="green">333</FONT>          return !ManagementHelper.isOperationResult(message);<a name="line.333"></a>
+<FONT color="green">334</FONT>       }<a name="line.334"></a>
+<FONT color="green">335</FONT>    <a name="line.335"></a>
+<FONT color="green">336</FONT>       /**<a name="line.336"></a>
+<FONT color="green">337</FONT>        * Used by HornetQ management service.<a name="line.337"></a>
+<FONT color="green">338</FONT>        */<a name="line.338"></a>
+<FONT color="green">339</FONT>       public static void storeResult(final Message message, final Object result) throws Exception<a name="line.339"></a>
+<FONT color="green">340</FONT>       {<a name="line.340"></a>
+<FONT color="green">341</FONT>          String resultString;<a name="line.341"></a>
+<FONT color="green">342</FONT>    <a name="line.342"></a>
+<FONT color="green">343</FONT>          if (result != null)<a name="line.343"></a>
+<FONT color="green">344</FONT>          {<a name="line.344"></a>
+<FONT color="green">345</FONT>             // Result is stored in body, also encoded as JSON array of length 1<a name="line.345"></a>
+<FONT color="green">346</FONT>    <a name="line.346"></a>
+<FONT color="green">347</FONT>             JSONArray jsonArray = ManagementHelper.toJSONArray(new Object[] { result });<a name="line.347"></a>
+<FONT color="green">348</FONT>    <a name="line.348"></a>
+<FONT color="green">349</FONT>             resultString = jsonArray.toString();<a name="line.349"></a>
+<FONT color="green">350</FONT>          }<a name="line.350"></a>
+<FONT color="green">351</FONT>          else<a name="line.351"></a>
+<FONT color="green">352</FONT>          {<a name="line.352"></a>
+<FONT color="green">353</FONT>             resultString = null;<a name="line.353"></a>
+<FONT color="green">354</FONT>          }<a name="line.354"></a>
+<FONT color="green">355</FONT>    <a name="line.355"></a>
+<FONT color="green">356</FONT>          message.getBodyBuffer().writeNullableString(resultString);<a name="line.356"></a>
+<FONT color="green">357</FONT>       }<a name="line.357"></a>
+<FONT color="green">358</FONT>    <a name="line.358"></a>
+<FONT color="green">359</FONT>       /**<a name="line.359"></a>
+<FONT color="green">360</FONT>        * Returns the result of an operation invocation or an attribute value.<a name="line.360"></a>
+<FONT color="green">361</FONT>        * &lt;br&gt;<a name="line.361"></a>
+<FONT color="green">362</FONT>        * If an error occurred on the server, {@link #hasOperationSucceeded(Message)} will return {@code false}.<a name="line.362"></a>
+<FONT color="green">363</FONT>        * and the result will be a String corresponding to the server exception.<a name="line.363"></a>
+<FONT color="green">364</FONT>        */<a name="line.364"></a>
+<FONT color="green">365</FONT>       public static Object[] getResults(final Message message) throws Exception<a name="line.365"></a>
+<FONT color="green">366</FONT>       {<a name="line.366"></a>
+<FONT color="green">367</FONT>          String jsonString = message.getBodyBuffer().readNullableString();<a name="line.367"></a>
+<FONT color="green">368</FONT>    <a name="line.368"></a>
+<FONT color="green">369</FONT>          if (jsonString != null)<a name="line.369"></a>
+<FONT color="green">370</FONT>          {<a name="line.370"></a>
+<FONT color="green">371</FONT>             JSONArray jsonArray = new JSONArray(jsonString);<a name="line.371"></a>
+<FONT color="green">372</FONT>    <a name="line.372"></a>
+<FONT color="green">373</FONT>             Object[] res = ManagementHelper.fromJSONArray(jsonArray);<a name="line.373"></a>
+<FONT color="green">374</FONT>    <a name="line.374"></a>
+<FONT color="green">375</FONT>             return res;<a name="line.375"></a>
+<FONT color="green">376</FONT>          }<a name="line.376"></a>
+<FONT color="green">377</FONT>          else<a name="line.377"></a>
+<FONT color="green">378</FONT>          {<a name="line.378"></a>
+<FONT color="green">379</FONT>             return null;<a name="line.379"></a>
+<FONT color="green">380</FONT>          }<a name="line.380"></a>
+<FONT color="green">381</FONT>       }<a name="line.381"></a>
+<FONT color="green">382</FONT>    <a name="line.382"></a>
+<FONT color="green">383</FONT>       /**<a name="line.383"></a>
+<FONT color="green">384</FONT>        * Returns the result of an operation invocation or an attribute value.<a name="line.384"></a>
+<FONT color="green">385</FONT>        * &lt;br&gt;<a name="line.385"></a>
+<FONT color="green">386</FONT>        * If an error occurred on the server, {@link #hasOperationSucceeded(Message)} will return {@code false}.<a name="line.386"></a>
+<FONT color="green">387</FONT>        * and the result will be a String corresponding to the server exception.<a name="line.387"></a>
+<FONT color="green">388</FONT>        */<a name="line.388"></a>
+<FONT color="green">389</FONT>       public static Object getResult(final Message message) throws Exception<a name="line.389"></a>
+<FONT color="green">390</FONT>       {<a name="line.390"></a>
+<FONT color="green">391</FONT>          Object[] res = ManagementHelper.getResults(message);<a name="line.391"></a>
+<FONT color="green">392</FONT>    <a name="line.392"></a>
+<FONT color="green">393</FONT>          if (res != null)<a name="line.393"></a>
+<FONT color="green">394</FONT>          {<a name="line.394"></a>
+<FONT color="green">395</FONT>             return res[0];<a name="line.395"></a>
+<FONT color="green">396</FONT>          }<a name="line.396"></a>
+<FONT color="green">397</FONT>          else<a name="line.397"></a>
+<FONT color="green">398</FONT>          {<a name="line.398"></a>
+<FONT color="green">399</FONT>             return null;<a name="line.399"></a>
+<FONT color="green">400</FONT>          }<a name="line.400"></a>
+<FONT color="green">401</FONT>       }<a name="line.401"></a>
+<FONT color="green">402</FONT>    <a name="line.402"></a>
+<FONT color="green">403</FONT>       /**<a name="line.403"></a>
+<FONT color="green">404</FONT>        * Returns whether the invocation of the management operation on the server resource succeeded.<a name="line.404"></a>
+<FONT color="green">405</FONT>        */<a name="line.405"></a>
+<FONT color="green">406</FONT>       public static boolean hasOperationSucceeded(final Message message)<a name="line.406"></a>
+<FONT color="green">407</FONT>       {<a name="line.407"></a>
+<FONT color="green">408</FONT>          if (!ManagementHelper.isOperationResult(message))<a name="line.408"></a>
+<FONT color="green">409</FONT>          {<a name="line.409"></a>
+<FONT color="green">410</FONT>             return false;<a name="line.410"></a>
+<FONT color="green">411</FONT>          }<a name="line.411"></a>
+<FONT color="green">412</FONT>          if (message.containsProperty(ManagementHelper.HDR_OPERATION_SUCCEEDED))<a name="line.412"></a>
+<FONT color="green">413</FONT>          {<a name="line.413"></a>
+<FONT color="green">414</FONT>             return message.getBooleanProperty(ManagementHelper.HDR_OPERATION_SUCCEEDED);<a name="line.414"></a>
+<FONT color="green">415</FONT>          }<a name="line.415"></a>
+<FONT color="green">416</FONT>          return false;<a name="line.416"></a>
+<FONT color="green">417</FONT>       }<a name="line.417"></a>
+<FONT color="green">418</FONT>    <a name="line.418"></a>
+<FONT color="green">419</FONT>       /**<a name="line.419"></a>
+<FONT color="green">420</FONT>        * Used by HornetQ management service.<a name="line.420"></a>
+<FONT color="green">421</FONT>        */   <a name="line.421"></a>
+<FONT color="green">422</FONT>       public static Map&lt;String, Object&gt; fromCommaSeparatedKeyValues(final String str) throws Exception<a name="line.422"></a>
+<FONT color="green">423</FONT>       {<a name="line.423"></a>
+<FONT color="green">424</FONT>          if (str == null || str.trim().length() == 0)<a name="line.424"></a>
+<FONT color="green">425</FONT>          {<a name="line.425"></a>
+<FONT color="green">426</FONT>             return Collections.emptyMap();<a name="line.426"></a>
+<FONT color="green">427</FONT>          }<a name="line.427"></a>
+<FONT color="green">428</FONT>    <a name="line.428"></a>
+<FONT color="green">429</FONT>          // create a JSON array with 1 object:<a name="line.429"></a>
+<FONT color="green">430</FONT>          JSONArray array = new JSONArray("[{" + str + "}]");<a name="line.430"></a>
+<FONT color="green">431</FONT>          Map&lt;String, Object&gt; params = (Map&lt;String, Object&gt;)ManagementHelper.fromJSONArray(array)[0];<a name="line.431"></a>
+<FONT color="green">432</FONT>          return params;<a name="line.432"></a>
+<FONT color="green">433</FONT>       }<a name="line.433"></a>
+<FONT color="green">434</FONT>    <a name="line.434"></a>
+<FONT color="green">435</FONT>       /**<a name="line.435"></a>
+<FONT color="green">436</FONT>        * Used by HornetQ management service.<a name="line.436"></a>
+<FONT color="green">437</FONT>        */<a name="line.437"></a>
+<FONT color="green">438</FONT>       public static Object[] fromCommaSeparatedArrayOfCommaSeparatedKeyValues(final String str) throws Exception<a name="line.438"></a>
+<FONT color="green">439</FONT>       {<a name="line.439"></a>
+<FONT color="green">440</FONT>          if (str == null || str.trim().length() == 0)<a name="line.440"></a>
+<FONT color="green">441</FONT>          {<a name="line.441"></a>
+<FONT color="green">442</FONT>             return new Object[0];<a name="line.442"></a>
+<FONT color="green">443</FONT>          }<a name="line.443"></a>
+<FONT color="green">444</FONT>    <a name="line.444"></a>
+<FONT color="green">445</FONT>          String s = str;<a name="line.445"></a>
+<FONT color="green">446</FONT>    <a name="line.446"></a>
+<FONT color="green">447</FONT>          // if there is a single item, we wrap it in to make it a JSON object<a name="line.447"></a>
+<FONT color="green">448</FONT>          if (!s.trim().startsWith("{"))<a name="line.448"></a>
+<FONT color="green">449</FONT>          {<a name="line.449"></a>
+<FONT color="green">450</FONT>             s = "{" + s + "}";<a name="line.450"></a>
+<FONT color="green">451</FONT>          }<a name="line.451"></a>
+<FONT color="green">452</FONT>          JSONArray array = new JSONArray("[" + s + "]");<a name="line.452"></a>
+<FONT color="green">453</FONT>          return ManagementHelper.fromJSONArray(array);<a name="line.453"></a>
+<FONT color="green">454</FONT>       }<a name="line.454"></a>
+<FONT color="green">455</FONT>    <a name="line.455"></a>
+<FONT color="green">456</FONT>       // Constructors --------------------------------------------------<a name="line.456"></a>
+<FONT color="green">457</FONT>    <a name="line.457"></a>
+<FONT color="green">458</FONT>       private ManagementHelper()<a name="line.458"></a>
+<FONT color="green">459</FONT>       {<a name="line.459"></a>
+<FONT color="green">460</FONT>       }<a name="line.460"></a>
+<FONT color="green">461</FONT>    <a name="line.461"></a>
+<FONT color="green">462</FONT>       // Public --------------------------------------------------------<a name="line.462"></a>
+<FONT color="green">463</FONT>    <a name="line.463"></a>
+<FONT color="green">464</FONT>       // Package protected ---------------------------------------------<a name="line.464"></a>
+<FONT color="green">465</FONT>    <a name="line.465"></a>
+<FONT color="green">466</FONT>       // Protected -----------------------------------------------------<a name="line.466"></a>
+<FONT color="green">467</FONT>    <a name="line.467"></a>
+<FONT color="green">468</FONT>       // Private -------------------------------------------------------<a name="line.468"></a>
+<FONT color="green">469</FONT>    <a name="line.469"></a>
+<FONT color="green">470</FONT>       // Inner classes -------------------------------------------------<a name="line.470"></a>
+<FONT color="green">471</FONT>    }<a name="line.471"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

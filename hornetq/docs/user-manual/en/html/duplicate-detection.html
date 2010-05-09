@@ -1,0 +1,76 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;37.&nbsp;Duplicate Message Detection</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="core-bridges.html" title="Chapter&nbsp;36.&nbsp;Core Bridges"><link rel="next" href="clusters.html" title="Chapter&nbsp;38.&nbsp;Clusters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;37.&nbsp;Duplicate Message Detection</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="core-bridges.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="clusters.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="duplicate-detection"></a>Chapter&nbsp;37.&nbsp;Duplicate Message Detection</h2></div></div><div></div></div><p>HornetQ includes powerful automatic duplicate message detection, filtering out
+        duplicate messages without you having to code your own fiddly duplicate detection logic at
+        the application level. This chapter will explain what duplicate detection is, how HornetQ
+        uses it and how and where to configure it.</p><p>When sending messages from a client to a server, or indeed from a server to another
+        server, if the target server or connection fails sometime after sending the message, but
+        before the sender receives a response that the send (or commit) was processed successfully
+        then the sender cannot know for sure if the message was sent successfully to the
+        address.</p><p>If the target server or connection failed after the send was received and processed but
+        before the response was sent back then the message will have been sent to the address
+        successfully, but if the target server or connection failed before the send was received and
+        finished processing then it will not have been sent to the address successfully. From the
+        senders point of view it's not possible to distinguish these two cases.</p><p>When the server recovers this leaves the client in a difficult situation. It knows the
+        target server failed, but it does not know if the last message reached its destination ok.
+        If it decides to resend the last message, then that could result in a duplicate message
+        being sent to the address. If each message was an order or a trade then this could result in
+        the order being fulfilled twice or the trade being double booked. This is clearly not a
+        desirable situation.</p><p>Sending the message(s) in a transaction does not help out either. If the server or
+        connection fails while the transaction commit is being processed it is also indeterminate
+        whether the transaction was successfully committed or not!</p><p>To solve these issues HornetQ provides automatic duplicate messages detection for
+        messages sent to addresses.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8860"></a>37.1.&nbsp;Using Duplicate Detection for Message Sending</h2></div></div><div></div></div><p>Enabling duplicate message detection for sent messages is simple: you just need to set
+            a special property on the message to a unique value. You can create the value however
+            you like, as long as it is unique. When the target server receives the message it will
+            check if that property is set, if it is, then it will check in its in memory cache if it
+            has already received a message with that value of the header. If it has received a
+            message with the same value before then it will ignore the message.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Using duplicate detection to move messages between nodes can give you the same
+                    <span class="emphasis"><em>once and only once</em></span> delivery guarantees as if you were using
+                an XA transaction to consume messages from source and send them to the target, but
+                with less overhead and much easier configuration than using XA.</p></div><p>If you're sending messages in a transaction then you don't have to set the property
+            for <span class="emphasis"><em>every</em></span> message you send in that transaction, you only need to
+            set it once in the transaction. If the server detects a duplicate message for any
+            message in the transaction, then it will ignore the entire transaction.</p><p>The name of the property that you set is given by the value of <tt class="literal">org.hornetq.api.core.HDR_DUPLICATE_DETECTION_ID</tt>, which
+            is <tt class="literal">_HQ_DUPL_ID</tt></p><p>The value of the property can be of type <tt class="literal">byte[]</tt> or <tt class="literal">SimpleString</tt> if you're using the core API. If you're using JMS it must be
+            a <tt class="literal">String</tt>, and its value should be unique. An easy way of generating
+            a unique id is by generating a UUID.</p><p>Here's an example of setting the property using the core API:</p><pre class="programlisting">
+...     
+
+ClientMessage message = session.createMessage(true);
+
+SimpleString myUniqueID = "This is my unique id";   // Could use a UUID for this
+
+message.setStringProperty(HDR_DUPLICATE_DETECTION_ID, myUniqueID);
+
+...
+        </pre><p>And here's an example using the JMS API:</p><pre class="programlisting">
+...     
+
+Message jmsMessage = session.createMessage();
+
+String myUniqueID = "This is my unique id";   // Could use a UUID for this
+
+message.setStringProperty(HDR_DUPLICATE_DETECTION_ID.toString(), myUniqueID);
+
+...
+        </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="duplicate.id.cache"></a>37.2.&nbsp;Configuring the Duplicate ID Cache</h2></div></div><div></div></div><p>The server maintains caches of received values of the <tt class="literal">org.hornetq.core.message.impl.HDR_DUPLICATE_DETECTION_ID</tt> property
+            sent to each address. Each address has its own distinct cache.</p><p>The cache is a circular fixed size cache. If the cache has a maximum size of <tt class="literal">n</tt> elements, then the <tt class="literal">n + 1</tt>th id stored will overwrite
+            the <tt class="literal">0</tt>th element in the cache.</p><p>The maximum size of the cache is configured by the parameter <tt class="literal">id-cache-size</tt> in <tt class="literal">hornetq-configuration.xml</tt>, the default
+            value is <tt class="literal">2000</tt> elements.</p><p>The caches can also be configured to persist to disk or not. This is configured by the
+            parameter <tt class="literal">persist-id-cache</tt>, also in <tt class="literal">hornetq-configuration.xml</tt>. If this is set to <tt class="literal">true</tt> then
+            each id will be persisted to permanent storage as they are received. The default value
+            for this parameter is <tt class="literal">true</tt>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>When choosing a size of the duplicate id cache be sure to set it to a larger
+                enough size so if you resend messages all the previously sent ones are in the cache
+                not having been overwritten.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8949"></a>37.3.&nbsp;Duplicate Detection and Bridges</h2></div></div><div></div></div><p>Core bridges can be configured to automatically add a unique duplicate id value (if there
+            isn't already one in the message) before forwarding the message to it's target. This
+            ensures that if the target server crashes or the connection is interrupted and the
+            bridge resends the message, then if it has already been received by the target server,
+            it will be ignored.</p><p>To configure a core bridge to add the duplicate id header, simply set the <i class="parameter"><tt>use-duplicate-detection</tt></i> to <tt class="literal">true</tt> when configuring a
+            bridge in <tt class="literal">hornetq-configuration.xml</tt>.</p><p>The default value for this parameter is <tt class="literal">true</tt>.</p><p>For more information on core bridges and how to configure them, please see 
+                <a href="core-bridges.html" title="Chapter&nbsp;36.&nbsp;Core Bridges">Chapter&nbsp;36, <i>Core Bridges</i></a>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8974"></a>37.4.&nbsp;Duplicate Detection and Cluster Connections</h2></div></div><div></div></div><p>Cluster connections internally use core bridges to move messages reliable between
+            nodes of the cluster. Consequently they can also be configured to insert the duplicate
+            id header for each message they move using their internal bridges.</p><p>To configure a cluster connection to add the duplicate id header, simply set the
+                <i class="parameter"><tt>use-duplicate-detection</tt></i> to <tt class="literal">true</tt> when
+            configuring a cluster connection in <tt class="literal">hornetq-configuration.xml</tt>.</p><p>The default value for this parameter is <tt class="literal">true</tt>.</p><p>For more information on cluster connections and how to configure them, please see <a href="clusters.html" title="Chapter&nbsp;38.&nbsp;Clusters">Chapter&nbsp;38, <i>Clusters</i></a>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8999"></a>37.5.&nbsp;Duplicate Detection and Paging</h2></div></div><div></div></div><p>HornetQ also uses duplicate detection when paging messages to storage. This is
+            so when a message is depaged from storage and server failure occurs, we do not end up
+            depaging the message more than once which could result in duplicate delivery.</p><p>For more information on paging and how to configure it, please see <a href="paging.html" title="Chapter&nbsp;24.&nbsp;Paging">Chapter&nbsp;24, <i>Paging</i></a>.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="core-bridges.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="clusters.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;36.&nbsp;Core Bridges&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;38.&nbsp;Clusters</td></tr></table></div></body></html>

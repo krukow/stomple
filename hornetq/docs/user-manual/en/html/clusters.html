@@ -1,0 +1,422 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;38.&nbsp;Clusters</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="duplicate-detection.html" title="Chapter&nbsp;37.&nbsp;Duplicate Message Detection"><link rel="next" href="ha.html" title="Chapter&nbsp;39.&nbsp;High Availability and Failover"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;38.&nbsp;Clusters</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="duplicate-detection.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ha.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="clusters"></a>Chapter&nbsp;38.&nbsp;Clusters</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9028"></a>38.1.&nbsp;Clusters Overview</h2></div></div><div></div></div><p>HornetQ clusters allow groups of HornetQ servers to be grouped together in order to
+            share message processing load. Each active node in the cluster is an active HornetQ
+            server which manages its own messages and handles its own connections. A server must be
+            configured to be clustered, you will need to set the <tt class="literal">clustered</tt>
+            element in the <tt class="literal">hornetq-configuration.xml</tt> configuration file to
+                <tt class="literal">true</tt>, this is <tt class="literal">false</tt> by default.</p><p>The cluster is formed by each node declaring <span class="emphasis"><em>cluster connections</em></span>
+            to other nodes in the core configuration file <tt class="literal">hornetq-configuration.xml</tt>. When a node forms a cluster connection to
+            another node, internally it creates a <span class="emphasis"><em>core bridge</em></span> (as described in
+                <a href="core-bridges.html" title="Chapter&nbsp;36.&nbsp;Core Bridges">Chapter&nbsp;36, <i>Core Bridges</i></a>) connection between it and the other node, this is
+            done transparently behind the scenes - you don't have to declare an explicit bridge for
+            each node. These cluster connections allow messages to flow between the nodes of the
+            cluster to balance load.</p><p>Nodes can be connected together to form a cluster in many different topologies, we
+            will discuss a couple of the more common topologies later in this chapter.</p><p>We'll also discuss client side load balancing, where we can balance client connections
+            across the nodes of the cluster, and we'll consider message redistribution where HornetQ
+            will redistribute messages between nodes to avoid starvation.</p><p>Another important part of clustering is <span class="emphasis"><em>server discovery</em></span> where
+            servers can broadcast their connection details so clients or other servers can connect
+            to them with the minimum of configuration.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="clusters.server-discovery"></a>38.2.&nbsp;Server discovery</h2></div></div><div></div></div><p>Server discovery is a mechanism by which servers can broadcast their connection
+            settings across the network. This is useful for two purposes:</p><div class="itemizedlist"><ul type="disc"><li><p>Discovery by messaging clients. A messaging client wants to be able to connect
+                    to the servers of the cluster without having specific knowledge of which servers
+                    in the cluster are up at any one time. Messaging clients
+                        <span class="emphasis"><em>can</em></span> be initialised with an explicit list of the servers
+                    in a cluster, but this is not flexible or maintainable as servers are added or
+                    removed from the cluster.</p></li><li><p>Discovery by other servers. Servers in a cluster want to be able to create
+                    cluster connections to each other without having prior knowledge of all the
+                    other servers in the cluster. </p></li></ul></div><p>Server discovery uses <a href="http://en.wikipedia.org/wiki/User_Datagram_Protocol" target="_top">UDP</a> multicast to broadcast server connection settings. If UDP is disabled
+            on your network you won't be able to use this, and will have to specify servers
+            explicitly when setting up a cluster or using a messaging client.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters.broadcast-groups"></a>38.2.1.&nbsp;Broadcast Groups</h3></div></div><div></div></div><p>A broadcast group is the means by which a server broadcasts connectors over the
+                network. A connector defines a way in which a client (or other server) can make
+                connections to the server. For more information on what a connector is, please see
+                    <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>.</p><p>The broadcast group takes a set of connector pairs, each connector pair contains
+                connection settings for a live and (optional) backup server and broadcasts them on
+                the network. It also defines the UDP address and port settings. </p><p>Broadcast groups are defined in the server configuration file <tt class="literal">hornetq-configuration.xml</tt>. There can be many broadcast groups per
+                HornetQ server. All broadcast groups must be defined in a <tt class="literal">broadcast-groups</tt> element.</p><p>Let's take a look at an example broadcast group from <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">&lt;broadcast-groups&gt;
+   &lt;broadcast-group name="my-broadcast-group"&gt;
+      &lt;local-bind-address&gt;172.16.9.3&lt;/local-bind-address&gt;
+      &lt;local-bind-port&gt;5432&lt;/local-bind-port&gt;
+      &lt;group-address&gt;231.7.7.7&lt;/group-address&gt;
+      &lt;group-port&gt;9876&lt;/group-port&gt;
+      &lt;broadcast-period&gt;2000&lt;/broadcast-period&gt;
+      &lt;connector-ref connector-name="netty-connector" 
+        backup-connector-name="backup-connector"/&gt;
+   &lt;/broadcast-group&gt;
+&lt;/broadcast-groups&gt;</pre><p>Some of the broadcast group parameters are optional and you'll normally use the
+                defaults, but we specify them all in the above example for clarity. Let's discuss
+                each one in turn:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">name</tt> attribute. Each broadcast group in the server must
+                        have a unique name. </p></li><li><p><tt class="literal">local-bind-address</tt>. This is the local bind address that
+                        the datagram socket is bound to. If you have multiple network interfaces on
+                        your server, you would specify which one you wish to use for broadcasts by
+                        setting this property. If this property is not specified then the socket
+                        will be bound to the wildcard address, an IP address chosen by the
+                        kernel.</p></li><li><p><tt class="literal">local-bind-port</tt>. If you want to specify a local port to
+                        which the datagram socket is bound you can specify it here. Normally you
+                        would just use the default value of <tt class="literal">-1</tt> which signifies
+                        that an anonymous port should be used. This parameter is alawys specified in conjunction with
+                    <tt class="literal">local-bind-address</tt>.</p></li><li><p><tt class="literal">group-address</tt>. This is the multicast address to which
+                        the data will be broadcast. It is a class D IP address in the range <tt class="literal">224.0.0.0</tt> to <tt class="literal">239.255.255.255</tt>, inclusive.
+                        The address <tt class="literal">224.0.0.0</tt> is reserved and is not available
+                        for use. This parameter is mandatory.</p></li><li><p><tt class="literal">group-port</tt>. This is the UDP port number used for
+                        broadcasting. This parameter is mandatory.</p></li><li><p><tt class="literal">broadcast-period</tt>. This is the period in milliseconds
+                        between consecutive broadcasts. This parameter is optional, the default
+                        value is <tt class="literal">2000</tt> milliseconds.</p></li><li><p><tt class="literal">connector-ref</tt>. This specifies the connector and
+                        optional backup connector that will be broadcasted (see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a> for more information on connectors).
+                        The connector to be broadcasted is specified by the <tt class="literal">connector-name</tt> attribute, and the backup connector to be
+                        broadcasted is specified by the <tt class="literal">backup-connector</tt>
+                        attribute. The <tt class="literal">backup-connector</tt> attribute is
+                        optional.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters.discovery-groups"></a>38.2.2.&nbsp;Discovery Groups</h3></div></div><div></div></div><p>While the broadcast group defines how connector information is broadcasted from a
+                server, a discovery group defines how connector information is received from a
+                multicast address.</p><p>A discovery group maintains a list of connector pairs - one for each broadcast by
+                a different server. As it receives broadcasts on the multicast group address from a
+                particular server it updates its entry in the list for that server.</p><p>If it has not received a broadcast from a particular server for a length of time
+                it will remove that server's entry from its list.</p><p>Discovery groups are used in two places in HornetQ:</p><div class="itemizedlist"><ul type="disc"><li><p>By cluster connections so they know what other servers in the cluster they
+                        should make connections to.</p></li><li><p>By messaging clients so they can discovery what servers in the cluster
+                        they can connect to.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9196"></a>38.2.3.&nbsp;Defining Discovery Groups on the Server</h3></div></div><div></div></div><p>For cluster connections, discovery groups are defined in the server side
+                configuration file <tt class="literal">hornetq-configuration.xml</tt>. All discovery
+                groups must be defined inside a <tt class="literal">discovery-groups</tt> element. There
+                can be many discovery groups defined by HornetQ server. Let's look at an
+                example:</p><pre class="programlisting">&lt;discovery-groups&gt;
+   &lt;discovery-group name="my-discovery-group"&gt;
+      &lt;local-bind-address&gt;172.16.9.7&lt;/local-bind-address&gt;
+      &lt;group-address&gt;231.7.7.7&lt;/group-address&gt;
+      &lt;group-port&gt;9876&lt;/group-port&gt;
+      &lt;refresh-timeout&gt;10000&lt;/refresh-timeout&gt;
+   &lt;/discovery-group&gt;
+&lt;/discovery-groups&gt;</pre><p>We'll consider each parameter of the discovery group:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">name</tt> attribute. Each discovery group must have a unique
+                        name per server.</p></li><li><p><tt class="literal">local-bind-address</tt>. If you are running with multiple network interfaces on the same machine, you 
+                    may want to specify that the discovery group listens only only a specific interface. To do this you can specify the interface
+                    address with this parameter. This parameter is optional.</p></li><li><p><tt class="literal">group-address</tt>. This is the multicast ip address of the
+                        group to listen on. It should match the <tt class="literal">group-address</tt> in
+                        the broadcast group that you wish to listen from. This parameter is
+                        mandatory.</p></li><li><p><tt class="literal">group-port</tt>. This is the UDP port of the multicast
+                        group. It should match the <tt class="literal">group-port</tt> in the broadcast
+                        group that you wish to listen from. This parameter is mandatory.</p></li><li><p><tt class="literal">refresh-timeout</tt>. This is the period the discovery group
+                        waits after receiving the last broadcast from a particular server before
+                        removing that servers connector pair entry from its list. You would normally
+                        set this to a value significantly higher than the <tt class="literal">broadcast-period</tt> on the broadcast group otherwise servers
+                        might intermittently disappear from the list even though they are still
+                        broadcasting due to slight differences in timing. This parameter is
+                        optional, the default value is <tt class="literal">10000</tt> milliseconds (10
+                        seconds).</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters-discovery.groups.clientside"></a>38.2.4.&nbsp;Discovery Groups on the Client Side</h3></div></div><div></div></div><p>Let's discuss how to configure a HornetQ client to use discovery to discover a
+                list of servers to which it can connect. The way to do this differs depending on
+                whether you're using JMS or the core API.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9254"></a>38.2.4.1.&nbsp;Configuring client discovery using JMS</h4></div></div><div></div></div><p>If you're using JMS and you're also using the JMS Service on the server to
+                    load your JMS connection factory instances into JNDI, then you can specify which
+                    discovery group to use for your JMS connection factory in the server side xml
+                    configuration <tt class="literal">hornetq-jms.xml</tt>. Let's take a look at an
+                    example:</p><pre class="programlisting">&lt;connection-factory name="ConnectionFactory"&gt;
+   &lt;discovery-group-ref discovery-group-name="my-discovery-group"/&gt;
+    &lt;entries&gt;
+       &lt;entry name="ConnectionFactory"/&gt;
+    &lt;/entries&gt;
+&lt;/connection-factory&gt;</pre><p>The element <tt class="literal">discovery-group-ref</tt> specifies the name of a
+                    discovery group defined in <tt class="literal">hornetq-configuration.xml</tt>.</p><p>When this connection factory is downloaded from JNDI by a client application
+                    and JMS connections are created from it, those connections will be load-balanced
+                    across the list of servers that the discovery group maintains by listening on
+                    the multicast address specified in the discovery group configuration.</p><p>If you're using JMS, but you're not using JNDI to lookup a connection factory
+                    - you're instantiating the JMS connection factory directly then you can specify
+                    the discovery group parameters directly when creating the JMS connection
+                    factory. Here's an
+                    example:</p><pre class="programlisting">final String groupAddress = "231.7.7.7";
+
+final int groupPort = 9876;
+
+ConnectionFactory jmsConnectionFactory = 
+        HornetQJMSClient.createConnectionFactory(groupAddress, groupPort);
+
+Connection jmsConnection1 = jmsConnectionFactory.createConnection();
+
+Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>The <tt class="literal">refresh-timeout</tt> can be set directly on the connection
+                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout() if you
+                        want to change the default value.</tt></p><p>There is also a further parameter settable on the connection factory using the
+                    setter method <tt class="literal">setDiscoveryInitialWaitTimeout()</tt>. If the connection
+                    factory is used immediately after creation then it may not have had enough time
+                    to received broadcasts from all the nodes in the cluster. On first usage, the
+                    connection factory will make sure it waits this long since creation before
+                    creating the first connection. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9293"></a>38.2.4.2.&nbsp;Configuring client discovery using Core</h4></div></div><div></div></div><p>If you're using the core API to directly instantiate <tt class="literal">ClientSessionFactory</tt> instances, then you can specify the
+                    discovery group parameters directly when creating the session factory. Here's an
+                    example:
+                    </p><pre class="programlisting">
+                    final String groupAddress = "231.7.7.7"; 
+                    final int groupPort = 9876;
+                    SessionFactory factory = HornetQClient.createClientSessionFactory(groupAddress, groupPort);
+                    ClientSession session1 = factory.createClientSession(...); ClientSession
+                    session2 = factory.createClientSession(...);
+                
+                </pre><p>The <tt class="literal">refresh-timeout</tt> can be set directly on the session
+                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout() if you
+                        want to change the default value.</tt></p><p>There is also a further parameter settable on the session factory using the
+                    setter method <tt class="literal">setDiscoveryInitialWaitTimeout()</tt>. If the session factory
+                    is used immediately after creation then it may not have had enough time to
+                    received broadcasts from all the nodes in the cluster. On first usage, the
+                    session factory will make sure it waits this long since creation before creating
+                    the first session. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9318"></a>38.3.&nbsp;Server-Side Message Load Balancing</h2></div></div><div></div></div><p>If cluster connections are defined between nodes of a cluster, then HornetQ will load
+            balance messages arriving at a particular node from a client.</p><p>Let's take a simple example of a cluster of four nodes A, B, C, and D arranged in a
+                <span class="emphasis"><em>symmetric cluster</em></span> (described in <a href="clusters.html#symmetric-cluster" title="38.7.1.&nbsp;Symmetric cluster">Section&nbsp;38.7.1, &#8220;Symmetric cluster&#8221;</a>). We have a queue called <tt class="literal">OrderQueue</tt>
+            deployed on each node of the cluster.</p><p>We have client Ca connected to node A, sending orders to the server. We have also have
+            order processor clients Pa, Pb, Pc, and Pd connected to each of the nodes A, B, C, D. If
+            no cluster connection was defined on node A, then as order messages arrive on node A
+            they will all end up in the <tt class="literal">OrderQueue</tt> on node A, so will only get
+            consumed by the order processor client attached to node A, Pa.</p><p>If we define a cluster connection on node A, then as ordered messages arrive on node A
+            instead of all of them going into the local <tt class="literal">OrderQueue</tt> instance, they
+            are distributed in a round-robin fashion between all the nodes of the cluster. The
+            messages are forwarded from the receiving node to other nodes of the cluster. This is
+            all done on the server side, the client maintains a single connection to node A.</p><p>For example, messages arriving on node A might be distributed in the following order
+            between the nodes: B, D, C, A, B, D, C, A, B, D. The exact order depends on the order
+            the nodes started up, but the algorithm used is round robin.</p><p>HornetQ cluster connections can be configured to always blindly load balance messages
+            in a round robin fashion irrespective of whether there are any matching consumers on
+            other nodes, but they can be a bit cleverer than that and also be configured to only
+            distribute to other nodes if they have matching consumers. We'll look at both these
+            cases in turn with some examples, but first we'll discuss configuring cluster
+            connections in general.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters.cluster-connections"></a>38.3.1.&nbsp;Configuring Cluster Connections</h3></div></div><div></div></div><p>Cluster connections group servers into clusters so that messages can be load
+                balanced between the nodes of the cluster. Let's take a look at a typical cluster
+                connection. Cluster connections are always defined in <tt class="literal">hornetq-configuration.xml</tt> inside a <tt class="literal">cluster-connection</tt> element. There can be zero or more cluster
+                connections defined per HornetQ server.</p><pre class="programlisting">
+&lt;cluster-connections&gt;
+    &lt;cluster-connection name="my-cluster"&gt;
+        &lt;address&gt;jms&lt;/address&gt;
+        &lt;retry-interval&gt;500&lt;/retry-interval&gt;
+        &lt;use-duplicate-detection&gt;true&lt;/use-duplicate-detection&gt;
+        &lt;forward-when-no-consumers&gt;false&lt;/forward-when-no-consumers&gt;
+        &lt;max-hops&gt;1&lt;/max-hops&gt;
+        &lt;discovery-group-ref discovery-group-name="my-discovery-group"/&gt;
+    &lt;/cluster-connection&gt;
+&lt;/cluster-connections&gt;                
+            </pre><p>In the above cluster connection all parameters have been explicitly specified. In
+                practice you might use the defaults for some.</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">address</tt>. Each cluster connection only applies to
+                        messages sent to an address that starts with this value.</p><p>In this case, this cluster connection will load balance messages sent to
+                        address that start with <tt class="literal">jms</tt>. This cluster connection,
+                        will, in effect apply to all JMS queue and topic subscriptions since they
+                        map to core queues that start with the substring "jms".</p><p>The address can be any value and you can have many cluster connections
+                        with different values of <tt class="literal">address</tt>, simultaneously
+                        balancing messages for those addresses, potentially to different clusters of
+                        servers. By having multiple cluster connections on different addresses a
+                        single HornetQ Server can effectively take part in multiple clusters
+                        simultaneously.</p><p>By careful not to have multiple cluster connections with overlapping
+                        values of <tt class="literal">address</tt>, e.g. "europe" and "europe.news" since
+                        this could result in the same messages being distributed between more than
+                        one cluster connection, possibly resulting in duplicate deliveries. </p><p>This parameter is mandatory.</p></li><li><p><tt class="literal">retry-interval</tt>. We mentioned before that, internally,
+                        cluster connections cause bridges to be created between the nodes of the
+                        cluster. If the cluster connection is created and the target node has not
+                        been started, or say, is being rebooted, then the cluster connections from
+                        other nodes will retry connecting to the target until it comes back up, in
+                        the same way as a bridge does.</p><p>This parameter determines the interval in milliseconds between retry
+                        attempts. It has the same meaning as the <tt class="literal">retry-interval</tt>
+                        on a bridge (as described in <a href="core-bridges.html" title="Chapter&nbsp;36.&nbsp;Core Bridges">Chapter&nbsp;36, <i>Core Bridges</i></a>).</p><p>This parameter is optional and its default value is <tt class="literal">500</tt>
+                        milliseconds.</p></li><li><p><tt class="literal">use-duplicate-detection</tt>. Internally cluster connections
+                        use bridges to link the nodes, and bridges can be configured to add a
+                        duplicate id property in each message that is forwarded. If the target node
+                        of the bridge crashes and then recovers, messages might be resent from the
+                        source node. By enabling duplicate detection any duplicate messages will be
+                        filtered out and ignored on receipt at the target node.</p><p>This parameter has the same meaning as <tt class="literal">use-duplicate-detection</tt> on a bridge. For more information on
+                        duplicate detection, please see <a href="duplicate-detection.html" title="Chapter&nbsp;37.&nbsp;Duplicate Message Detection">Chapter&nbsp;37, <i>Duplicate Message Detection</i></a>.</p><p>This parameter is optional and has a default value of <tt class="literal">true</tt>.</p></li><li><p><tt class="literal">forward-when-no-consumers</tt>. This parameter determines
+                        whether messages will be distributed round robin between other nodes of the
+                        cluster <span class="emphasis"><em>irrespective</em></span> of whether there are matching or
+                        indeed any consumers on other nodes. </p><p>If this is set to <tt class="literal">true</tt> then each incoming message will
+                        be round robin'd even though the same queues on the other nodes of the
+                        cluster may have no consumers at all, or they may have consumers that have
+                        non matching message filters (selectors). Note that HornetQ will
+                            <span class="emphasis"><em>not</em></span> forward messages to other nodes if there are no
+                            <span class="emphasis"><em>queues</em></span> of the same name on the other nodes, even if
+                        this parameter is set to <tt class="literal">true</tt>.</p><p>If this is set to <tt class="literal">false</tt> then HornetQ will only forward
+                        messages to other nodes of the cluster if the address to which they are
+                        being forwarded has queues which have consumers, and if those consumers have
+                        message filters (selectors) at least one of those selectors must match the
+                        message.</p><p>This parameter is optional, the default value is <tt class="literal">false</tt>.</p></li><li><p><tt class="literal">max-hops</tt>. When a cluster connection decides the set of
+                        nodes to which it might load balance a message, those nodes do not have to
+                        be directly connected to it via a cluster connection. HornetQ can be
+                        configured to also load balance messages to nodes which might be connected
+                        to it only indirectly with other HornetQ servers as intermediates in a
+                        chain.</p><p>This allows HornetQ to be configured in more complex topologies and still
+                        provide message load balancing. We'll discuss this more later in this
+                        chapter.</p><p>The default value for this parameter is <tt class="literal">1</tt>, which means
+                        messages are only load balanced to other HornetQ serves which are directly
+                        connected to this server. This parameter is optional.</p></li><li><p><tt class="literal">discovery-group-ref</tt>. This parameter determines which
+                        discovery group is used to obtain the list of other servers in the cluster
+                        that this cluster connection will make connections to.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters.clusteruser"></a>38.3.2.&nbsp;Cluster User Credentials</h3></div></div><div></div></div><p>When creating connections between nodes of a cluster to form a cluster connection,
+                HornetQ uses a cluster user and cluster password which is defined in <tt class="literal">hornetq-configuration.xml</tt>:</p><pre class="programlisting">
+                &lt;cluster-user&gt;HORNETQ.CLUSTER.ADMIN.USER&lt;/cluster-user&gt;
+                &lt;cluster-password&gt;CHANGE ME!!&lt;/cluster-password&gt;
+            </pre><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Warning</h3><p>It is imperative that these values are changed from their default, or remote
+                    clients will be able to make connections to the server using the default values.
+                    If they are not changed from the default, HornetQ will detect this and pester
+                    you with a warning on every start-up.</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="clusters.client.loadbalancing"></a>38.4.&nbsp;Client-Side Load balancing</h2></div></div><div></div></div><p>With HornetQ client-side load balancing, subsequent sessions created using a single
+            session factory can be connected to different nodes of the cluster. This allows sessions
+            to spread smoothly across the nodes of a cluster and not be "clumped" on any particular
+            node.</p><p>The load balancing policy to be used by the client factory is configurable. HornetQ
+            provides two out-of-the-box load balancing policies and you can also implement your own
+            and use that.</p><p>The out-of-the-box policies are</p><div class="itemizedlist"><ul type="disc"><li><p>Round Robin. With this policy the first node is chosen randomly then each
+                    subsequent node is chosen sequentially in the same order.</p><p>For example nodes might be chosen in the order B, C, D, A, B, C, D, A, B or D,
+                    A, B, C, A, B, C, D, A or C, D, A, B, C, D, A, B, C, D, A.</p></li><li><p>Random. With this policy each node is chosen randomly.</p></li></ul></div><p>You can also implement your own policy by implementing the interface <tt class="literal">org.hornetq.api.core.client.loadbalance.ConnectionLoadBalancingPolicy</tt></p><p>Specifying which load balancing policy to use differs whether you are using JMS or the
+            core API. If you don't specify a policy then the default will be used which is <tt class="literal">org.hornetq.api.core.client.loadbalance.RoundRobinConnectionLoadBalancingPolicy</tt>.</p><p>If you're using JMS, and you're using JNDI on the server to put your JMS connection
+            factories into JNDI, then you can specify the load balancing policy directly in the
+                <tt class="literal">hornetq-jms.xml</tt> configuration file on the server as follows:
+            </p><pre class="programlisting">
+&lt;connection-factory name="ConnectionFactory"&gt;
+    &lt;discovery-group-ref discovery-group-name="my-discovery-group"/&gt;
+    &lt;entries&gt;
+        &lt;entry name="ConnectionFactory"/&gt;
+    &lt;/entries&gt;
+    &lt;connection-load-balancing-policy-class-name&gt;
+    org.hornetq.api.core.client.loadbalance.RandomConnectionLoadBalancingPolicy
+    &lt;/connection-load-balancing-policy-class-name&gt;
+&lt;/connection-factory&gt;            
+        </pre><p>The
+            above example would deploy a JMS connection factory that uses the random connection load
+            balancing policy. </p><p>If you're using JMS but you're instantiating your connection factory directly on the
+            client side then you can set the load balancing policy using the setter on the <tt class="literal">HornetQConnectionFactory</tt> before using it:
+            </p><pre class="programlisting">
+ConnectionFactory jmsConnectionFactory = HornetQJMSClient.createConnectionFactory(...);
+jmsConnectionFactory.setLoadBalancingPolicyClassName("com.acme.MyLoadBalancingPolicy");
+        </pre><p>If you're using the core API, you can set the load balancing policy directly on the
+                <tt class="literal">ClientSessionFactory</tt> instance you are using:
+            </p><pre class="programlisting">
+ClientSessionFactory factory = HornetQClient.createClientSessionFactory(...);
+factory.setLoadBalancingPolicyClassName("com.acme.MyLoadBalancingPolicy");
+            </pre><p>The set of servers over which the factory load balances can be determined in one of
+            two ways:</p><div class="itemizedlist"><ul type="disc"><li><p>Specifying servers explicitly</p></li><li><p>Using discovery.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9539"></a>38.5.&nbsp;Specifying Members of a Cluster Explicitly</h2></div></div><div></div></div><p>Sometimes UDP is not enabled on a network so it's not possible to use UDP server
+            discovery for clients to discover the list of servers in the cluster, or for servers to
+            discover what other servers are in the cluster.</p><p>In this case, the list of servers in the cluster can be specified explicitly on each
+            node and on the client side. Let's look at how we do this:</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9546"></a>38.5.1.&nbsp;Specify List of Servers on the Client Side</h3></div></div><div></div></div><p>This differs depending on whether you're using JMS or the Core API</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9551"></a>38.5.1.1.&nbsp;Specifying List of Servers using JMS</h4></div></div><div></div></div><p>If you're using JMS, and you're using the JMS Service to load your JMS
+                    connection factory instances directly into JNDI on the server, then you can
+                    specify the list of servers in the server side configuration file <tt class="literal">hornetq-jms.xml</tt>. Let's take a look at an example:</p><pre class="programlisting">&lt;connection-factory name="ConnectionFactory"&gt;
+   &lt;connectors&gt;
+      &lt;connector-ref connector-name="my-connector1" 
+           backup-connector-name="my-backup-connector1"/&gt;
+      &lt;connector-ref connector-name="my-connector2" 
+           backup-connector-name="my-backup-connector2"/&gt;
+      &lt;connector-ref connector-name="my-connector3" 
+           backup-connector-name="my-backup-connector3"/&gt;
+   &lt;/connectors&gt;
+   &lt;entries&gt;
+      &lt;entry name="ConnectionFactory"/&gt;
+   &lt;/entries&gt;
+&lt;/connection-factory&gt;</pre><p>The <tt class="literal">connection-factory</tt> element can contain zero or more
+                        <tt class="literal">connector-ref</tt> elements, each one of which specifies a
+                        <tt class="literal">connector-name</tt> attribute and an optional <tt class="literal">backup-connector-name</tt> attribute. The <tt class="literal">connector-name</tt> attribute references a connector defined in
+                        <tt class="literal">hornetq-configuration.xml</tt> which will be used as a live
+                    connector. The <tt class="literal">backup-connector-name</tt> is optional, and if
+                    specified it also references a connector defined in <tt class="literal">hornetq-configuration.xml</tt>. For more information on connectors
+                    please see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>.</p><p>The connection factory thus maintains a list of [connector, backup connector]
+                    pairs, these pairs are then used by the client connection load balancing policy
+                    on the client side when creating connections to the cluster.</p><p>If you're using JMS but you're not using JNDI then you can also specify the
+                    list of [connector, backup connector] pairs directly when instantiating the
+                        <tt class="literal">HornetQConnectionFactory</tt>, here's an
+                    example:</p><pre class="programlisting">List&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt; serverList = 
+        new ArrayList&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt;();
+
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC0, backupTC0));
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC1, backupTC1));
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC2, backupTC2));
+
+ConnectionFactory jmsConnectionFactory = HornetQJMSClient.createConnectionFactory(serverList);
+
+Connection jmsConnection1 = jmsConnectionFactory.createConnection();
+
+Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>In the above snippet we create a list of pairs of <tt class="literal">TransportConfiguration</tt> objects. Each <tt class="literal">TransportConfiguration</tt> object contains knowledge of how to make a
+                    connection to a specific server.</p><p>A <tt class="literal">HornetQConnectionFactory</tt> instance is then created passing
+                    the list of servers in the constructor. Any connections subsequently created by
+                    this factory will create connections according to the client connection load
+                    balancing policy applied to that list of servers.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9611"></a>38.5.1.2.&nbsp;Specifying List of Servers using the Core API</h4></div></div><div></div></div><p>If you're using the core API you can also specify the list of servers directly
+                    when creating the <tt class="literal">ClientSessionFactory</tt> instance. Here's an
+                    example:</p><pre class="programlisting">List&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt; serverList = 
+        new ArrayList&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt;();
+
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC0, backupTC0));
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC1, backupTC1));
+serverList.add(new Pair&lt;TransportConfiguration, 
+        TransportConfiguration&gt;(liveTC2, backupTC2));
+
+ClientSessionFactory factory = HornetQClient.createClientSessionFactory(serverList);
+
+ClientSession sesison1 = factory.createClientSession(...);
+
+ClientSession session2 = factory.createClientSession(...);</pre><p>In the above snippet we create a list of pairs of <tt class="literal">TransportConfiguration</tt> objects. Each <tt class="literal">TransportConfiguration</tt> object contains knowledge of how to make a
+                    connection to a specific server. For more information on this, please see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>.</p><p>A <tt class="literal">ClientSessionFactoryImpl</tt> instance is then created passing
+                    the list of servers in the constructor. Any sessions subsequently created by
+                    this factory will create sessions according to the client connection load
+                    balancing policy applied to that list of servers.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters.static.servers"></a>38.5.2.&nbsp;Specifying List of Servers to form a Cluster</h3></div></div><div></div></div><p>Let's take a look at an example where each cluster connection is defined for a
+                symmetric cluster, but we're not using discovery for each node to discover its
+                neighbours, instead we'll configure each cluster connection to have explicit
+                knowledge of all the other nodes in the cluster.</p><p>Here's an example cluster connection definition showing that:</p><pre class="programlisting">&lt;cluster-connections&gt;
+    &lt;cluster-connection name="my-explicit-cluster"&gt;
+        &lt;address&gt;jms&lt;/address&gt;
+        &lt;connector-ref connector-name="my-connector1" 
+            backup-connector-name="my-backup-connector1"/&gt;
+        &lt;connector-ref connector-name="my-connector2" 
+            backup-connector-name="my-backup-connector2"/&gt;
+        &lt;connector-ref connector-name="my-connector3" 
+            backup-connector-name="my-backup-connector3"/&gt;
+    &lt;/cluster-connection&gt;
+&lt;/cluster-connections&gt;</pre><p>The <tt class="literal">cluster-connection</tt> element can contain zero or more
+                    <tt class="literal">connector-ref</tt> elements, each one of which specifies a
+                    <tt class="literal">connector-name</tt> attribute and an optional <tt class="literal">backup-connector-name</tt> attribute. The <tt class="literal">connector-name</tt> attribute references a connector defined in <tt class="literal">hornetq-configuration.xml</tt> which will be used as a live connector. The
+                    <tt class="literal">backup-connector-name</tt> is optional, and if specified it also
+                references a connector defined in <tt class="literal">hornetq-configuration.xml</tt>. For
+                more information on connectors please see <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;Configuring the Transport">Chapter&nbsp;16, <i>Configuring the Transport</i></a>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Due to a limitation in HornetQ 2.0.0, failover is not supported for clusters
+                    defined using a static set of nodes. To support failover over cluster nodes,
+                    they must be configured to use a discovery group.</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="clusters.message-redistribution"></a>38.6.&nbsp;Message Redistribution</h2></div></div><div></div></div><p>Another important part of clustering is message redistribution. Earlier we learned how
+            server side message load balancing round robins messages across the cluster. If <tt class="literal">forward-when-no-consumers</tt> is false, then messages won't be forwarded to
+            nodes which don't have matching consumers, this is great and ensures that messages don't
+            arrive on a queue which has no consumers to consume them, however there is a situation
+            it doesn't solve: What happens if the consumers on a queue close after the messages have
+            been sent to the node? If there are no consumers on the queue the message won't get
+            consumed and we have a <span class="emphasis"><em>starvation</em></span> situation.</p><p>This is where message redistribution comes in. With message redistribution HornetQ can
+            be configured to automatically <span class="emphasis"><em>redistribute</em></span> messages from queues
+            which have no consumers back to other nodes in the cluster which do have matching
+            consumers.</p><p>Message redistribution can be configured to kick in immediately after the last
+            consumer on a queue is closed, or to wait a configurable delay after the last consumer
+            on a queue is closed before redistributing. By default message redistribution is
+            disabled.</p><p>Message redistribution can be configured on a per address basis, by specifying the
+            redistribution delay in the address settings, for more information on configuring
+            address settings, please see <a href="queue-attributes.html" title="Chapter&nbsp;25.&nbsp;Queue Attributes">Chapter&nbsp;25, <i>Queue Attributes</i></a>.</p><p>Here's an address settings snippet from <tt class="literal">hornetq-configuration.xml</tt>
+            showing how message redistribution is enabled for a set of queues:</p><pre class="programlisting">&lt;address-settings&gt;     
+   &lt;address-setting match="jms.#"&gt;
+      &lt;redistribution-delay&gt;0&lt;/redistribution-delay&gt;
+   &lt;/address-setting&gt;
+ &lt;/address-settings&gt;</pre><p>The above <tt class="literal">address-settings</tt> block would set a <tt class="literal">redistribution-delay</tt> of <tt class="literal">0</tt> for any queue which is bound
+            to an address that starts with "jms.". All JMS queues and topic subscriptions are bound
+            to addresses that start with "jms.", so the above would enable instant (no delay)
+            redistribution for all JMS queues and topic subscriptions.</p><p>The attribute <tt class="literal">match</tt> can be an exact match or it can be a string
+            that conforms to the HornetQ wildcard syntax (described in <a href="wildcard-syntax.html" title="Chapter&nbsp;13.&nbsp;Understanding the HornetQ Wildcard Syntax">Chapter&nbsp;13, <i>Understanding the HornetQ Wildcard Syntax</i></a>).</p><p>The element <tt class="literal">redistribution-delay</tt> defines the delay in milliseconds
+            after the last consumer is closed on a queue before redistributing messages from that
+            queue to other nodes of the cluster which do have matching consumers. A delay of zero
+            means the messages will be immediately redistributed. A value of <tt class="literal">-1</tt>
+            signifies that messages will never be redistributed. The default value is <tt class="literal">-1</tt>.</p><p>It often makes sense to introduce a delay before redistributing as it's a common case
+            that a consumer closes but another one quickly is created on the same queue, in such a
+            case you probably don't want to redistribute immediately since the new consumer will
+            arrive shortly.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9736"></a>38.7.&nbsp;Cluster topologies</h2></div></div><div></div></div><p>HornetQ clusters can be connected together in many different topologies, let's
+            consider the two most common ones here</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="symmetric-cluster"></a>38.7.1.&nbsp;Symmetric cluster</h3></div></div><div></div></div><p>A symmetric cluster is probably the most common cluster topology, and you'll be
+                familiar with if you've had experience of JBoss Application Server
+                clustering.</p><p>With a symmetric cluster every node in the cluster is connected to every other
+                node in the cluster. In other words every node in the cluster is no more than one
+                hop away from every other node.</p><p>To form a symmetric cluster every node in the cluster defines a cluster connection
+                with the attribute <tt class="literal">max-hops</tt> set to <tt class="literal">1</tt>.
+                Typically the cluster connection will use server discovery in order to know what
+                other servers in the cluster it should connect to, although it is possible to
+                explicitly define each target server too in the cluster connection if, for example,
+                UDP is not available on your network.</p><p>With a symmetric cluster each node knows about all the queues that exist on all
+                the other nodes and what consumers they have. With this knowledge it can determine
+                how to load balance and redistribute messages around the nodes.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9758"></a>38.7.2.&nbsp;Chain cluster</h3></div></div><div></div></div><p>With a chain cluster, each node in the cluster is not connected to every node in
+                the cluster directly, instead the nodes form a chain with a node on each end of the
+                chain and all other nodes just connecting to the previous and next nodes in the
+                chain.</p><p>An example of this would be a three node chain consisting of nodes A, B and C.
+                Node A is hosted in one network and has many producer clients connected to it
+                sending order messages. Due to corporate policy, the order consumer clients need to
+                be hosted in a different network, and that network is only accessible via a third
+                network. In this setup node B acts as a mediator with no producers or consumers on
+                it. Any messages arriving on node A will be forwarded to node B, which will in turn
+                forward them to node C where they can get consumed. Node A does not need to directly
+                connect to C, but all the nodes can still act as a part of the cluster.</p><p>To set up a cluster in this way, node A would define a cluster connection that
+                connects to node B, and node B would define a cluster connection that connects to
+                node C. In this case we only want cluster connections in one direction since we're
+                only moving messages from node A-&gt;B-&gt;C and never from C-&gt;B-&gt;A.</p><p>For this topology we would set <tt class="literal">max-hops</tt> to <tt class="literal">2</tt>. With a value of <tt class="literal">2</tt> the knowledge of what queues and
+                consumers that exist on node C would be propagated from node C to node B to node A.
+                Node A would then know to distribute messages to node B when they arrive, even
+                though node B has no consumers itself, it would know that a further hop away is node
+                C which does have consumers.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="duplicate-detection.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ha.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;37.&nbsp;Duplicate Message Detection&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;39.&nbsp;High Availability and Failover</td></tr></table></div></body></html>

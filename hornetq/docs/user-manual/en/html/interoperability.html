@@ -1,0 +1,63 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;45.&nbsp;Interoperability</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="intercepting-operations.html" title="Chapter&nbsp;44.&nbsp;Intercepting Operations"><link rel="next" href="perf-tuning.html" title="Chapter&nbsp;46.&nbsp;Performance Tuning"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;45.&nbsp;Interoperability</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="intercepting-operations.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="perf-tuning.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="interoperability"></a>Chapter&nbsp;45.&nbsp;Interoperability</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="stomp"></a>45.1.&nbsp;Stomp</h2></div></div><div></div></div><p><a href="http://stomp.codehaus.org/" target="_top">Stomp</a> is a text-orientated wire protocol that allows
+            Stomp clients to communicate with Stomp Brokers.</p><p><a href="http://stomp.codehaus.org/Clients" target="_top">Stomp clients</a> are available for
+        several languages and platforms making it a good choice for interoperability.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="stomp.native"></a>45.1.1.&nbsp;Native Stomp support</h3></div></div><div></div></div><p>HornetQ provides native support for Stomp. To be able to send and receive Stomp messages,
+            you must configure a <tt class="literal">NettyAcceptor</tt> with a <tt class="literal">protocol</tt>
+            parameter set to <tt class="literal">stomp</tt>:</p><pre class="programlisting">
+	&lt;acceptor name="stomp-acceptor"&gt;
+		&lt;factory-class&gt;org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory&lt;/factory-class&gt;
+		&lt;param key="protocol"  value="stomp"/&gt;
+		&lt;param key="port"  value="61613"/&gt;
+	&lt;/acceptor&gt;
+</pre><p>With this configuration, HornetQ will accept Stomp connections on 
+            the port <tt class="literal">61613</tt> (which is the default port of the Stomp brokers).</p><p>See the <tt class="literal">stomp</tt> example which shows how to configure a HornetQ server with Stomp.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e10828"></a>45.1.1.1.&nbsp;Limitations</h4></div></div><div></div></div><p>Message acknowledgements are not transactional. The ACK frame can not be part of a transaction
+              (it will be ignored if its <tt class="literal">transaction</tt> header is set).</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e10836"></a>45.1.2.&nbsp;Mapping Stomp destinations to HornetQ addresses and queues</h3></div></div><div></div></div><p>Stomp clients deals with <span class="emphasis"><em>destinations</em></span> when sending messages and subscribing.
+            Destination names are simply strings which are mapped to some form of destination on the 
+            server - how the server translates these is left to the server implementation.</p><p>In HornetQ, these destinations are mapped to <span class="emphasis"><em>addresses</em></span> and <span class="emphasis"><em>queues</em></span>.
+            When a Stomp client sends a message (using a <tt class="literal">SEND</tt> frame), the specified destination is mapped
+            to an address.
+            When a Stomp client subscribes (or unsubscribes) for a destination (using a <tt class="literal">SUBSCRIBE</tt>
+            or <tt class="literal">UNSUBSCRIBE</tt> frame), the destination is mapped to a HornetQ queue.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e10861"></a>45.1.3.&nbsp;Stomp and JMS interoperabilty</h3></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e10864"></a>45.1.3.1.&nbsp;Using JMS destinations</h4></div></div><div></div></div><p>As explained in <a href="jms-core-mapping.html" title="Chapter&nbsp;9.&nbsp;Mapping JMS Concepts to the Core API">Chapter&nbsp;9, <i>Mapping JMS Concepts to the Core API</i></a>, JMS destinations are also mapped to HornetQ addresses and queues.
+              If you want to use Stomp to send messages to JMS destinations, the Stomp destinations must follow the same convention:</p><div class="itemizedlist"><ul type="disc"><li><p>send or subscribe to a JMS <span class="emphasis"><em>Queue</em></span> by prepending the queue name by <tt class="literal">jms.queue.</tt>.</p><p>For example, to send a message to the <tt class="literal">orders</tt> JMS Queue, the Stomp client must send the frame:</p><pre class="programlisting">
+SEND
+destination:jms.queue.orders
+
+hello queue orders
+^@
+                </pre></li><li><p>send or subscribe to a JMS <span class="emphasis"><em>Topic</em></span> by prepending the topic name by <tt class="literal">jms.topic.</tt>.</p><p>For example to subscribe to the <tt class="literal">stocks</tt> JMS Topic, the Stomp client must send the frame:</p><pre class="programlisting">
+SUBSCRIBE
+destination:jms.topic.stocks
+
+^@
+                </pre></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e10904"></a>45.1.3.2.&nbsp;Send and consuming Stomp message from JMS or HornetQ Core API</h4></div></div><div></div></div><p>Stomp is mainly a text-orientated protocol. To make it simpler to interoperate with JMS and HornetQ Core API, 
+               our Stomp implementation checks for presence of the <tt class="literal">content-length</tt> header to decide how to map a Stomp message
+               to a JMS Message or a Core message.
+             </p><p>If the Stomp message has a <tt class="literal">content-length</tt> header, it will be mapped to a JMS <span class="emphasis"><em>TextMessage</em></span>
+               or a Core message with a <span class="emphasis"><em>single nullable SimpleString in the body buffer</em></span>.</p><p>Alternatively, if the Stomp message does <span class="emphasis"><em>not</em></span> have a <tt class="literal">content-length</tt> header, 
+               it will be mapped to a JMS <span class="emphasis"><em>BytesMessage</em></span>
+               or a Core message with a <span class="emphasis"><em>byte[] in the body buffer</em></span>.</p><p>The same logic applies when mapping a JMS message or a Core message to Stomp. A Stomp client can check the presence
+                of the <tt class="literal">content-length</tt> header to determine the type of the message body (UTF-8 String or bytes).</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="stomp.websockets"></a>45.1.4.&nbsp;Stomp Over Web Sockets</h3></div></div><div></div></div><p>HornetQ also support Stomp over <a href="http://dev.w3.org/html5/websockets/" target="_top">Web Sockets</a>. Modern web browser which support Web Sockets can send and receive
+            Stomp messages from HornetQ.</p><p>To enable Stomp over Web Sockets, you must configure a <tt class="literal">NettyAcceptor</tt> with a <tt class="literal">protocol</tt>
+            parameter set to <tt class="literal">stomp_ws</tt>:</p><pre class="programlisting">
+&lt;acceptor name="stomp-ws-acceptor"&gt;
+	&lt;factory-class&gt;org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory&lt;/factory-class&gt;
+	&lt;param key="protocol" value="stomp_ws"/&gt;
+	&lt;param key="port" value="61614"/&gt;
+&lt;/acceptor&gt;
+         </pre><p>With this configuration, HornetQ will accept Stomp connections over Web Sockets on 
+            the port <tt class="literal">61614</tt> with the URL path <tt class="literal">/stomp</tt>.
+            Web browser can then connect to <tt class="literal">ws://&lt;server&gt;:61614/stomp</tt> usin a Web Socket to send and receive Stomp
+            messages.</p><p>A companion JavaScript library to ease client-side development is available from 
+            <a href="http://github.com/jmesnil/stomp-websocket" target="_top">GitHub</a> (please see
+            its <a href="http://jmesnil.net/stomp-websocket/doc/" target="_top">documentation</a> for a complete description).</p><p>The <tt class="literal">stomp-websockets</tt> example shows how to configure HornetQ server to have web browsers and Java
+            applications exchanges messages on a JMS topic.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="stompconnect"></a>45.1.5.&nbsp;StompConnect</h3></div></div><div></div></div><p><a href="http://stomp.codehaus.org/StompConnect" target="_top">StompConnect</a> is a server that
+            can act as a Stomp broker and proxy the Stomp protocol to the standard JMS API.
+            Consequently, using StompConnect it is possible to turn HornetQ into a Stomp Broker and
+            use any of the available stomp clients. These include clients written in C, C++, c# and
+            .net etc.</p><p>To run StompConnect first start the HornetQ server and make sure that it is using
+            JNDI.</p><p>Stomp requires the file <tt class="literal">jndi.properties</tt> to be available on the
+            classpath. This should look something like:</p><pre class="programlisting">java.naming.factory.initial=org.jnp.interfaces.NamingContextFactory
+java.naming.provider.url=jnp://localhost:1099
+java.naming.factory.url.pkgs=org.jboss.naming:org.jnp.interfaces</pre><p>Make sure this file is in the classpath along with the StompConnect jar and the
+            HornetQ jars and simply run <tt class="literal">java org.codehaus.stomp.jms.Main</tt>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11008"></a>45.2.&nbsp;REST</h2></div></div><div></div></div><p>REST support coming soon!</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11013"></a>45.3.&nbsp;AMQP</h2></div></div><div></div></div><p>AMQP support coming soon!</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="intercepting-operations.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="perf-tuning.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;44.&nbsp;Intercepting Operations&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;46.&nbsp;Performance Tuning</td></tr></table></div></body></html>

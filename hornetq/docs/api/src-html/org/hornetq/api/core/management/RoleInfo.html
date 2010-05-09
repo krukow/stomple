@@ -1,0 +1,215 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * Copyright 2009 Red Hat, Inc.<a name="line.2"></a>
+<FONT color="green">003</FONT>     * Red Hat licenses this file to you under the Apache License, version<a name="line.3"></a>
+<FONT color="green">004</FONT>     * 2.0 (the "License"); you may not use this file except in compliance<a name="line.4"></a>
+<FONT color="green">005</FONT>     * with the License.  You may obtain a copy of the License at<a name="line.5"></a>
+<FONT color="green">006</FONT>     *    http://www.apache.org/licenses/LICENSE-2.0<a name="line.6"></a>
+<FONT color="green">007</FONT>     * Unless required by applicable law or agreed to in writing, software<a name="line.7"></a>
+<FONT color="green">008</FONT>     * distributed under the License is distributed on an "AS IS" BASIS,<a name="line.8"></a>
+<FONT color="green">009</FONT>     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or<a name="line.9"></a>
+<FONT color="green">010</FONT>     * implied.  See the License for the specific language governing<a name="line.10"></a>
+<FONT color="green">011</FONT>     * permissions and limitations under the License.<a name="line.11"></a>
+<FONT color="green">012</FONT>     */<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>    package org.hornetq.api.core.management;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>    import org.hornetq.utils.json.JSONArray;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import org.hornetq.utils.json.JSONObject;<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>    /**<a name="line.19"></a>
+<FONT color="green">020</FONT>     * Helper class to create Java Objects from the<a name="line.20"></a>
+<FONT color="green">021</FONT>     * JSON serialization returned by {@link AddressControl#getRolesAsJSON()}.<a name="line.21"></a>
+<FONT color="green">022</FONT>     * <a name="line.22"></a>
+<FONT color="green">023</FONT>     * @author &lt;a href="jmesnil@redhat.com"&gt;Jeff Mesnil&lt;/a&gt;<a name="line.23"></a>
+<FONT color="green">024</FONT>     */<a name="line.24"></a>
+<FONT color="green">025</FONT>    public class RoleInfo<a name="line.25"></a>
+<FONT color="green">026</FONT>    {<a name="line.26"></a>
+<FONT color="green">027</FONT>       final private String name;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>       final private boolean send;<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>       final private boolean consume;<a name="line.31"></a>
+<FONT color="green">032</FONT>    <a name="line.32"></a>
+<FONT color="green">033</FONT>       final private boolean createDurableQueue;<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>       final private boolean deleteDurableQueue;<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>       final private boolean createNonDurableQueue;<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>       final private boolean deleteNonDurableQueue;<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>       final private boolean manage;<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>       /**<a name="line.43"></a>
+<FONT color="green">044</FONT>        * Returns an array of RoleInfo corresponding to the JSON serialization returned<a name="line.44"></a>
+<FONT color="green">045</FONT>        * by {@link AddressControl#getRolesAsJSON()}.<a name="line.45"></a>
+<FONT color="green">046</FONT>        */<a name="line.46"></a>
+<FONT color="green">047</FONT>       public static final RoleInfo[] from(final String jsonString) throws Exception<a name="line.47"></a>
+<FONT color="green">048</FONT>       {<a name="line.48"></a>
+<FONT color="green">049</FONT>          JSONArray array = new JSONArray(jsonString);<a name="line.49"></a>
+<FONT color="green">050</FONT>          RoleInfo[] roles = new RoleInfo[array.length()];<a name="line.50"></a>
+<FONT color="green">051</FONT>          for (int i = 0; i &lt; array.length(); i++)<a name="line.51"></a>
+<FONT color="green">052</FONT>          {<a name="line.52"></a>
+<FONT color="green">053</FONT>             JSONObject r = array.getJSONObject(i);<a name="line.53"></a>
+<FONT color="green">054</FONT>             RoleInfo role = new RoleInfo(r.getString("name"),<a name="line.54"></a>
+<FONT color="green">055</FONT>                                          r.getBoolean("send"),<a name="line.55"></a>
+<FONT color="green">056</FONT>                                          r.getBoolean("consume"),<a name="line.56"></a>
+<FONT color="green">057</FONT>                                          r.getBoolean("createDurableQueue"),<a name="line.57"></a>
+<FONT color="green">058</FONT>                                          r.getBoolean("deleteDurableQueue"),<a name="line.58"></a>
+<FONT color="green">059</FONT>                                          r.getBoolean("createNonDurableQueue"),<a name="line.59"></a>
+<FONT color="green">060</FONT>                                          r.getBoolean("deleteNonDurableQueue"),<a name="line.60"></a>
+<FONT color="green">061</FONT>                                          r.getBoolean("manage"));<a name="line.61"></a>
+<FONT color="green">062</FONT>             roles[i] = role;<a name="line.62"></a>
+<FONT color="green">063</FONT>          }<a name="line.63"></a>
+<FONT color="green">064</FONT>          return roles;<a name="line.64"></a>
+<FONT color="green">065</FONT>       }<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>       private RoleInfo(final String name,<a name="line.67"></a>
+<FONT color="green">068</FONT>                        final boolean send,<a name="line.68"></a>
+<FONT color="green">069</FONT>                        final boolean consume,<a name="line.69"></a>
+<FONT color="green">070</FONT>                        final boolean createDurableQueue,<a name="line.70"></a>
+<FONT color="green">071</FONT>                        final boolean deleteDurableQueue,<a name="line.71"></a>
+<FONT color="green">072</FONT>                        final boolean createNonDurableQueue,<a name="line.72"></a>
+<FONT color="green">073</FONT>                        final boolean deleteNonDurableQueue,<a name="line.73"></a>
+<FONT color="green">074</FONT>                        final boolean manage)<a name="line.74"></a>
+<FONT color="green">075</FONT>       {<a name="line.75"></a>
+<FONT color="green">076</FONT>          this.name = name;<a name="line.76"></a>
+<FONT color="green">077</FONT>          this.send = send;<a name="line.77"></a>
+<FONT color="green">078</FONT>          this.consume = consume;<a name="line.78"></a>
+<FONT color="green">079</FONT>          this.createDurableQueue = createDurableQueue;<a name="line.79"></a>
+<FONT color="green">080</FONT>          this.deleteDurableQueue = deleteDurableQueue;<a name="line.80"></a>
+<FONT color="green">081</FONT>          this.createNonDurableQueue = createNonDurableQueue;<a name="line.81"></a>
+<FONT color="green">082</FONT>          this.deleteNonDurableQueue = deleteNonDurableQueue;<a name="line.82"></a>
+<FONT color="green">083</FONT>          this.manage = manage;<a name="line.83"></a>
+<FONT color="green">084</FONT>       }<a name="line.84"></a>
+<FONT color="green">085</FONT>    <a name="line.85"></a>
+<FONT color="green">086</FONT>       /**<a name="line.86"></a>
+<FONT color="green">087</FONT>        * Returns the name of the role.<a name="line.87"></a>
+<FONT color="green">088</FONT>        */<a name="line.88"></a>
+<FONT color="green">089</FONT>       public String getName()<a name="line.89"></a>
+<FONT color="green">090</FONT>       {<a name="line.90"></a>
+<FONT color="green">091</FONT>          return name;<a name="line.91"></a>
+<FONT color="green">092</FONT>       }<a name="line.92"></a>
+<FONT color="green">093</FONT>    <a name="line.93"></a>
+<FONT color="green">094</FONT>       /**<a name="line.94"></a>
+<FONT color="green">095</FONT>        * Returns whether this role can send messages to the address.<a name="line.95"></a>
+<FONT color="green">096</FONT>        */<a name="line.96"></a>
+<FONT color="green">097</FONT>       public boolean isSend()<a name="line.97"></a>
+<FONT color="green">098</FONT>       {<a name="line.98"></a>
+<FONT color="green">099</FONT>          return send;<a name="line.99"></a>
+<FONT color="green">100</FONT>       }<a name="line.100"></a>
+<FONT color="green">101</FONT>    <a name="line.101"></a>
+<FONT color="green">102</FONT>       /**<a name="line.102"></a>
+<FONT color="green">103</FONT>        * Returns whether this role can consume messages from queues bound to the address.<a name="line.103"></a>
+<FONT color="green">104</FONT>        */<a name="line.104"></a>
+<FONT color="green">105</FONT>       public boolean isConsume()<a name="line.105"></a>
+<FONT color="green">106</FONT>       {<a name="line.106"></a>
+<FONT color="green">107</FONT>          return consume;<a name="line.107"></a>
+<FONT color="green">108</FONT>       }<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>       /**<a name="line.110"></a>
+<FONT color="green">111</FONT>        * Returns whether this role can create durable queues bound to the address.<a name="line.111"></a>
+<FONT color="green">112</FONT>        */<a name="line.112"></a>
+<FONT color="green">113</FONT>       public boolean isCreateDurableQueue()<a name="line.113"></a>
+<FONT color="green">114</FONT>       {<a name="line.114"></a>
+<FONT color="green">115</FONT>          return createDurableQueue;<a name="line.115"></a>
+<FONT color="green">116</FONT>       }<a name="line.116"></a>
+<FONT color="green">117</FONT>    <a name="line.117"></a>
+<FONT color="green">118</FONT>       /**<a name="line.118"></a>
+<FONT color="green">119</FONT>        * Returns whether this role can delete durable queues bound to the address.<a name="line.119"></a>
+<FONT color="green">120</FONT>        */<a name="line.120"></a>
+<FONT color="green">121</FONT>       public boolean isDeleteDurableQueue()<a name="line.121"></a>
+<FONT color="green">122</FONT>       {<a name="line.122"></a>
+<FONT color="green">123</FONT>          return deleteDurableQueue;<a name="line.123"></a>
+<FONT color="green">124</FONT>       }<a name="line.124"></a>
+<FONT color="green">125</FONT>    <a name="line.125"></a>
+<FONT color="green">126</FONT>       /**<a name="line.126"></a>
+<FONT color="green">127</FONT>        * Returns whether this role can create non-durable queues bound to the address.<a name="line.127"></a>
+<FONT color="green">128</FONT>        */<a name="line.128"></a>
+<FONT color="green">129</FONT>       public boolean isCreateNonDurableQueue()<a name="line.129"></a>
+<FONT color="green">130</FONT>       {<a name="line.130"></a>
+<FONT color="green">131</FONT>          return createNonDurableQueue;<a name="line.131"></a>
+<FONT color="green">132</FONT>       }<a name="line.132"></a>
+<FONT color="green">133</FONT>    <a name="line.133"></a>
+<FONT color="green">134</FONT>       /**<a name="line.134"></a>
+<FONT color="green">135</FONT>        * Returns whether this role can delete non-durable queues bound to the address.<a name="line.135"></a>
+<FONT color="green">136</FONT>        */<a name="line.136"></a>
+<FONT color="green">137</FONT>       public boolean isDeleteNonDurableQueue()<a name="line.137"></a>
+<FONT color="green">138</FONT>       {<a name="line.138"></a>
+<FONT color="green">139</FONT>          return deleteNonDurableQueue;<a name="line.139"></a>
+<FONT color="green">140</FONT>       }<a name="line.140"></a>
+<FONT color="green">141</FONT>    <a name="line.141"></a>
+<FONT color="green">142</FONT>       /**<a name="line.142"></a>
+<FONT color="green">143</FONT>        * Returns whether this role can send management messages to the address.<a name="line.143"></a>
+<FONT color="green">144</FONT>        */<a name="line.144"></a>
+<FONT color="green">145</FONT>       public boolean isManage()<a name="line.145"></a>
+<FONT color="green">146</FONT>       {<a name="line.146"></a>
+<FONT color="green">147</FONT>          return manage;<a name="line.147"></a>
+<FONT color="green">148</FONT>       }<a name="line.148"></a>
+<FONT color="green">149</FONT>    }<a name="line.149"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

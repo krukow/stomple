@@ -1,0 +1,33 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;27.&nbsp;Last-Value Queues</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="scheduled-messages.html" title="Chapter&nbsp;26.&nbsp;Scheduled Messages"><link rel="next" href="message-grouping.html" title="Chapter&nbsp;28.&nbsp;Message Grouping"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;27.&nbsp;Last-Value Queues</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="scheduled-messages.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="message-grouping.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="last-value-queues"></a>Chapter&nbsp;27.&nbsp;Last-Value Queues</h2></div></div><div></div></div><p>Last-Value queues are special queues which discard any messages when a newer message with
+      the same value for a well-defined Last-Value property is put in the queue. In other words, a
+      Last-Value queue only retains the last value.</p><p>A typical example for Last-Value queue is for stock prices, where you are only interested
+      by the latest value for a particular stock.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e5028"></a>27.1.&nbsp;Configuring Last-Value Queues</h2></div></div><div></div></div><p>Last-value queues are defined in the address-setting configuration:</p><pre class="programlisting">
+&lt;address-setting match="jms.queue.lastValueQueue"&gt;
+    &lt;last-value-queue&gt;true&lt;/last-value-queue&gt;
+&lt;/address-setting&gt;
+            </pre><p>By default, <tt class="literal">last-value-queue</tt> is false. Address wildcards can be used
+         to configure Last-Value queues for a set of addresses (see <a href="wildcard-syntax.html" title="Chapter&nbsp;13.&nbsp;Understanding the HornetQ Wildcard Syntax">Chapter&nbsp;13, <i>Understanding the HornetQ Wildcard Syntax</i></a>).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e5042"></a>27.2.&nbsp;Using Last-Value Property</h2></div></div><div></div></div><p>The property name used to identify the last value is <tt class="literal">"_HQ_LVQ_NAME"</tt>
+         (or the constant <tt class="literal">Message.HDR_LAST_VALUE_NAME</tt> from the Core API).</p><p>For example, if two messages with the same value for the Last-Value property are sent to
+         a Last-Value queue, only the latest message will be kept in the queue:</p><pre class="programlisting">
+// send 1st message with Last-Value property set to STOCK_NAME
+TextMessage message = 
+  session.createTextMessage("1st message with Last-Value property set");
+message.setStringProperty("_HQ_LVQ_NAME", "STOCK_NAME");
+producer.send(message);
+
+// send 2nd message with Last-Value property set to STOCK_NAME             
+message = 
+  session.createTextMessage("2nd message with Last-Value property set");
+message.setStringProperty("_HQ_LVQ_NAME", "STOCK_NAME");
+producer.send(message);
+       
+...
+       
+// only the 2nd message will be received: it is the latest with 
+// the Last-Value property set
+TextMessage messageReceived = (TextMessage)messageConsumer.receive(5000);
+System.out.format("Received message: %s\n", messageReceived.getText());             
+            </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e5057"></a>27.3.&nbsp;Example</h2></div></div><div></div></div><p>See <a href="examples.html#examples.last-value-queue" title="11.1.23.&nbsp;Last-Value Queue">Section&nbsp;11.1.23, &#8220;Last-Value Queue&#8221;</a> for an example which shows how last
+         value queues are configured and used with JMS.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="scheduled-messages.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="message-grouping.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;26.&nbsp;Scheduled Messages&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;28.&nbsp;Message Grouping</td></tr></table></div></body></html>

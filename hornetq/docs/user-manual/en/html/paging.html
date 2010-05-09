@@ -1,0 +1,76 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;24.&nbsp;Paging</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="large-messages.html" title="Chapter&nbsp;23.&nbsp;Large Messages"><link rel="next" href="queue-attributes.html" title="Chapter&nbsp;25.&nbsp;Queue Attributes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;24.&nbsp;Paging</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="large-messages.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="queue-attributes.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="paging"></a>Chapter&nbsp;24.&nbsp;Paging</h2></div></div><div></div></div><p>HornetQ transparently supports huge queues containing millions of messages while the
+        server is running with limited memory.</p><p>In such a situation it's not possible to store all of the queues in memory at any one
+        time, so HornetQ transparently <span class="emphasis"><em>pages</em></span> messages into and out of memory as
+        they are needed, thus allowing massive queues with a low memory footprint.</p><p>HornetQ will start paging messages to disk, when the size of all messages in memory for an
+        address exceeds a configured maximum size.</p><p>By default, HornetQ does not page messages - this must be explicitly configured to
+        activate it.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4567"></a>24.1.&nbsp;Page Files</h2></div></div><div></div></div><p>Messages are stored per address on the file system. Each address has an individual
+            folder where messages are stored in multiple files (page files). Each file will contain
+            messages up to a max configured size (<tt class="literal">page-size-bytes</tt>). When reading
+            page-files all messages on the page-file are read, routed and the file is deleted as
+            soon as the messages are recovered.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="paging.main.config"></a>24.2.&nbsp;Configuration</h2></div></div><div></div></div><p>You can configure the location of the paging folder</p><p>Global paging parameters are specified on the main configuration file (<tt class="literal">hornetq-configuration.xml</tt>).</p><pre class="programlisting">&lt;configuration xmlns="urn:hornetq"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:hornetq /schema/hornetq-configuration.xsd"&gt;
+            
+            ...
+            
+            &lt;paging-directory&gt;/somewhere/paging-directory&lt;/paging-directory&gt;
+            
+            ...        </pre><p>
+            </p><div class="table"><a name="d0e4589"></a><p class="title"><b>Table&nbsp;24.1.&nbsp;Paging Configuration Parameters</b></p><table summary="Paging Configuration Parameters" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><tt class="literal">paging-directory</tt></td><td>Where page files are stored. HornetQ will create one folder for
+                                each address being paged under this configured location.</td><td>data/paging</td></tr></tbody></table></div><p>
+        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="paging.mode"></a>24.3.&nbsp;Paging Mode</h2></div></div><div></div></div><p>As soon as messages delivered to an address exceed the configured size, that address
+            alone goes into page mode.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Paging is done individually per address. If you configure a max-size-bytes for an
+                address, that means each matching address will have a maximum size that you
+                specified. It DOES NOT mean that the total overall size of all matching addresses is
+                limited to max-size-bytes.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e4622"></a>24.3.1.&nbsp;Configuration</h3></div></div><div></div></div><p>Configuration is done at the address settings, done at the main configuration file
+                    (<tt class="literal">hornetq-configuration.xml</tt>).</p><pre class="programlisting">  &lt;address-settings&gt;
+      &lt;address-setting match="jms.someaddress"&gt;
+         &lt;max-size-bytes&gt;104857600&lt;/max-size-bytes&gt;
+         &lt;page-size-bytes&gt;10485760&lt;/page-size-bytes&gt;
+         &lt;address-full-policy&gt;PAGE&lt;/address-full-policy&gt;
+      &lt;/address-setting&gt;
+   &lt;/address-settings&gt;
+        </pre><p>This is the list of available parameters on the address settings.</p><p>
+                </p><div class="table"><a name="d0e4636"></a><p class="title"><b>Table&nbsp;24.2.&nbsp;Paging Address Settings</b></p><table summary="Paging Address Settings" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><tt class="literal">max-size-bytes</tt></td><td>What's the max memory the address could have before entering
+                                    on page mode.</td><td>-1 (disabled)</td></tr><tr><td><tt class="literal">page-size-bytes</tt></td><td>The size of each page file used on the paging system</td><td>10MiB (10 * 1024 * 1024 bytes)</td></tr><tr><td><tt class="literal">address-full-policy</tt></td><td>This must be set to PAGE for paging to enable. If the value
+                                    is PAGE then further messages will be paged to disk. If the
+                                    value is DROP then further messages will be silently dropped. If
+                                    the value is BLOCK then client message producers will block when
+                                    they try and send further messages.</td><td>PAGE</td></tr></tbody></table></div><p>
+            </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4677"></a>24.4.&nbsp;Dropping messages</h2></div></div><div></div></div><p>Instead of paging messages when the max size is reached, an address can also be
+            configured to just drop messages when the address is full.</p><p>To do this just set the <tt class="literal">address-full-policy</tt> to <tt class="literal">DROP</tt> in the address settings</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4690"></a>24.5.&nbsp;Blocking producers</h2></div></div><div></div></div><p>Instead of paging messages when the max size is reached, an address can also be
+            configured to block producers from sending further messages when the address is full,
+            thus preventing the memory being exhausted on the server.</p><p>When memory is freed up on the server, producers will automatically unblock and be
+            able to continue sending.</p><p>To do this just set the <tt class="literal">address-full-policy</tt> to <tt class="literal">BLOCK</tt> in the address settings</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4705"></a>24.6.&nbsp;Caution with Addresses with Multiple Queues</h2></div></div><div></div></div><p>When a message is routed to an address that has multiple queues bound to it, e.g. a
+            JMS subscription, there is only 1 copy of the message in memory. Each queue only deals
+            with a reference to this. Because of this the memory is only freed up once all queues
+            referencing the message have delivered it. This means that if not all queues deliver the
+            message we can end up in a state where messages are not delivered. </p><p>For example:</p><div class="itemizedlist"><ul type="disc"><li><p>An address has 10 queues </p></li><li><p>One of the queues does not deliver its messages (maybe because of a slow
+                    consumer).</p></li><li><p>Messages continually arrive at the address and paging is started.</p></li><li><p>The other 9 queues are empty even though messages have been sent.</p></li></ul></div><p>In this example we have to wait until the last queue has delivered some of its
+            messages before we depage and the other queues finally receive some more
+            messages.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4727"></a>24.7.&nbsp;Paging and message selectors</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Please note that message selectors will only operate on messages in memory. If you
+                have a large amount of messages paged to disk and a selector that only matches some
+                of the paged messages, then those messages won't be consumed until the messages in
+                memory have been consumed. HornetQ does not scan through page files on disk to
+                locate matching messages. To do this efficiently would mean implementing and
+                managing indexes amongst other things. Effectively we would be writing a relational
+                database! This is not the primary role of a messaging system. If you find yourself
+                using selectors which only select small subsets of messages in very large queues
+                which are too large to fit in memory at any one time, then you probably want a
+                relational database not a messaging system - you're effectively executing queries
+                over tables.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4733"></a>24.8.&nbsp;Paging and browsers</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Please note that message browsers only operate over messages in memory. They do
+                not operate over messages paged to disk. Messages are paged to disk
+                    <span class="emphasis"><em>before</em></span> they are routed to any queues, so when they are
+                paged, they are not in any queues, so will not appear when browsing any queues.
+            </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4742"></a>24.9.&nbsp;Paging and unacknowledged messages</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p> Please note that until messages are acknowledged they are still in memory on the
+                server, so they contribute to the size of messages on a particular address. If
+                messages are paged to disk for an address, and are being consumed, they will be
+                depaged from disk when enough memory has been freed up in that address after
+                messages have been consumed and acknowledged. However if messages are not
+                acknowledged then more messages will not be depaged since there is no free space in
+                memory. In this case message consumption can appear to hang. If not acknowledging
+                explictly messages are acknowledged according to the <tt class="literal">ack-batch-size</tt> setting. Be careful not to set your paging max size to
+                a figure lower than ack-batch-size or your system may appear to hang! </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e4751"></a>24.10.&nbsp;Example</h2></div></div><div></div></div><p>See <a href="examples.html#examples.paging" title="11.1.34.&nbsp;Paging">Section&nbsp;11.1.34, &#8220;Paging&#8221;</a> for an example which shows how to use paging
+            with HornetQ.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="large-messages.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="queue-attributes.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;23.&nbsp;Large Messages&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;25.&nbsp;Queue Attributes</td></tr></table></div></body></html>
