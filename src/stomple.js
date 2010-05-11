@@ -39,7 +39,7 @@
         infoAvailable = globalObject.console && typeof globalObject.console.info === 'function',
         trim;
     if (typeof WebSocket === 'undefined' ||  !WebSocket || globalObject.Stomple) {
-        if (warnAvailable && Stomple.debug) {
+        if (warnAvailable) {
             globalObject.console.warn(globalObject.Stomple?"Stomple already defined.":"Stomple: WebSockets not available");
         }
         globalObject.Stomple = globalObject.Stomple || false;
@@ -183,26 +183,27 @@
         command: null,
         headers: null,
         body: null,
-        toString: function() {
-            var res = [this.command, '\n'],
+        toString: function() {//http://www.sitepen.com/blog/2008/05/09/string-performance-an-analysis/
+            var res = this.command,
                 h,
                 hds = this.headers;
+            res += '\n';
 	        if (hds) {
 	          for (h in hds) {
 	            if(hds.hasOwnProperty(h)) {
-                    res.push(h);
-                    res.push(':');
-                    res.push(hds[h]);
-                    res.push('\n');
+                    res += h;
+                    res += ':';
+                    res += hds[h];
+                    res += '\n';
 	            }
 	          }
 	        }
-	        res.push('\n');
+	        res += '\n';
 	        if (this.body) {
-	          res.push(this.body);
+	          res += this.body;
 	        }
-            res.push(NULL);
-	        return res.join('');
+            res += NULL;
+	        return res;
         }
     };
     
