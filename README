@@ -11,4 +11,8 @@ krukow:~/Projects/private/stomple$ ./hornetq/bin/run.sh ./hornetq/examples/jms/s
 Open example in a browser that supports WebSockets (e.g., Chrome)
 2) open example/transactional-chat.html
 
-More info to come...
+Running tests:
+1) Start hornetq 
+krukow:~/Projects/private/stomple$ ./hornetq/bin/run.sh ./hornetq/examples/jms/stomp-websockets/server0
+
+2) open test/all.html or which ever test you want to run...
