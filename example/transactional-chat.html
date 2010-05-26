@@ -16,6 +16,7 @@
 	<button id="beginBtn" onclick='begin();'>Begin transaction</button>
 	<button id="commitBtn" onclick='commit();'>Commit transaction</button>
 	<button id="abortBtn" onclick='abort();'>Abort transaction</button>
+	<button id="disBtn" onclick='disconnect();'>Disconnect</button>
 	<p>
 	Chat:<br>
 	<div id="content"></div>
@@ -30,6 +31,9 @@
 	  }
 	  function abort() {
 		  client.abort({});
+	  }
+	  function disconnect() {
+		  client.disconnect({success: function(){console.log("dis");}, failure: function(){console.log(42);}});
 	  }
 	  function reset() {
 		  document.getElementById('inputText').value = '';

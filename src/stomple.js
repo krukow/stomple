@@ -230,9 +230,10 @@
         autoReceipt: true,
         closeOnError: true,
         
-        onconnect: emptyFn,
+        onConnect: emptyFn,
         connectFailed: emptyFn,
-        error: emptyFn,
+        onError: emptyFn,
+        onReceipt: emptyFn,
       
 		socketOpen: emptyFn,
         socketMessage: emptyFn,
@@ -292,6 +293,16 @@
         
         disconnect: function(spec) {
             this.checkConnectAndDo(this.doDisconnect, spec);
+        },
+        
+        close: function(spec) {
+            spec = spec || {};
+            if (this.disconnectOnClose || spec.disconnectOnClose) {
+                //this.checkConnectAndDo(this.doDisconnect, spec);
+            }
+            if (this.websocket) {
+                this.websocket.close();            
+            }
         },
         
         checkConnectAndDo: function(action, spec, actionName) {
@@ -439,11 +450,12 @@
                 tid = this.session + "-t-" + (++this.transid);  
             } 
             trans = {id: tid, msgs:[]};
+
             return this.transmitFrame({
                     command: 'BEGIN',
                     spec: spec,
                     beforeSend: function (f) {
-                        f.headers.transaction = f.headers.transaction || tid; 
+                        f.headers.transaction = tid; 
                     },
                     onSend: function (f) {
                         that.transactions.push(trans);
@@ -513,7 +525,7 @@
             this.session = f.headers.session || '';
             this.msgid = 0;
             this.transid = 0;
-            this.onconnect(info);
+            this.onConnect(info);
             if (this.connectConfig && 
                  typeof this.connectConfig.success === 'function') {
                  this.connectConfig.success(info);
@@ -545,6 +557,7 @@
         },
         
         handleClose: function(info) {
+            this.socketClose(info);
             if (this.connectTimeoutId) {
                 clearTimeout(this.connectTimeoutId);
                 if (this.connectConfig && 
@@ -572,6 +585,9 @@
         },
                 
         handleMessage: function(msg) {
+            if (this.socketMessage(msg) === false) {
+                return;//cancel
+            }            
             var data = msg.data,
                 i = data.indexOf('\n'),
                 N,
@@ -634,6 +650,9 @@
                     if (handlerSpec && typeof handlerSpec.success === 'function') {
                         handlerSpec.success(handlerSpec.frame);
                     }
+                    if (typeof this.onReceipt === 'function') {
+                        this.onReceipt(handlerSpec.frame);
+                    }
                     break;
                 
                 case "ERROR": 
@@ -641,8 +660,8 @@
                     if (handlerSpec && typeof handlerSpec.failure === 'function') {
                         handlerSpec.failure(handlerSpec.frame);
                     }
-                    if (typeof this.error === 'function') {
-                        this.error(handlerSpec.frame);
+                    if (typeof this.onError === 'function') {
+                        this.onError(handlerSpec.frame);
                     }
                     break;
             }             
