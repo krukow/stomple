@@ -10,7 +10,6 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 	    //---------------------------------------------
 	 
 	    setUp : function() {
-             Stomple.debug = true;
 	        this.client = Stomple.create_client({
 	            url : "ws://localhost:61614/stomp",
 	            destination : "jms.topic.chat",
@@ -20,7 +19,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 	    },
 	
 	    tearDown : function() {
-            this.client.close(); Stomple.debug = false;
+            this.client.close(); 
 	    },
 	
 	    "Subscription should succeed and call success callback" : function() {
@@ -50,7 +49,6 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                 failure: function(spec) {
                     //expected..
                     gotError = true;
-                    console.log(spec)
                 }
             
             });

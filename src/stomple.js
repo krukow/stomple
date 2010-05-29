@@ -29,7 +29,7 @@
 * @copyright 2010 Karl Krukow <kkr@trifork.com>
 * @license http://opensource.org/licenses/mit-license.php MIT License
 * @link http://github.com/krukow/stomple
-* @version 0.9 (beta)
+* @version 0.95 (RC1)
 */
 (function() {
     var globalObject = this,
@@ -229,6 +229,7 @@
         autoContentLength: true,
         autoReceipt: true,
         closeOnError: true,
+        disconnectOnClose: true,
         
         onConnect: emptyFn,
         connectFailed: emptyFn,
@@ -297,8 +298,13 @@
         
         close: function(spec) {
             spec = spec || {};
-            if (this.disconnectOnClose || spec.disconnectOnClose) {
-                //this.checkConnectAndDo(this.doDisconnect, spec);
+            var that = this,
+                closefn = function(){that.close();}
+            if (this.connected && this.disconnectOnClose || spec.disconnectOnClose) {
+                this.disconnect({
+                    success:closefn,
+                    failure: closefn
+                });
             }
             if (this.websocket) {
                 this.websocket.close();            
@@ -332,8 +338,9 @@
                         passcode: spec.passcode || this.passcode
                     } 
                 });
-            if (Stomple.debug)
+            if (Stomple.debug) {
                 console.log(">>>>\n"+f.toString());//TODO: devel only
+            }
             this.connectTimeoutId = setTimeout(function(){
                 that.connectTimeoutId = null;
                 that.handleConnectFailed({reason: 'timeout', frame: f, websocket: this.websocket});
@@ -356,28 +363,34 @@
             if (typeof config.beforeSend === 'function') {
                 config.beforeSend(f);
             }
-            if (Stomple.debug)
+            if (Stomple.debug) {
                 console.log(">>>>\n"+f.toString());//TODO: devel only
+            }
+                
             if (this.websocket.send(f.toString())) {
                 if (typeof config.onSend === 'function') {
 	                config.onSend(f);
 	            }
-                timeoutId = setTimeout(function(){
-                    if (typeof config.onTimeout === 'function') {
-		                config.onTimeout(f);
-		            }
-                    if (receipt) {
-                        delete that.pending[receipt];
-                    }
-                    if (hasFail) {
-                       spec.failure({reason: "timeout", frame: f, websocket: this.websocket});
-                    }
-                }, spec.timeout || this.timeout);
                 if (receipt) {
+                    timeoutId = setTimeout(function(){
+	                    if (typeof config.onTimeout === 'function') {
+	                        config.onTimeout(f);
+	                    }
+	                    if (receipt) {
+	                        delete that.pending[receipt];
+	                    }
+	                    if (hasFail) {
+	                       spec.failure({reason: "timeout", frame: f, websocket: this.websocket});
+	                    }
+	                }, spec.timeout || this.timeout);
                     if (typeof config.makeReceiptHandler === 'function') {
                         this.pending[receipt] = config.makeReceiptHandler(spec,timeoutId, f);
                     } else {
                         this.pending[receipt] = this.makeReceiptHandler(spec,timeoutId,f);
+                    }
+                } else {
+                    if (typeof spec.success === 'function') {
+                        spec.success(f);   
                     }
                 }
                 return f;
@@ -509,9 +522,15 @@
         },
         
         doDisconnect: function(spec) {
+            var that = this;
             return this.transmitFrame({
                     command: 'DISCONNECT',
-                    spec: spec
+                    spec: spec,
+                    beforeSend: function(f) {
+                        //consider us disconnected regardless of outcome
+                        that.connected = false;
+                        that.connectConfig = null;
+                    }
             });
         },
         
@@ -630,8 +649,10 @@
                 headers: headers,
                 body: body
             });
-            if (Stomple.debug)
+            if (Stomple.debug) {
                 console.log("<<<<\n"+f.toString());//TODO: devel only
+            }
+                
             switch (cmd) {
                 case "CONNECTED":
                     this.handleConnect({frame: f, websocket: this.websocket});

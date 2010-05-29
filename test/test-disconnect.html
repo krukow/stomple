@@ -16,13 +16,8 @@
     <script type="text/javascript" src="../src/stomple.js"></script>
     
    <!--  Test Cases -->
-   <script type="text/javascript" src="tests/test-subscribe.js"></script> 
-   <script type="text/javascript" src="tests/test-lowlevel.js"></script> 
-   <script type="text/javascript" src="tests/test-send.js"></script> 
-   <script type="text/javascript" src="tests/test-unsubscribe.js"></script>
-   <script type="text/javascript" src="tests/test-transaction.js"></script>
-   <script type="text/javascript" src="tests/test-client-ack.js"></script>
-   <script type="text/javascript" src="tests/test-disconnect.js"></script>   
+   <script type="text/javascript" src="tests/test-disconnect.js"></script>  
+	
 	
 </head>
 <body class="yui3-skin-sam">
@@ -32,14 +27,8 @@
 if (Stomple) {
 	YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 		
-		Y.Test.Runner.add(new Y.Test.Case(test_subscribe));
-		Y.Test.Runner.add(new Y.Test.Case(test_lowlevel));
-		Y.Test.Runner.add(new Y.Test.Case(test_send));
-		Y.Test.Runner.add(new Y.Test.Case(test_unsubscribe));
-		Y.Test.Runner.add(new Y.Test.Case(test_transaction));
-		Y.Test.Runner.add(new Y.Test.Case(test_client_ack));
 		Y.Test.Runner.add(new Y.Test.Case(test_disconnect));
-		
+
 	    var yconsole = new Y.Console({
 	        newestOnTop: false                   
 	    });

@@ -50,16 +50,17 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                         success: function(){ setupFailed = false;}
                     });
                     this.wait(function(){
-                         var i,N = msgBodies.length;
+                         var i,N = msgBodies.length,
+                            sendFailed = function() {
+                                        Y.Assert.fail("send failed.");
+                                   };
                          if (setupFailed) {
                             Y.Assert.fail("Cannot run test: Begin transaction failed");
                          } else {
                            for (i=0;i<N;i+=1) {
                                 this.client.send({
                                    body: ""+msgBodies[i],
-                                   failure: function() {
-                                        Y.Assert.fail("send failed.");
-                                   }
+                                   failure: sendFailed
                                });
                                
                            }
@@ -121,16 +122,17 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                             success: function(){ setupFailed = false;}
                         });
                         this.wait(function(){
-                             var i,N = msgBodies.length;
+                             var i,N = msgBodies.length,
+                                sendFailed = function() {
+                                            Y.Assert.fail("send failed.");
+                                       };
                              if (setupFailed) {
                                 Y.Assert.fail("Cannot run test: Begin transaction failed");
                              } else {
                                for (i=0;i<N;i+=1) {
                                     this.client.send({
                                        body: ""+msgBodies[i],
-                                       failure: function() {
-                                            Y.Assert.fail("send failed.");
-                                       }
+                                       failure: sendFailed
                                    });
                                    
                                }
@@ -204,16 +206,17 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 		                        success: function(){ setupFailed = false;}
 		                    });
 		                    this.wait(function(){
-		                         var i,N = outerBodies.length-1;
+		                         var i,N = outerBodies.length-1,
+                                    sendFailed = function() {
+                                                Y.Assert.fail("send failed.");
+                                           };
 		                         if (setupFailed) {
 		                            Y.Assert.fail("Cannot run test: Begin transaction failed");
 		                         } else {
 		                           for (i=0;i<N;i+=1) {
 		                                this.client.send({
 		                                   body: ""+outerBodies[i],
-		                                   failure: function() {
-		                                        Y.Assert.fail("send failed.");
-		                                   }
+		                                   failure: sendFailed
 		                               });
 		                           }
 		                           this.wait(function(){
@@ -228,16 +231,17 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 		                                this.wait(function(){
                                             Y.Assert.areSame(2, this.client.transactions.length);
                                                                     //two pending transactions
-		                                     var i,N = innerBodies.length;
+		                                     var i,N = innerBodies.length,
+                                                 sendFailed = function() {
+		                                                Y.Assert.fail("send failed.");
+		                                           };
 		                                     if (setupFailed) {
 		                                        Y.Assert.fail("Cannot run test: Begin inner transaction failed");
 		                                     } else {
 		                                       for (i=0;i<N;i+=1) {
 		                                            this.client.send({
 		                                               body: ""+innerBodies[i],
-		                                               failure: function() {
-		                                                    Y.Assert.fail("send failed.");
-		                                               }
+		                                               failure: sendFailed
 		                                            });
 		                                       }
 		                                       this.wait(function(){
@@ -283,8 +287,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                                                                     //no pending transactions
 							                                     }
 							                                }, 500);
-		                                                 },500)
-		                                                 
+		                                                 },500);
 		                                                 
 		                                            },500);
 		                                        },500);
