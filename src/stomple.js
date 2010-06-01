@@ -598,7 +598,7 @@
         close: function(spec) {
             spec = spec || {};
             var that = this,
-                closefn = function(){that.close();}
+                closefn = function(){that.close();};
             if (this.connected && this.disconnectOnClose || spec.disconnectOnClose) {
                 this.disconnect({
                     success:closefn,
