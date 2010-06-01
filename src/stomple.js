@@ -33,7 +33,7 @@
 */
 (function() {
     var globalObject = this,
-        Stomple,
+        Stomple,//publicly exported API or 'false' if unsupported.
         emptyFn = function() {},
         warnAvailable = globalObject.console && typeof globalObject.console.warn === 'function',
         infoAvailable = globalObject.console && typeof globalObject.console.info === 'function',
@@ -66,12 +66,12 @@
          * 
          * @see http://www.ecma-international.org/publications/standards/Ecma-262.htm
          * @see http://groups.google.com/group/comp.lang.javascript/msg/e04726a66face2a2
-         * @param {Object} origin
-         * @param {Object} props a specification object describing overrides as in
-         *            EcmaScript 5th edition Object.create. Only supported
-         *            specification objects have a single property named value,
+         * @param {Object} o origin (to be used as prototype)
+         * @param {Object} props a configuration object describing overrides as in
+         *            EcmaScript 5th edition Object.create. Only supports
+         *            configuration objects that have a single property named 'value',
          *            e.g. {value: 42}.
-         * @return {Object} object with <code>origin</code> as its prototype
+         * @return {Object} object with <code>o</code> as its prototype
          */
         Object.create = (function() {
             function F() {}
@@ -99,6 +99,8 @@
      * @see http://www.ecma-international.org/publications/standards/Ecma-262.htm
      * @param {Object} tgt target object
      * @param {Object} src source object
+     * @param {boolean} asDataDescriptor if true, copies sources properties into target properties
+     * as data descriptors.
      * @return {Object} the tgt parameter.
      */
     var copyTo = function(tgt, src, asDataDescriptor) {
@@ -124,7 +126,7 @@
      * Computes the number of bytes in the UTF-8 encoding of its 
      * string parameter, body.
      * This is needed to set the content-length header in Stomp.
-     * @param {Object} body the string to compute on
+     * @param {String} body the string to compute on
      * @return {Number} Number of bytes in the UTF-8 encoding of body.
      */
     var computeContentLength = function(body) {
@@ -136,12 +138,12 @@
         return count;
     };
     
-     /**
+    /**
      * "Opposite" operation of computeContentLength.
      * Given a string an a number of bytes to read. Compute the
      * index into the string to read to (to "simulate" reading that number of bytes).  
      * This is needed when receiving a Stomp message with the content-length header set.
-     * @param {Object} body the string to compute on
+     * @param {String} body the string to compute on
      * @param {Number} len the received content-length
      * @return {Number} index into body to read to (not including).
      */
@@ -173,12 +175,15 @@
     
     var NULL = '\u0000';
         
-     /*
-      * The frame starts with a command (e.g., CONNECT), followed by a newline, 
-      * followed by headers in a <key>:<value> with each header followed by a newline. 
-      * A blank line indicates the end of the headers and beginning of the body
-      * and the null indicates the end of the frame.
-      */
+    /**
+     * Prototype of frame objects. Defines a toString method to convert the frame
+     * into a Stomp message.
+     * 
+     * The frame starts with a command (e.g., CONNECT), followed by a newline, 
+     * followed by headers in a <key>:<value> with each header followed by a newline. 
+     * A blank line indicates the end of the headers and beginning of the body
+     * and the null indicates the end of the frame.
+     */
     var FramePrototype = {
         command: null,
         headers: null,
@@ -207,6 +212,12 @@
         }
     };
     
+    /**
+     * Create a Stomp frame (@see Stomple.FramePrototype).
+     * @param {Object} spec contains: the Stomp command, a configuration object
+     * specifying headers, and a string body property.
+     * @return {Object} a Stomp frame corresponding to spec. 
+     */
     var make_frame = function(spec) {
         var o = {};
         if (spec.command) {
@@ -222,40 +233,178 @@
         return f;
     };
     
+    /**
+     * Prototype of Stomple client objects. 
+     * Defines all the default values, and possible callbacks.
+     * Properties can be changed by accessing Stomple.ClientPrototype.
+     * 
+     * Properties are documented inline.
+     */
     var ClientPrototype = {
         
+        /**
+         * The timeout value to use for all interaction with server.
+         * If timeout occurs then a corresponding failure function is called
+         * with reason timeout.
+         */
         timeout: 8000,        
+        /**
+         * true if Stomple should automatically issue a CONNECT Stomp Frame
+         * upon first action. This frees the user from explicitly calling the
+         * connect function with a success and failure callback.
+         */
         autoConnect: true,
+        
+        /**
+         * true to have Stomple automatically set a 'content-lenght' 
+         * Stomp header. Stomple computes this by computing the number of
+         * bytes in the UTF-8 encoding of the frame's body.
+         */
         autoContentLength: true,
+
+        /**
+         * true to have Stomple automatically set an auto-generated
+         * 'receipt' header on all Stomp frames. This causes the Stomp server to send a 
+         * receipt message to confirm successful receiption of the original 
+         * message. The callers success function is only called upon reception of
+         * the confirming message. Otherwise failure is called.
+         */
         autoReceipt: true,
+        
+        /**
+         * If a websocket error occurs close the websocket.
+         */
         closeOnError: true,
+        
+        /**
+         * If user calls the close method, send a DISCONNECT Stomp frame
+         * to gracefully close connection.
+         */
         disconnectOnClose: true,
         
+        /**
+         * Callback for the successful Stomp connect event.
+         */
         onConnect: emptyFn,
+        /**
+         * Callback for the un-successful Stomp connect event.
+         */
         connectFailed: emptyFn,
+        /**
+         * Handler for receiption of server ERROR frames.
+         */
         onError: emptyFn,
+        
+        /**
+         * Handler for server RECEIPT frames.
+         */
         onReceipt: emptyFn,
       
+        /**
+         * Low-level callback: called with WebSocket opens.
+         */
 		socketOpen: emptyFn,
+        /**
+         * Low-level callback: called with WebSocket receives a message.
+         */
         socketMessage: emptyFn,
+        /**
+         * Low-level callback: called with WebSocket closes.
+         */
         socketClose: emptyFn,
+        /**
+         * Low-level callback: called with WebSocket has an error.
+         */
 		socketError: emptyFn,
         
+        /**
+         * true if client is connected (i.e. has a session with a Stomp server).
+         */
         connected: false,
+        /**
+         * The underlying raw WebSocket used by this client
+         */
         websocket: null,
+        /**
+         * A session identifier generated by server when connecting in Stomp
+         */
         session: null,
+        /**
+         * Private. An object used when needing callbacks on autoConnect.
+         */
         connectConfig: null,
+        
+        /**
+         * Private. Id of setTimeout for connection.
+         */
         connectTimeoutId: null,
+        /**
+         * Private. Counter used to generate message ids (the current message number).
+         */
         msgid: null,
+        /**
+         * Private. Counter used to generate transaction ids (the current transaction number).
+         */
         transid: null,
+        /**
+         * Private. Array of pending callback specs (corresponding to messages
+         * that haven't gotten receipts yet). Each spec will either have its success
+         * or failure callback called depending on what the server does. (Failure is called on timeout).
+         */
         pending: null,
+        /**
+         * Private. Object of callback specs for the various destinations that
+         * are subscribed to. For example subscribers = 
+         * {
+         *  'jms.topic.chat' : [{
+         *          handler: function(msg) {...},
+         *          scope: anObject
+         *  }, ... ]
+         *  'jms.topic.another': [...]
+         * }
+         */
         subscribers: null,
+        /**
+         * Private. A stack of active transactions. Each transaction is an object
+         * {id: tid, msgs:[]}, where id identified transaction and msgs un-used right now :)
+         */
         transactions: null,
+        /**
+         * End-point of the websocket
+         */
         url: null,
+        
+        /**
+         * Default destination.
+         */
         destination: null,
+        /**
+         * Login for default destination.
+         */
         login: null,
+        /**
+         * Passcode for default destination.
+         */
         passcode: null,
         
+        
+        /**
+         * Sends a CONNECT Stomp frame to initiate a Stomp session.
+         * @param {Object} spec a configuration object. With optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         ack: 'client',
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         connect: function(spec) {
             if (this.connected) {
                 throw new Error("Called connect when in connected state.");
@@ -264,38 +413,188 @@
             this.doConnect(spec);
         },
         
+        /**
+         * Sends a SEND Stomp frame to send a Stomp message to a destination.
+         * @param {Object} spec a configuration object. 
+         * If no default destination is active, a destination property must be specified.
+         * A string property 'body' must be specified.
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         send: function(spec) {
             this.checkConnectAndDo(this.doSend, spec);
         },
-        
+        /**
+         * Sends a SUBSCRIBE Stomp frame to subscribe to a Stomp destination.
+         * @param {Object} spec a configuration object. 
+         * If no default destination is active, a destination property must be specified.
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         subscribe: function(spec) {
             this.checkConnectAndDo(this.doSubscribe,spec);
         },
-        
+        /**
+         * Sends an UNSUBSCRIBE Stomp frame to un-subscribe from a Stomp destination.
+         * @param {Object} spec a configuration object. 
+         * If no default destination is active, a destination property must be specified.
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         unsubscribe: function(spec) {
             this.checkConnectAndDo(this.doUnsubscribe, spec);
         },
-        
+        /**
+         * Sends a BEGIN Stomp frame to start a transaction.
+         * @param {Object} spec a configuration object. 
+         * A transaction header is generate automatically if one is not specified (as in the 
+         * example below). Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         begin: function(spec) {
             this.checkConnectAndDo(this.doBegin, spec);
         },
-        
+        /**
+         * Sends a COMMIT Stomp frame to commit a transaction.
+         * @param {Object} spec a configuration object. 
+         * A transaction header is generate automatically (equal to that of the current BEGIN
+         * frame - working in a stack-like manner) if one is not specified (as in the 
+         * example below). Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         commit: function(spec) {
             this.checkConnectAndDo(this.doCommit, spec);
         },
-        
+        /**
+         * Sends an ACK Stomp frame to explicitly ackowledge receiption of a message
+         * to the server. (In conjunction with header: client: ack -see Stomp 
+         * prototcol specification).
+         * @param {Object} spec a configuration object. 
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         ack: function(spec) {
             this.checkConnectAndDo(this.doAck, spec);
         },
-        
+        /**
+         * Sends an ABORT Stomp frame to abort a transaction.
+         * @param {Object} spec a configuration object. 
+         * A transaction header is generate automatically (equal to that of the current BEGIN
+         * frame - working in a stack-like manner) if one is not specified (as in the 
+         * example below). In case of nested transactions, only the inner-most transaction
+         * is ABORTED (unless transaction header is specified).
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         abort: function(spec) {
             this.checkConnectAndDo(this.doAbort, spec);
         },
-        
+        /**
+         * Sends a DISCONNECT Stomp frame to terminate the connection and Stomp session.
+         * @param {Object} spec a configuration object. 
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * The overrides are the usual ones (@see Stomple.ClientPrototype).
+         * Stomp headers can be set explicitly by providing an 'options' property in 
+         * spec which is an object of header-value properties. E.g.,
+         * {
+         *   options: {
+         *      headers: {
+         *         transaction: 't42'
+         *      }
+         *   }
+         * }
+         */
         disconnect: function(spec) {
             this.checkConnectAndDo(this.doDisconnect, spec);
         },
-        
+        /**
+         * Closes the underlying WebSocket. If disconnectOnClose is true, then
+         * a Stomp DISCONNECT frame is sent to server first.
+         * @param {Object} spec a configuration object. 
+         * Has optional success and failure 
+         * callback functions one of which is guaranteed to be called eventually depending
+         * on the outcome of the command.
+         * Overrides: disconnectOnClose, timeout, (TODO more)
+         */
         close: function(spec) {
             spec = spec || {};
             var that = this,
@@ -311,10 +610,16 @@
             }
         },
         
-        checkConnectAndDo: function(action, spec, actionName) {
+        /**
+         * Private. checks whether we are connected and performs action if so.
+         * Otherwise connects if autoConnect, or throws error otherwise.
+         * @param {Function} action
+         * @param {spec} configuration object. 
+         */
+         checkConnectAndDo: function(action, spec) {
             var that = this;
             if (!this.connected) { 
-                if (this.autoConnect) {
+                if (this.autoConnect || spec && spec.autoConnect) {
                     this.connect(Object.create(spec, {
                       success: {value: function() {
                            action.call(that, spec);
@@ -327,7 +632,10 @@
                 action.call(this, spec);
             }
         },
-        
+        /**
+         * Private. Perform Connect
+         * @param {spec} configuration object. 
+         */
         doConnect: function(spec) {
             var that = this,
                 w = this.websocket = new WebSocket(this.url),
@@ -351,7 +659,12 @@
             w.onclose   = function(e) {that.handleClose(e);};
             w.onerror   = function() {that.handleError();};
         },
-        
+        /**
+         * Private. Template method for all Stomp actions. Callbacks for various stages:
+         * beforeSend, onSend, onTimeout, success, failure
+         * @param {Object} spec configuration object...
+         * @return {Object/boolean} false if websocket send fails, sent frame otherwise.
+         */
         transmitFrame: function(config) {
             var spec = config.spec,
                 cmd = config.command,
@@ -404,7 +717,10 @@
                 return false;
             }
         },
-        
+        /**
+         * Private. Perform send
+         * @param {spec} configuration object. 
+         */
         doSend: function(spec) {
             return this.transmitFrame({
                 command: 'SEND',
@@ -412,7 +728,10 @@
             });
         },
         
-        
+        /**
+         * Private. Perform Subscribe
+         * @param {spec} configuration object. 
+         */
         doSubscribe: function(spec) {
              var that = this;
              return this.transmitFrame({
@@ -442,7 +761,10 @@
                     }
              });
         },
-        
+        /**
+         * Private. Perform Un-Subscribe
+         * @param {spec} configuration object. 
+         */
         doUnsubscribe: function(spec) {
             var that = this;
             return this.transmitFrame({
@@ -454,7 +776,10 @@
 	                }
              });
         },
-        
+        /**
+         * Private. Perform begin
+         * @param {spec} configuration object. 
+         */
         doBegin: function(spec) {
             var that = this,
                 tid, trans;
@@ -491,6 +816,10 @@
              });
         },
         
+        /**
+         * Private. Perform commit
+         * @param {spec} configuration object. 
+         */
         doCommit: function(spec) {
             var that = this;
             return this.transmitFrame({
@@ -502,6 +831,10 @@
             });
         },
         
+        /**
+         * Private. Perform ack
+         * @param {spec} configuration object. 
+         */
         doAck: function(spec) {
             var that = this;
             return this.transmitFrame({
@@ -510,6 +843,10 @@
             });
         },
         
+        /**
+         * Private. Perform abort
+         * @param {spec} configuration object. 
+         */
         doAbort: function(spec) {
             var that = this;
             return this.transmitFrame({
@@ -521,6 +858,10 @@
             });
         },
         
+        /**
+         * Private. Perform disconnect
+         * @param {spec} configuration object. 
+         */
         doDisconnect: function(spec) {
             var that = this;
             return this.transmitFrame({
@@ -534,6 +875,11 @@
             });
         },
         
+        /**
+         * Private. Handle connect success. Initializes state (connected, session, ...)
+         * Calls callbacks onConnect and connectConfig.success.
+         * @param {spec} configuration object. 
+         */
         handleConnect: function(info) {
             var f = info.frame;
             if (this.connectTimeoutId) {
@@ -551,6 +897,11 @@
             }
         },
         
+        /**
+         * Private. Handle connect failed. Cleans state (connected, session, ...)
+         * Calls callbacks connectFailed and connectConfig.failure.
+         * @param {spec} configuration object. 
+         */
         handleConnectFailed: function(info) {
             if (this.connectTimeoutId) {
                 clearTimeout(this.connectTimeoutId);
@@ -567,6 +918,10 @@
             }
         },
         
+        /**
+         * Private. Handle websocket open failed. Sends connect frame.
+         * @param {spec} configuration object. 
+         */
         handleOpen: function(f, spec) {
             if (this.socketOpen(f) === false) {
                 this.websocket.close();
@@ -575,6 +930,12 @@
             this.websocket.send(f.toString());
         },
         
+        /**
+         * Private. Handle websocket close. Calls callbacks
+         * socketClose, clears connect timeout if present. calls this.destroy.
+         * If connectConfig.failure is present it is called.
+         * @param {spec} configuration object. 
+         */
         handleClose: function(info) {
             this.socketClose(info);
             if (this.connectTimeoutId) {
@@ -587,6 +948,13 @@
             this.destroy();
         },
         
+        /**
+         * Private. Handle websocket error. Calls callbacks
+         * socketError, clears connect timeout if present. Closes websocket
+         * if this.closeOnError.
+         * If connectConfig.failure is present it is called.
+         * @param {spec} configuration object. 
+         */
         handleError: function() {
             if (this.socketError() !== false && this.closeOnError) {
                 if (this.connectTimeoutId) {
@@ -602,7 +970,14 @@
             }
             
         },
-                
+        
+        /**
+         * Private. Handle websocket message. Calls callbacks
+         * socketMessage. Parses Stomp message and calls,
+         * message, error, connect, or receipt depending on server frame.
+         * Handles message details (e.g. content-length).
+         * @param {msg} configuration object. 
+         */
         handleMessage: function(msg) {
             if (this.socketMessage(msg) === false) {
                 return;//cancel
@@ -795,6 +1170,16 @@
         }
     };
     
+    /**
+     * Creates a Stomple client object.
+     * @param {Object} spec configuration object. Each of the prototype properties
+     * can be overridden by specifying properties on the configuration object.
+     * The url property is mandatory. If destination property is specified, then
+     * this becomes the default destination for all Stomp methods with destinations.
+     * Properties login and passcode are used to connect.
+     * @return {Object} Stomple client object with Stomple.ClientPrototype as its prototype.
+     * 
+     */
     var create_client = function(spec) {
         var url = spec.url,
             destination = spec.destination;
@@ -811,11 +1196,14 @@
         return Object.create(ClientPrototype, copyTo(defaultValues, spec, true));
     };
   
+    /**
+     * Public interface
+     */
 	Stomple = {
         create_client: create_client,
         ClientPrototype: ClientPrototype,
         FramePrototype: FramePrototype,
-        debug: false
+        debug: false //debug will log all input and output Stomp messages.
     };
 
     globalObject.Stomple = Stomple;
