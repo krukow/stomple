@@ -243,7 +243,7 @@
     var ClientPrototype = {
         
         /**
-         * The timeout value to use for all interaction with server.
+         * The timeout value in ms to use for all interaction with server.
          * If timeout occurs then a corresponding failure function is called
          * with reason timeout.
          */
