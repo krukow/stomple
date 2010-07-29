@@ -33,12 +33,24 @@
 */
 (function() {
     var globalObject = this,
+        /** David Mark's isHostMethod function,
+         * see also:
+         * http://peter.michaux.ca/articles/feature-detection-state-of-the-art-browser-scripting
+         * Modified to use strict equality
+         */
+        isHostMethod = function(object, property) {
+		  var t = typeof object[property];  
+		  return t==='function' ||
+		         (!!(t==='object' && object[property])) ||
+		         t==='unknown';
+		},
         Stomple,//publicly exported API or 'false' if unsupported.
         emptyFn = function() {},
-        warnAvailable = globalObject.console && typeof globalObject.console.warn === 'function',
-        infoAvailable = globalObject.console && typeof globalObject.console.info === 'function',
+        consoleAvailable = isHostMethod(globalObject,"console"),
+        warnAvailable = consoleAvailable && isHostMethod(globalObject.console,"warn"),
+        infoAvailable = consoleAvailable && isHostMethod(globalObject.console,"info"),
         trim;
-    if (typeof WebSocket === 'undefined' ||  !WebSocket || globalObject.Stomple) {
+    if (isHostMethod(globalObject,"WebSocket")) {
         if (warnAvailable) {
             globalObject.console.warn(globalObject.Stomple?"Stomple already defined.":"Stomple: WebSockets not available");
         }
@@ -173,7 +185,8 @@
     };
     
     
-    var NULL = '\u0000';
+    var NULL = '\u0000',
+        NL = '\n';
         
     /**
      * Prototype of frame objects. Defines a toString method to convert the frame
@@ -192,18 +205,18 @@
             var res = this.command,
                 h,
                 hds = this.headers;
-            res += '\n';
+            res += NL;
 	        if (hds) {
 	          for (h in hds) {
 	            if(hds.hasOwnProperty(h)) {
                     res += h;
                     res += ':';
                     res += hds[h];
-                    res += '\n';
+                    res += NL;
 	            }
 	          }
 	        }
-	        res += '\n';
+	        res += NL;
 	        if (this.body) {
 	          res += this.body;
 	        }
@@ -983,7 +996,7 @@
                 return;//cancel
             }            
             var data = msg.data,
-                i = data.indexOf('\n'),
+                i = data.indexOf(NL),
                 N,
                 cmd = data.substring(0,i),
                 headersAndBody = data.substring(i+1),

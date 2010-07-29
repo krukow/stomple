@@ -84,8 +84,8 @@
 			success: function() {//did subscription succeed?
 				console.log("sub ok..");
 			},
-			failure: function() {//did subscription fail?
-				console.log("sub fail");
+			failure: function(reason) {//did subscription fail?
+				console.log(reason);
 			} 
 		  });
 		  document.getElementById('inputText').focus();
