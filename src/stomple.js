@@ -47,10 +47,11 @@
         Stomple,//publicly exported API or 'false' if unsupported.
         emptyFn = function() {},
         consoleAvailable = isHostMethod(globalObject,"console"),
+        logAvailable = consoleAvailable && isHostMethod(globalObject.console,"log"),
         warnAvailable = consoleAvailable && isHostMethod(globalObject.console,"warn"),
         infoAvailable = consoleAvailable && isHostMethod(globalObject.console,"info"),
         trim;
-    if (isHostMethod(globalObject,"WebSocket")) {
+    if (!isHostMethod(globalObject,"WebSocket")) {
         if (warnAvailable) {
             globalObject.console.warn(globalObject.Stomple?"Stomple already defined.":"Stomple: WebSockets not available");
         }
@@ -659,7 +660,7 @@
                         passcode: spec.passcode || this.passcode
                     } 
                 });
-            if (Stomple.debug) {
+            if (Stomple.debug && logAvailable) {
                 console.log(">>>>\n"+f.toString());//TODO: devel only
             }
             this.connectTimeoutId = setTimeout(function(){
@@ -689,7 +690,7 @@
             if (typeof config.beforeSend === 'function') {
                 config.beforeSend(f);
             }
-            if (Stomple.debug) {
+            if (Stomple.debug && logAvailable) {
                 console.log(">>>>\n"+f.toString());//TODO: devel only
             }
                 
@@ -1037,7 +1038,7 @@
                 headers: headers,
                 body: body
             });
-            if (Stomple.debug) {
+            if (Stomple.debug && logAvailable) {
                 console.log("<<<<\n"+f.toString());//TODO: devel only
             }
                 
