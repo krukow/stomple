@@ -34,7 +34,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                 handler: function(msg) {
                     received = msg.body;
                 },
-                scope: this
+                thisObj: this
             });
             
             this.wait(function(){

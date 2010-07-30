@@ -33,7 +33,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                 handler: function(msg) {
                     Y.Assert.fail("received unexpected message on "+this.destination);
                 },
-                scope: this.client
+                thisObj: this.client
             });
             
             this.wait(function(){

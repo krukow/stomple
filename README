@@ -4,6 +4,8 @@ Introduction in blog post:
 
 http://blog.higher-order.net/2010/06/01/stomple-rc1-combining-websockets-and-reliable-messaging/
 
+Note the word: scope is replaced by thisObj to avoid confusion
+
 Quick Demo:
 1) Start hornetq 
 krukow:~/Projects/private/stomple$ ./hornetq/bin/run.sh ./hornetq/examples/jms/stomp-websockets/server0

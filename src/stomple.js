@@ -74,7 +74,7 @@
     if (!Object.create) {
         /**
          * Modified version of Crockford/Cornford/Lasse Reichstein Nielsen's
-         * object function Modified to match EcmaScript 5th edtion Object.create
+         * object function. Modified to match EcmaScript 5th edtion Object.create
          * (no support for setting other properties than value, though).
          * 
          * @see http://www.ecma-international.org/publications/standards/Ecma-262.htm
@@ -270,7 +270,7 @@
         autoConnect: true,
         
         /**
-         * true to have Stomple automatically set a 'content-lenght' 
+         * true to have Stomple automatically set a 'content-length' 
          * Stomp header. Stomple computes this by computing the number of
          * bytes in the UTF-8 encoding of the frame's body.
          */
@@ -315,19 +315,19 @@
         onReceipt: emptyFn,
       
         /**
-         * Low-level callback: called with WebSocket opens.
+         * Low-level callback: called when WebSocket opens.
          */
 		socketOpen: emptyFn,
         /**
-         * Low-level callback: called with WebSocket receives a message.
+         * Low-level callback: called when WebSocket receives a message.
          */
         socketMessage: emptyFn,
         /**
-         * Low-level callback: called with WebSocket closes.
+         * Low-level callback: called when WebSocket closes.
          */
         socketClose: emptyFn,
         /**
-         * Low-level callback: called with WebSocket has an error.
+         * Low-level callback: called when WebSocket has an error.
          */
 		socketError: emptyFn,
         
@@ -372,7 +372,7 @@
          * {
          *  'jms.topic.chat' : [{
          *          handler: function(msg) {...},
-         *          scope: anObject
+         *          thisObj: anObject
          *  }, ... ]
          *  'jms.topic.another': [...]
          * }
@@ -613,7 +613,7 @@
             spec = spec || {};
             var that = this,
                 closefn = function(){that.close();};
-            if (this.connected && this.disconnectOnClose || spec.disconnectOnClose) {
+            if (this.connected && (this.disconnectOnClose || spec.disconnectOnClose)) {
                 this.disconnect({
                     success:closefn,
                     failure: closefn
@@ -652,21 +652,20 @@
          */
         doConnect: function(spec) {
             var that = this,
-                w = this.websocket = new WebSocket(this.url),
+                w = that.websocket = new WebSocket(that.url),
                 f = make_frame({
                     command:"CONNECT",
                     headers: {
-                        login: spec.login || this.login,
-                        passcode: spec.passcode || this.passcode
+                        login: spec.login || that.login,
+                        passcode: spec.passcode || that.passcode
                     } 
                 });
             if (Stomple.debug && logAvailable) {
                 console.log(">>>>\n"+f.toString());//TODO: devel only
             }
-            this.connectTimeoutId = setTimeout(function(){
-                that.connectTimeoutId = null;
-                that.handleConnectFailed({reason: 'timeout', frame: f, websocket: this.websocket});
-            }, spec.timeout || this.timeout);
+            that.connectTimeoutId = setTimeout(function(){
+                that.handleConnectFailed({reason: 'timeout', frame: f, websocket: w});
+            }, spec.timeout || that.timeout);
             
             w.onopen    = function() {that.handleOpen(f, spec);};
             w.onmessage = function(msg) {that.handleMessage(msg);};
@@ -921,14 +920,17 @@
                 clearTimeout(this.connectTimeoutId);
                 this.connectTimeoutId = null;
             }
-            this.connected = false;
-            this.session = null;
-            this.msgid = null;
-            this.transid = null;
             this.connectFailed(info);
             if (this.connectConfig && 
                  typeof this.connectConfig.failure === 'function') {
                  this.connectConfig.failure(info);
+            }
+            this.connected = false;
+            this.session = null;
+            this.msgid = null;
+            this.transid = null;
+            if (this.closeOnError) {
+                this.websocket.close();
             }
         },
         
@@ -1051,7 +1053,7 @@
                     if (subs) {
                         for (i=0,N=subs.length;i<N;i+=1) {
                             sub = subs[i];
-                            sub.handler.call(sub.scope || globalObject,f);
+                            sub.handler.call(sub.thisObj || globalObject,f);
                         }
                     }
                     break;

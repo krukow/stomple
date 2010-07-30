@@ -35,7 +35,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                 handler: function(msg) {
                     received.push(msg.body);
                 },
-                scope: this.client
+                thisObj: this.client
             });
             
             this.wait(function(){
@@ -107,7 +107,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                         }
                         
                     },
-                    scope: this.client
+                    thisObj: this.client
                 });
                 
                 this.wait(function(){
@@ -191,7 +191,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 	                handler: function(msg) {
 	                    received.push(msg.body);
 	                },
-	                scope: this.client
+	                thisObj: this.client
 	            });
             
 		            this.wait(function(){

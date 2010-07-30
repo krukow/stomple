@@ -54,7 +54,7 @@ YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
                         Y.Assert.fail("received "+count+" messages");  
                     }
                 },
-                scope: this
+                thisObj: this
             });
 	        this.wait(function(){
                 Y.Assert.isTrue(ok, "Success was not called within 500 ms.");
