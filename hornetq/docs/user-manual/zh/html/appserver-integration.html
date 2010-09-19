@@ -1,0 +1,393 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;32.&nbsp;Java EE&#21644;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#38598;&#25104;</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.1&#29992;&#25143;&#25163;&#20876;"><link rel="up" href="index.html" title="HornetQ 2.1&#29992;&#25143;&#25163;&#20876;"><link rel="previous" href="security.html" title="Chapter&nbsp;31.&nbsp;&#23433;&#20840;"><link rel="next" href="jms-bridge.html" title="Chapter&nbsp;33.&nbsp;JMS&#26725;&#65288;Bridge&#65289;"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;32.&nbsp;Java EE&#21644;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#38598;&#25104;</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="security.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="jms-bridge.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="appserver-integration"></a>Chapter&nbsp;32.&nbsp;Java EE&#21644;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#38598;&#25104;</h2></div></div><div></div></div><p>HornetQ&#21487;&#20197;&#23481;&#26131;&#22320;&#23433;&#35013;&#21040;JBoss 4&#24212;&#29992;&#26381;&#21153;&#22120;&#21450;&#20854;&#20197;&#19978;&#29256;&#26412;&#12290;&#26377;&#20851;&#23433;&#35013;&#30340;&#35814;&#32454;&#35828;&#26126;&#35831;&#21442;&#38405;&#24555;&#36895;&#25351;&#21335;&#12290;</p><p>HornetQ&#25552;&#20379;&#20102;&#19968;&#20010;JCA&#36866;&#37197;&#22120;&#65292;&#20351;&#24471;&#23427;&#36824;&#21487;&#20197;&#19982;&#20854;&#23427;JEE&#20860;&#23481;&#30340;&#24212;&#29992;&#26381;&#21153;&#22120;&#38598;&#25104;&#12290;&#35831;&#21442;&#38405;&#20854;&#23427;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;
+          &#26377;&#20851;JCA&#36866;&#37197;&#22120;&#38598;&#25104;&#30340;&#35828;&#26126;&#26469;&#25805;&#20316;&#12290;</p><p>JCA&#36866;&#37197;&#22120;&#30340;&#20316;&#29992;&#26159;&#25511;&#21046;&#28040;&#24687;&#27969;&#20837;&#21040;&#28040;&#24687;Bean&#65288;MDB&#65289;&#65292;&#24182;&#25511;&#21046;&#28040;&#24687;&#20174;&#21508;&#31181;JEE&#27169;&#22359;&#20013;&#21457;&#20986;&#65288;&#22914;EJB&#21644;Servlet&#65289;&#12290;</p><p>&#26412;&#31456;&#35762;&#36848;&#36825;&#20123;JEE&#27169;&#22359;&#37197;&#32622;HornetQ&#30340;&#22522;&#26412;&#20449;&#24687;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e6940"></a>32.1.&nbsp;&#37197;&#32622;&#28040;&#24687;Bean</h2></div></div><div></div></div><p>&#20351;&#29992;HornetQ&#21521;MDB&#20256;&#36882;&#28040;&#24687;&#65292;&#38656;&#35201;&#22312;&#25991;&#20214;<tt class="literal">ra.xml</tt>&#20013;&#37197;&#32622;JCA&#36866;&#37197;&#22120;&#12290;&#35813;&#25991;&#20214;&#22312;
+            <tt class="literal">jms-ra.rar</tt>&#25991;&#20214;&#20013;&#12290;&#40664;&#35748;&#37197;&#32622;&#19979;HornetQ&#26381;&#21153;&#20351;&#29992;InVm&#36830;&#25509;&#22120;&#25509;&#25910;&#28040;&#24687;&#12290;&#22312;&#26412;&#31456;
+            &#21518;&#38754;&#21015;&#20986;&#20102;&#21487;&#37197;&#32622;&#30340;&#36873;&#39033;&#12290;</p><p>&#25152;&#26377;MDB&#37117;&#38656;&#35201;&#26377;&#30446;&#26631;&#31867;&#22411;&#21644;&#30446;&#26631;&#30340;&#30456;&#20851;&#37197;&#32622;&#12290;&#19979;&#38754;&#23601;&#26159;&#19968;&#20010;&#20351;&#29992;annotation&#37197;&#32622;MDB&#30340;&#20363;&#23376;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDBExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue")
+                     })
+@ResourceAdapter("hornetq-ra.rar")
+public class MDBExample implements MessageListener
+{
+   public void onMessage(Message message)...
+}</pre><p>&#19978;&#20363;&#20013;&#37197;&#32622;&#20102;MDB&#20174;&#19968;&#20010;&#38431;&#21015;&#20013;&#25509;&#25910;&#28040;&#24687;&#65292;&#23427;&#30340;JNDI&#32465;&#23450;&#21517;&#20026;<tt class="literal">queue/testQueue</tt>&#12290;
+            &#36825;&#20010;&#38431;&#21015;&#24517;&#39035;&#20107;&#20808;&#22312;HornetQ&#26381;&#21153;&#22120;&#37197;&#32622;&#25991;&#20214;&#20013;&#37197;&#32622;&#24182;&#37096;&#32626;&#22909;&#30340;&#12290;</p><p><tt class="literal">ResourceAdapter</tt> annotation&#29992;&#26469;&#25351;&#20986;&#20351;&#29992;&#21738;&#20010;&#36866;&#37197;&#22120;&#12290;&#35201;&#20351;&#29992;&#23427;&#24517;&#39035;&#35201;&#24341;&#20837;
+            <tt class="literal">org.jboss.ejb3.annotation.ResourceAdapter</tt> &#65288;JBoss AS 5.x&#25110;&#20197;&#19978;&#65289;&#12290;
+            &#36825;&#20010;&#31867;&#22312;
+            <tt class="literal">jboss-ejb3-ext-api.jar</tt>&#25991;&#20214;&#20013;&#12290;&#35813;&#25991;&#20214;&#21487;&#20197;&#22312;JBoss&#30340;repository&#20013;&#25214;&#21040;&#12290;
+            &#21478;&#22806;&#19968;&#20010;&#26041;&#27861;&#26159;&#20351;&#29992;&#37096;&#32626;&#25551;&#36848;&#25991;&#20214;&#65288;deployment descriptor&#65289;&#65292;&#21363;&#22312;&#25991;&#20214;<tt class="literal">jboss.xml</tt>&#20013;&#21152;&#20837;&#31867;&#20284;&#20197;&#19979;&#30340;&#20869;&#23481;&#65306;
+</p><pre class="programlisting">&lt;message-driven&gt;
+   &lt;ejb-name&gt;ExampleMDB&lt;/ejb-name&gt;
+   &lt;resource-adapter-name&gt;hornetq-ra.rar&lt;/resource-adapter-name&gt;
+&lt;/message-driven&gt;
+</pre><p>&#20320;&#36824;&#21487;&#20197;&#23558;hornetq-ra.rar&#25913;&#21517;&#20026;jms-ra.rar&#32780;&#19981;&#38656;&#35201;&#20219;&#20309;annotation&#25110;&#39069;&#22806;&#30340;&#37096;&#32626;&#25551;&#36848;&#20449;&#24687;&#12290;&#20294;&#26159;&#20320;&#38656;&#35201;
+            &#32534;&#36753;<tt class="literal">jms-ds.xml</tt>&#25991;&#20214;&#65292;&#23558;&#20854;&#20013;&#30340;<tt class="literal">rar-name</tt>&#39033;&#25913;&#25104;&#30456;&#24212;&#30340;&#20540;&#12290;</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>HornetQ&#26159;JBoss AS 6&#40664;&#35748;&#30340;JMS&#25552;&#20379;&#32773;&#12290;&#20174;&#36825;&#20010;&#29256;&#26412;&#24320;&#22987;HornetQ&#30340;&#36164;&#28304;&#36866;&#37197;&#22120;&#21517;&#23383;&#26159;
+               <tt class="literal">jms-ra.rar</tt>&#65292;&#24182;&#19988;&#20320;&#19981;&#38656;&#35201;&#22312;MDB&#30340;annotation&#20013;&#25351;&#23450;&#23427;&#12290;</p></div><p>HornetQ&#21457;&#24067;&#21253;&#20013;&#30340;&#25152;&#26377;&#20363;&#23376;&#37117;&#20351;&#29992;annotation&#26041;&#27861;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e6990"></a>32.1.1.&nbsp;&#20351;&#29992;&#23481;&#22120;&#31649;&#29702;&#20107;&#21153;&#65288;CMT&#65289;</h3></div></div><div></div></div><p>&#24403;MDB&#20351;&#29992;&#23481;&#22120;&#31649;&#29702;&#20107;&#21153;&#26102;&#65292;&#28040;&#24687;&#30340;&#20256;&#36882;&#34987;&#21253;&#21547;&#22312;&#19968;&#20010;JTA&#20107;&#21153;&#20013;&#12290;&#20107;&#21153;&#30340;&#25552;&#20132;&#19982;&#22238;&#28378;&#26159;&#30001;&#23481;&#22120;&#26469;&#25511;&#21046;&#30340;&#12290;&#22914;&#26524;&#20107;&#21153;
+                &#34987;&#22238;&#28378;&#65292;&#28040;&#24687;&#20256;&#36882;&#20250;&#36827;&#34892;&#30456;&#24212;&#30340;&#22788;&#29702;&#65288;&#40664;&#35748;&#26159;&#37325;&#26032;&#20256;&#36882;&#28040;&#24687;&#65292;&#22914;&#26524;&#37325;&#26032;&#20256;&#36882;&#27425;&#25968;&#36229;&#36807;10&#27425;&#65292;&#28040;&#24687;&#23601;&#34987;&#21457;&#24448;DLQ&#65289;&#12290;&#20351;&#29992;
+                annotation&#37197;&#32622;&#22914;&#19979;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDB_CMP_TxRequiredExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue")
+                     })
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
+@TransactionAttribute(value= TransactionAttributeType.REQUIRED)
+@ResourceAdapter("hornetq-ra.rar")
+public class MDB_CMP_TxRequiredExample implements MessageListener
+{
+   public void onMessage(Message message)...
+}</pre><p><tt class="literal">TransactionManagement</tt> &#34920;&#31034;&#36825;&#20010;MDB&#20351;&#29992;&#23481;&#22120;&#31649;&#29702;&#25345;&#20037;&#24615;&#12290;
+                <tt class="literal">TransactionAttribute</tt> &#34920;&#31034;&#36825;&#20010;MDB&#35201;&#27714;JTA&#20107;&#21153;&#12290;&#27880;&#24847;&#36825;&#20010;annotation&#30340;
+                &#21478;&#22806;&#21807;&#19968;&#30340;&#21512;&#27861;&#20540;&#26159;<tt class="literal">TransactionAttributeType.NOT_SUPPORTED</tt>&#65292;&#23427;&#34920;&#31034;
+                MDB&#19981;&#38656;&#35201;JTA&#20107;&#21153;&#25903;&#25345;&#12290;</p><p>&#22914;&#26524;&#35201;&#22238;&#28378;&#20107;&#21153;&#65292;&#21487;&#20197;&#35843;&#29992;<tt class="literal">MessageDrivenContext</tt>&#30340;
+                <tt class="literal">setRollbackOnly</tt>&#26041;&#27861;&#12290;&#22914;&#19979;&#38754;&#30340;&#20195;&#30721;&#25152;&#31034;&#65306;</p><pre class="programlisting">   @Resource
+   MessageDrivenContextContext ctx;
+
+   public void onMessage(Message message)
+   {
+      try
+      {
+         //something here fails
+      }
+      catch (Exception e)
+      {
+         ctx.setRollbackOnly();
+      }
+   }</pre><p>&#22914;&#26524;&#20320;&#19981;&#38656;&#35201;&#20351;&#29992;XA&#20107;&#21153;&#65292;&#20320;&#21487;&#20197;&#29992;&#19968;&#30456;&#26412;&#22320;&#30340;&#20107;&#21153;&#26469;&#20195;&#26367;&#65288;&#27604;&#22914;&#20320;&#21482;&#26377;&#19968;&#20010;JMS&#36164;&#28304;&#65289;&#12290;
+                &#22914;&#19979;&#25152;&#31034;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDB_CMP_TxLocalExample",
+               activationConfig =
+                     {
+                           @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                           @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue"),
+                           @ActivationConfigProperty(propertyName = "useLocalTx", propertyValue = "true")
+                     })
+@TransactionManagement(value = TransactionManagementType.CONTAINER)
+@TransactionAttribute(value = TransactionAttributeType.NOT_SUPPORTED)
+@ResourceAdapter("hornetq-ra.rar")
+public class MDB_CMP_TxLocalExample implements MessageListener
+{
+   public void onMessage(Message message)...
+}</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7021"></a>32.1.2.&nbsp;&#20351;&#29992;Bean&#31649;&#29702;&#20107;&#21153;&#65288;BMT&#65289;</h3></div></div><div></div></div><p>&#28040;&#24687;Bean&#21487;&#20197;&#36890;&#36807;&#37197;&#32622;&#20351;&#29992;Bean&#31649;&#29702;&#30340;&#20107;&#21153;&#65288;BMT&#65289;&#12290;&#22312;&#31181;&#24773;&#20917;&#19979;&#20250;&#21019;&#24314;&#19968;&#20010;&#29992;&#25143;&#20107;&#21153;
+                &#65288;User Transaction&#65289;&#12290;&#22914;&#19979;&#25152;&#31034;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDB_BMPExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue"),
+                        @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Dups-ok-acknowledge")
+                     })
+@TransactionManagement(value= TransactionManagementType.BEAN)
+@ResourceAdapter("hornetq-ra.rar")
+public class MDB_BMPExample implements MessageListener
+{
+   public void onMessage(Message message)
+}</pre><p>&#20351;&#29992;BMT&#26102;&#65292;&#28040;&#24687;&#30340;&#20256;&#36882;&#22312;&#29992;&#25143;&#20107;&#21153;&#30340;&#33539;&#22260;&#20043;&#22806;&#65292;&#23427;&#30340;&#36890;&#30693;&#27169;&#24335;&#30001;<tt class="literal">acknowledgeMode</tt>&#21442;&#25968;&#20915;&#23450;&#12290;
+                &#35813;&#21442;&#25968;&#26377;&#20004;&#20010;&#21512;&#27861;&#30340;&#20540;&#65292;&#21363;<tt class="literal">Auto-acknowledge</tt>&#21644;<tt class="literal">Dups-ok-acknowledge</tt>&#12290;&#35831;&#27880;&#24847;&#65292;&#30001;&#20110;&#28040;&#24687;&#30340;&#20256;&#36882;&#22312;&#20107;&#21153;&#20043;&#22806;&#65292;&#22312;MDB&#20013;&#22914;&#26524;&#21457;&#29983;&#38169;&#35823;&#28040;&#24687;
+                &#26159;&#19981;&#20250;&#37325;&#26032;&#20256;&#36882;&#30340;&#12290;</p><p>&#29992;&#25143;&#21487;&#20197;&#20687;&#22914;&#19979;&#25152;&#31034;&#25511;&#21046;&#20107;&#21153;&#30340;&#29983;&#21629;&#21608;&#26399;&#65306;</p><pre class="programlisting">   @Resource
+   MessageDrivenContext ctx;
+
+   public void onMessage(Message message)
+   {
+      UserTransaction tx;
+      try
+      {
+         TextMessage textMessage = (TextMessage)message;
+
+         String text = textMessage.getText();
+
+         UserTransaction tx = ctx.getUserTransaction();
+
+         tx.begin();
+         
+         //do some stuff within the transaction
+
+         tx.commit();
+
+      }
+      catch (Exception e)
+      {
+         tx.rollback();
+      }
+   }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7043"></a>32.1.3.&nbsp;&#22312;MDB&#20013;&#20351;&#29992;&#36873;&#25321;&#22120;</h3></div></div><div></div></div><p>MDB&#21487;&#20197;&#37197;&#32622;&#28040;&#24687;&#36873;&#25321;&#22120;&#12290;&#22914;&#19979;&#25152;&#31034;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDBMessageSelectorExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue"),
+                        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "color = 'RED'")
+                     })
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
+@TransactionAttribute(value= TransactionAttributeType.REQUIRED)
+@ResourceAdapter("hornetq-ra.rar")
+public class MDBMessageSelectorExample implements MessageListener
+{
+   public void onMessage(Message message)....
+}</pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e7050"></a>32.2.&nbsp;&#22312;JEE&#27169;&#22359;&#20869;&#21457;&#36865;&#28040;&#24687;</h2></div></div><div></div></div><p>JCA&#36866;&#37197;&#22120;&#25903;&#25345;&#21457;&#36865;&#28040;&#24687;&#12290;&#36830;&#25509;&#24037;&#21378;&#30340;&#40664;&#35748;&#37197;&#32622;&#22312;<tt class="literal">jms-ds.xml</tt>&#25991;&#20214;&#20013;&#65292;&#23545;&#24212;&#30340;JNDI&#21517;&#23383;&#26159;
+            <tt class="literal">java:/JmsXA</tt>&#12290;&#22312;JEE&#20013;&#20351;&#29992;&#23427;&#21457;&#36865;&#28040;&#24687;&#23558;&#20316;&#20026;JTA&#20107;&#21153;&#30340;&#19968;&#37096;&#20998;&#26469;&#23545;&#24453;&#12290;</p><p>&#22914;&#26524;&#28040;&#24687;&#21457;&#36865;&#22833;&#36133;&#65292;&#25972;&#20010;&#20107;&#21153;&#23558;&#22238;&#28378;&#65292;&#28040;&#24687;&#20250;&#34987;&#37325;&#26032;&#21457;&#36865;&#12290;&#19979;&#38754;&#26159;&#19968;&#20010;MDB&#21457;&#36865;&#28040;&#24687;&#30340;&#20363;&#23376;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDBMessageSendTxExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue")
+                     })
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
+@TransactionAttribute(value= TransactionAttributeType.REQUIRED)
+@ResourceAdapter("hornetq-ra.rar")
+public class MDBMessageSendTxExample implements MessageListener
+{
+   @Resource(mappedName = "java:/JmsXA")
+   ConnectionFactory connectionFactory;
+
+   @Resource(mappedName = "queue/replyQueue")
+   Queue replyQueue;
+
+   public void onMessage(Message message)
+   {
+      Connection conn = null;
+      try
+      {
+         //Step 9. We know the client is sending a text message so we cast
+         TextMessage textMessage = (TextMessage)message;
+
+         //Step 10. get the text from the message.
+         String text = textMessage.getText();
+
+         System.out.println("message " + text);
+
+         conn = connectionFactory.createConnection();
+
+         Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+         MessageProducer producer = sess.createProducer(replyQueue);
+
+         producer.send(sess.createTextMessage("this is a reply"));
+
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      finally
+      {
+         if(conn != null)
+         {
+            try
+            {
+               conn.close();
+            }
+            catch (JMSException e)
+            { 
+            }
+         }
+      }
+   }
+   }</pre><p>&#22312;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;EJB&#65288;&#21253;&#25324;&#20250;&#35805;Bean, &#23454;&#20307;Bean&#21644;&#28040;&#24687;Bean&#65289;&#12289;Servlet&#65288;&#21253;&#25324;jsp&#65289;&#25105;&#23450;&#21046;&#30340;MBean&#20013;
+            &#37117;&#21487;&#20197;&#20351;&#29992;JMS&#30340;JCA&#36866;&#37197;&#22120;&#26469;&#21457;&#36865;&#28040;&#24687;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e7067"></a>32.3.&nbsp;MDB&#19982;&#25509;&#25910;&#27744;&#30340;&#22823;&#23567;</h2></div></div><div></div></div><p>&#21253;&#25324;JBoss&#22312;&#20869;&#30340;&#32477;&#22823;&#22810;&#25968;&#24212;&#29992;&#26381;&#21153;&#22120;&#20801;&#35768;&#29992;&#25143;&#23450;&#20041;&#19968;&#20010;&#27744;&#20013;&#30340;MDB&#25968;&#37327;&#12290;&#22312;JBoss&#20013;&#36825;&#20010;&#21442;&#25968;&#21517;&#26159;<tt class="literal">MaxPoolSize</tt>&#65292;&#23427;&#22312;&#25991;&#20214;
+         ejb3-interceptors-aop.xml&#20013;&#37197;&#32622;&#12290;&#36825;&#20010;&#21442;&#25968;&#19981;&#24433;&#21709;&#23454;&#38469;&#21019;&#24314;&#30340;&#20250;&#35805;&#65295;&#25509;&#25910;&#32773;&#30340;&#25968;&#37327;&#12290;&#36164;&#28304;&#36866;&#37197;&#22120;&#19981;&#30693;&#36947;MDB&#30340;&#20855;&#20307;&#23454;&#29616;&#12290;&#25152;&#20197;&#21363;&#20351;&#20320;&#35774;&#32622;MDB&#27744;&#22312;&#22823;&#23567;
+         &#20026;1&#65292;&#20173;&#28982;&#20250;&#26377;15&#20010;&#20250;&#35805;&#65295;&#25509;&#25910;&#32773;&#34987;&#21019;&#24314;&#65288;&#40664;&#35748;&#20540;&#65289;&#12290;&#22914;&#26524;&#20320;&#24819;&#25913;&#21464;&#20250;&#35805;&#65295;&#25509;&#25910;&#32773;&#21019;&#24314;&#30340;&#25968;&#37327;&#65292;&#20320;&#21487;&#20197;&#36890;&#36807;&#35774;&#32622;&#36164;&#28304;&#36866;&#37197;&#22120;&#30340;&#21442;&#25968;
+         <tt class="literal">maxSession</tt>&#23454;&#29616;&#12290;&#20063;&#21487;&#20197;&#36890;&#36807;&#35774;&#32622;MDB&#30340;&#28608;&#27963;&#37197;&#32622;&#21442;&#25968;&#26469;&#23436;&#25104;&#65306;</p><pre class="programlisting">@MessageDriven(name = "MDBMessageSendTxExample",
+               activationConfig =
+                     {
+                        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+                        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/testQueue"),
+                        @ActivationConfigProperty(propertyName = "maxSession", propertyValue = "1")
+                     })
+@TransactionManagement(value= TransactionManagementType.CONTAINER)
+@TransactionAttribute(value= TransactionAttributeType.REQUIRED)
+@ResourceAdapter("hornetq-ra.rar")
+public class MyMDB implements MessageListener
+{ ....}
+      </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e7080"></a>32.4.&nbsp;&#37197;&#32622;JCA&#36866;&#37197;&#22120;</h2></div></div><div></div></div><p>&#36890;&#36807;JCA&#36866;&#37197;&#22120;&#21487;&#20197;&#23558;HornetQ&#38598;&#25104;&#21040;JEE&#20860;&#23481;&#30340;&#27169;&#22359;&#20013;&#65292;&#22914;MDB&#21644;EJB&#12290;&#23427;&#30340;&#37197;&#32622;&#20915;&#23450;&#20102;&#36825;&#20123;&#27169;&#22359;&#22914;&#20309;&#25509;&#25910;&#21644;&#21457;&#36865;&#28040;&#24687;&#12290;</p><p>HornetQ&#30340;JCA&#36866;&#37197;&#22120;&#26159;&#36890;&#36807;<tt class="literal">jms-ra.rar</tt>&#37096;&#32626;&#30340;&#12290;&#23427;&#30340;&#37197;&#32622;&#25991;&#20214;&#20013;&#20854;&#20013;&#30340;
+              <tt class="literal">META-INF/ra.xml</tt>&#12290;</p><p>&#19979;&#38754;&#26159;&#23427;&#30340;&#20855;&#20307;&#37197;&#32622;&#20869;&#23481;&#65306;</p><pre class="programlisting">&lt;resourceadapter&gt;
+      &lt;resourceadapter-class&gt;org.hornetq.ra.HornetQResourceAdapter&lt;/resourceadapter-class&gt;
+      &lt;config-property&gt;
+         &lt;description&gt;The transport type&lt;/description&gt;
+         &lt;config-property-name&gt;ConnectorClassName&lt;/config-property-name&gt;
+         &lt;config-property-type&gt;java.lang.String&lt;/config-property-type&gt;
+         &lt;config-property-value&gt;org.hornetq.core.remoting.impl.invm.InVMConnectorF
+         actory&lt;/config-property-value&gt;
+      &lt;/config-property&gt;
+      &lt;config-property&gt;
+         &lt;description&gt;The transport configuration. These values must be in the form of key=val;key=val;&lt;/description&gt;
+         &lt;config-property-name&gt;ConnectionParameters&lt;/config-property-name&gt;
+         &lt;config-property-type&gt;java.lang.String&lt;/config-property-type&gt;
+         &lt;config-property-value&gt;server-id=0&lt;/config-property-value&gt;
+      &lt;/config-property&gt;
+
+      &lt;outbound-resourceadapter&gt;
+         &lt;connection-definition&gt;
+            &lt;managedconnectionfactory-class&gt;org.hornetq.ra.HornetQRAManagedConnection
+            Factory&lt;/managedconnectionfactory-class&gt;
+
+            &lt;config-property&gt;
+               &lt;description&gt;The default session type&lt;/description&gt;
+               &lt;config-property-name&gt;SessionDefaultType&lt;/config-property-name&gt;
+               &lt;config-property-type&gt;java.lang.String&lt;/config-property-type&gt;
+               &lt;config-property-value&gt;javax.jms.Queue&lt;/config-property-value&gt;
+            &lt;/config-property&gt;
+            &lt;config-property&gt;
+               &lt;description&gt;Try to obtain a lock within specified number of seconds; less
+               than or equal to 0 disable this functionality&lt;/description&gt;
+               &lt;config-property-name&gt;UseTryLock&lt;/config-property-name&gt;
+               &lt;config-property-type&gt;java.lang.Integer&lt;/config-property-type&gt;
+               &lt;config-property-value&gt;0&lt;/config-property-value&gt;
+            &lt;/config-property&gt;
+
+            &lt;connectionfactory-interface&gt;org.hornetq.ra.HornetQRAConnectionFactory
+            &lt;/connectionfactory-interface&gt;
+            &lt;connectionfactororg.hornetq.ra.HornetQConnectionFactoryImplonFactoryImpl
+            &lt;/connectionfactory-impl-class&gt;
+            &lt;connection-interface&gt;javax.jms.Session&lt;/connection-interface&gt;
+            &lt;connection-impl-class&gt;org.hornetq.ra.HornetQRASession
+            &lt;/connection-impl-class&gt;
+         &lt;/connection-definition&gt;
+         &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
+         &lt;authentication-mechanism&gt;
+            &lt;authentication-mechanism-type&gt;BasicPassword
+            &lt;/authentication-mechanism-type&gt;
+            &lt;credential-interface&gt;javax.resource.spi.security.PasswordCredential
+            &lt;/credential-interface&gt;
+         &lt;/authentication-mechanism&gt;
+         &lt;reauthentication-support&gt;false&lt;/reauthentication-support&gt;
+      &lt;/outbound-resourceadapter&gt;
+
+      &lt;inbound-resourceadapter&gt;
+         &lt;messageadapter&gt;
+            &lt;messagelistener&gt;
+               &lt;messagelistener-type&gt;javax.jms.MessageListener&lt;/messagelistener-type&gt;
+               &lt;activationspec&gt;
+                  &lt;activationspec-class&gt;org.hornetq.ra.inflow.HornetQActivationSpec
+                  &lt;/activationspec-class&gt;
+                  &lt;required-config-property&gt;
+                      &lt;config-property-name&gt;destination&lt;/config-property-name&gt;
+                  &lt;/required-config-property&gt;
+               &lt;/activationspec&gt;
+            &lt;/messagelistener&gt;
+         &lt;/messageadapter&gt;
+      &lt;/inbound-resourceadapter&gt;
+
+   &lt;/resourceadapter&gt;</pre><p>&#25972;&#20010;&#37197;&#32622;&#21487;&#20197;&#20998;&#20026;&#19977;&#20010;&#20027;&#35201;&#37096;&#20998;</p><div class="orderedlist"><ol type="1"><li><p>&#36866;&#37197;&#22120;&#30340;&#20840;&#23616;&#21442;&#25968;</p></li><li><p>&#36866;&#37197;&#22120;&#22806;&#37096;&#65288;outbound&#65289;&#37197;&#32622;&#12290;&#29992;&#20110;&#22312;JEE&#29615;&#22659;&#20013;&#21019;&#24314;JMS&#36164;&#28304;&#12290;</p></li><li><p>&#36866;&#37197;&#22120;&#20869;&#37096;&#65288;inbound&#65289;&#37197;&#32622;&#12290;&#29992;&#20110;&#25511;&#21046;MDB&#30340;&#28040;&#24687;&#25509;&#25910;&#12290; </p></li></ol></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7109"></a>32.4.1.&nbsp;&#36866;&#37197;&#22120;&#30340;&#20840;&#23616;&#21442;&#25968;</h3></div></div><div></div></div><p>&#39318;&#20808;&#30475;&#21040;&#30340;&#31532;&#19968;&#20010;&#21442;&#25968;&#26159;<tt class="literal">resourceadapter-class</tt>&#12290;&#36825;&#26159;HornetQ
+                &#30340;&#36866;&#37197;&#22120;&#31867;&#12290;&#27492;&#21442;&#25968;&#19981;&#21487;&#26356;&#25913;&#12290;</p><p>&#22312;&#27492;&#20043;&#21518;&#26159;&#21487;&#37197;&#32622;&#30340;&#21442;&#25968;&#12290;&#21069;&#20004;&#20010;&#37197;&#32622;&#36866;&#37197;&#22120;&#25152;&#20351;&#29992;&#30340;&#20256;&#36755;&#12290;&#20854;&#20313;&#30340;&#29992;&#26469;&#37197;&#32622;&#36830;&#25509;&#24037;&#21378;&#12290;</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>&#25152;&#26377;&#36830;&#25509;&#24037;&#21378;&#30340;&#21442;&#25968;&#22312;&#27809;&#26377;&#23450;&#20041;&#26102;&#20351;&#29992;&#40664;&#35748;&#20540;&#12290;&#21442;&#25968;<tt class="literal">reconnectAttempts</tt>
+                        &#30340;&#40664;&#35748;&#20540;&#21462;-1&#65292;&#34920;&#31034;&#22914;&#26524;&#36830;&#25509;&#22833;&#36133;&#65292;HornetQ&#20250;&#19981;&#20572;&#22320;&#23581;&#35797;&#37325;&#26032;&#36830;&#25509;&#12290;&#36825;&#20010;&#21442;&#25968;&#21482;&#36866;&#29992;&#20110;&#21019;&#24314;&#36828;&#31243;
+                        &#36830;&#25509;&#30340;&#24773;&#20917;&#12290;&#22914;&#26524;&#26159;InVm&#36830;&#25509;&#22120;&#65292;&#21017;&#27704;&#36828;&#19981;&#21487;&#33021;&#21457;&#29983;&#36830;&#25509;&#25925;&#38556;&#12290;</p></div><p>&#19979;&#38754;&#32473;&#20986;&#20102;&#27599;&#20010;&#21442;&#25968;&#30340;&#35828;&#26126;&#65306;</p><div class="table"><a name="d0e7127"></a><p class="title"><b>Table&nbsp;32.1.&nbsp;&#20840;&#23616;&#37197;&#32622;&#21442;&#25968;</b></p><table summary="&#20840;&#23616;&#37197;&#32622;&#21442;&#25968;" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>&#21442;&#25968;&#21517;</th><th>&#21442;&#25968;&#31867;&#22411;</th><th>&#21442;&#25968;&#35828;&#26126;</th></tr></thead><tbody><tr><td>ConnectorClassName</td><td>String</td><td>&#36830;&#25509;&#22120;&#30340;&#31867;&#21517;&#65292;&#21442;&#35265; <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;&#20256;&#36755;&#23618;&#30340;&#37197;&#32622;">Chapter&nbsp;16, <i>&#20256;&#36755;&#23618;&#30340;&#37197;&#32622;</i></a></td></tr><tr><td>ConnectionParameters</td><td>String</td><td>&#20256;&#36755;&#37197;&#32622;&#21442;&#25968;&#12290;&#23427;&#30340;&#20540;&#24517;&#39035;&#26159;&#37319;&#29992;
+                                <tt class="literal">key1=val1;key2=val2;</tt>&#30340;&#24418;&#24335;&#12290;&#19981;&#21516;&#36830;&#25509;&#22120;&#26377;&#19981;&#21516;&#30340;&#21442;&#25968;&#12290;</td></tr><tr><td>useLocalTx</td><td>boolean</td><td>&#35774;&#20026;True&#65292;&#21017;&#36827;&#34892;&#26412;&#22320;&#20107;&#21153;&#20248;&#21270;&#12290;</td></tr><tr><td>UserName</td><td>String</td><td>&#29992;&#20110;&#21019;&#24314;&#36830;&#25509;&#26102;&#20351;&#29992;&#30340;&#29992;&#25143;&#21517;</td></tr><tr><td>Password</td><td>String</td><td>&#29992;&#20110;&#21019;&#24314;&#36830;&#25509;&#26102;&#20351;&#29992;&#30340;&#29992;&#25143;&#23494;&#30721;</td></tr><tr><td>BackupConnectorClassName</td><td>String</td><td>&#21457;&#29983;&#25925;&#38556;&#26159;&#20351;&#29992;&#30340;&#22791;&#20221;&#20256;&#36755;</td></tr><tr><td>BackupConnectionParameters</td><td>String</td><td>&#22791;&#20221;&#20256;&#36755;&#30340;&#37197;&#32622;&#21442;&#25968;</td></tr><tr><td><a href="configuration-index.html#configuration.discovery-group.group-address">DiscoveryAddress</a></td><td>String</td><td>&#26381;&#21153;&#22120;&#33258;&#21160;&#26816;&#27979;&#25152;&#20351;&#29992;&#30340;&#21457;&#29616;&#32452;&#65288;discovery group&#65289;&#22320;&#22336;</td></tr><tr><td><a href="configuration-index.html#configuration.discovery-group.group-port">DiscoveryPort</a></td><td>Integer</td><td>&#26816;&#27979;&#25152;&#20351;&#29992;&#30340;&#31471;&#21475;&#21495;</td></tr><tr><td><a href="configuration-index.html#configuration.discovery-group.refresh-timeout">DiscoveryRefreshTimeout</a></td><td>Long</td><td>&#21047;&#26032;&#30340;&#26102;&#38388;&#65288;timeout&#65289;&#12290;&#21333;&#20301;&#20026;&#27627;&#31186;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.discovery-initial-wait-timeout">
+                                  DiscoveryInitialWaitTimeout
+                               </a></td><td>Long</td><td>&#26816;&#27979;&#20043;&#21069;&#25152;&#38656;&#31561;&#24453;&#30340;&#26102;&#38388;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.connection-load-balancing-policy-class-name">
+                                  ConnectionLoadBalancingPolicyClassName</a></td><td>String</td><td>&#36127;&#36733;&#22343;&#34913;&#31574;&#30053;&#20351;&#29992;&#30340;&#31867;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.discovery-initial-wait-timeout">
+                                  DiscoveryInitialWaitTimeout
+                               </a></td><td>Long</td><td>&#21521;&#26381;&#21153;&#22120;&#21457;&#36865;ping&#30340;&#21608;&#26399;&#65292;&#21333;&#20301;&#27627;&#31186;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.connection-ttl">ConnectionTTL</a></td><td>Long</td><td>&#36830;&#25509;&#30340;&#23384;&#27963;&#26102;&#38388;&#65288;TTL&#65289;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.call-timeout">CallTimeout</a></td><td>Long</td><td>&#27599;&#20010;&#25968;&#25454;&#21253;&#30340;&#35843;&#29992;&#36229;&#26102;&#12290;&#21333;&#20301;&#27627;&#31186;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.dups-ok-batch-size">DupsOKBatchSize</a></td><td>Integer</td><td>Dups OK&#30340;&#24773;&#20917;&#19979;&#28040;&#24687;&#25209;&#37327;&#30340;&#22823;&#23567;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.transaction-batch-size">TransactionBatchSize</a></td><td>Integer</td><td>&#22312;&#20107;&#21153;&#20013;&#21457;&#36865;&#28040;&#24687;&#30340;&#25209;&#37327;&#22823;&#23567;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.consumer-window-size">ConsumerWindowSize</a></td><td>Integer</td><td>&#25509;&#25910;&#32773;&#20869;&#37096;&#32531;&#23384;&#30340;&#31383;&#21475;&#22823;&#23567;</td></tr></tbody></table></div><p>&#25509;&#19978;&#39029;..</p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><tbody><tr><td><a href="configuration-index.html#configuration.connection-factory.consumer-max-rate">ConsumerMaxRate</a></td><td>Integer</td><td>&#25509;&#25910;&#32773;&#25509;&#25910;&#28040;&#24687;&#30340;&#26368;&#22823;&#36895;&#24230;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.confirmation-window-size">ConfirmationWindowSize</a></td><td>Integer</td><td>&#29992;&#20110;&#30830;&#35748;&#30340;&#31383;&#21475;&#22823;&#23567;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.producer-max-rate">ProducerMaxRate</a></td><td>Integer</td><td>&#21457;&#36865;&#32773;&#21457;&#36865;&#28040;&#24687;&#30340;&#26368;&#22823;&#36895;&#24230;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.min-large-message-size">MinLargeMessageSize</a></td><td>Integer</td><td>&#22823;&#28040;&#24687;&#30340;&#26368;&#23567;&#25968;&#20540;&#65292;&#21333;&#20301;&#23383;&#33410;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.block-on-acknowledge">BlockOnAcknowledge</a></td><td>Boolean</td><td>&#22914;&#26524;&#20026;true&#65292;&#34920;&#31034;&#20197;&#38459;&#22622;&#26041;&#27861;&#21457;&#36865;&#28040;&#24687;&#36890;&#30693;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.block-on-non-durable-send">BlockOnNonDurableSend</a></td><td>Boolean</td><td>&#22914;&#26524;&#20026;true&#65292;&#34920;&#31034;&#20197;&#38459;&#22622;&#26041;&#24335;&#21457;&#36865;&#38750;&#25345;&#20037;&#28040;&#24687;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.block-on-durable-send">BlockOnDurableSend</a></td><td>Boolean</td><td>&#22914;&#26524;&#20026;true&#65292;&#34920;&#31034;&#20197;&#38459;&#22622;&#26041;&#24335;&#21457;&#36865;&#25345;&#20037;&#28040;&#24687;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.auto-group">AutoGroup</a></td><td>Boolean</td><td>&#22914;&#26524;&#20026;true&#65292;&#34920;&#31034;&#33258;&#21160;&#28040;&#24687;&#20998;&#32452;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.pre-acknowledge">PreAcknowledge</a></td><td>Boolean</td><td>&#20915;&#23450;&#26159;&#21542;&#36827;&#34892;&#28040;&#24687;&#30340;&#39044;&#20808;&#36890;&#30693;&#65288;pre-acknowledge&#65289;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.reconnect-attempts">ReconnectAttempts</a></td><td>Integer</td><td>&#36830;&#25509;&#37325;&#35797;&#30340;&#27425;&#25968;&#65292;&#40664;&#35748;&#20026; -1</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.retry-interval">RetryInterval</a></td><td>Long</td><td>&#27599;&#27425;&#36830;&#25509;&#37325;&#35797;&#21069;&#31561;&#24453;&#30340;&#26102;&#38388;&#65292;&#21333;&#20301;&#27627;&#31186;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.retry-interval-multiplier">RetryIntervalMultiplier</a></td><td>Double</td><td>&#29992;&#20110;&#35745;&#31639;&#37325;&#35797;&#38388;&#38548;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.failover-on-server-shutdown">FailoverOnServerShutdown</a></td><td>Boolean</td><td>&#22914;&#26524;&#35774;&#20026;true&#34920;&#31034;&#23581;&#35797;&#36830;&#25509;&#20854;&#23427;&#30340;&#26381;&#21153;&#22120;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.client-id">ClientID</a></td><td>String</td><td>&#36830;&#25509;&#30340;&#23458;&#25143;&#31471;ID</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.client-failure-check-period">ClientFailureCheckPeriod</a></td><td>Long</td><td>&#23458;&#25143;&#31471;&#22914;&#26524;&#22312;&#36825;&#20010;&#26102;&#38388;&#20869;&#27809;&#26377;&#25910;&#21040;&#26381;&#21153;&#22120;&#25968;&#25454;&#21253;&#65292;&#23558;&#35748;&#20026;&#36830;&#25509;&#20986;&#29616;&#25925;&#38556;&#12290;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.use-global-pools">UseGlobalPools</a></td><td>Boolean</td><td>&#26159;&#21542;&#20351;&#29992;&#20840;&#23616;&#32447;&#31243;&#27744;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.scheduled-thread-pool-max-size">ScheduledThreadPoolMaxSize</a></td><td>Integer</td><td><span class="emphasis"><em>&#21487;&#35745;&#21010;&#32447;&#31243;&#27744;</em></span>&#30340;&#26368;&#22823;&#32447;&#31243;&#25968;</td></tr><tr><td><a href="configuration-index.html#configuration.connection-factory.thread-pool-max-size">ThreadPoolMaxSize</a></td><td>Integer</td><td>&#32447;&#31243;&#27744;&#30340;&#22823;&#23567;</td></tr></tbody></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7438"></a>32.4.2.&nbsp;&#36866;&#37197;&#22120;&#22806;&#37096;&#65288;outbound&#65289;&#37197;&#32622;</h3></div></div><div></div></div><p>&#22806;&#37096;&#37197;&#32622;&#21442;&#25968;&#24212;&#35813;&#20445;&#25345;&#19981;&#21464;&#12290;&#36825;&#26159;&#22240;&#20026;&#23427;&#25152;&#23450;&#20041;&#30340;&#36830;&#25509;&#24037;&#21378;&#35201;&#34987;Java EE&#30340;&#27169;&#22359;&#25152;&#20351;&#29992;&#12290;&#36825;&#20123;&#36830;&#25509;&#24037;&#21378;
+                &#21487;&#20197;&#23450;&#20041;&#22312;&#21517;&#23383;&#26679;&#24335;&#20026;<tt class="literal">*-ds.xml</tt>&#30340;&#37197;&#32622;&#25991;&#20214;&#20013;&#12290;&#22312;JBoss&#30340;&#37096;&#32626;&#30446;&#24405;
+                <tt class="literal">hornetq.sar</tt>&#19979;&#26377;&#19968;&#20010;&#40664;&#35748;&#30340;&#37197;&#32622;&#25991;&#20214;<tt class="literal">jms-ds.xml</tt>&#12290;
+                &#22312;&#36825;&#20010;&#25991;&#20214;&#20013;&#30340;&#36830;&#25509;&#24037;&#21378;&#30340;&#37197;&#32622;&#20174;&#20027;&#35201;&#30340;&#37197;&#32622;&#25991;&#20214;<tt class="literal">ra.xml</tt>&#20013;&#32487;&#25215;&#65292;
+                &#20294;&#26159;&#21487;&#20197;&#22312;&#36825;&#37324;&#37325;&#26032;&#23450;&#20041;&#12290;&#19979;&#38754;&#30340;&#20363;&#23376;&#20013;&#32473;&#20986;&#20102;&#37325;&#26032;&#23450;&#20041;&#30340;&#26041;&#27861;&#12290;</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>&#35831;&#27880;&#24847;&#36825;&#37324;&#30340;&#37197;&#32622;&#21482;&#36866;&#29992;&#20110;&#22312;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#20013;&#23433;&#35013;&#30340;HornetQ&#12290;&#22914;&#26524;&#35201;&#22312;&#20854;&#23427;JEE&#24212;&#29992;&#26381;&#21153;&#22120;&#20013;
+                &#20351;&#29992;&#24182;&#37197;&#32622;HornetQ&#65292;&#35831;&#21442;&#29031;&#30456;&#24212;&#30340;&#24212;&#29992;&#26381;&#21153;&#22120;&#25163;&#20876;&#12290;</p></div><pre class="programlisting">&lt;tx-connection-factory&gt;
+      &lt;jndi-name&gt;RemoteJmsXA&lt;/jndi-name&gt;
+      &lt;xa-transaction/&gt;
+      &lt;rar-name&gt;jms-ra.rar&lt;/rar-name&gt;
+      &lt;connection-definition&gt;org.hornetq.ra.HornetQRAConnectionFactory
+&lt;/connection-definition&gt;
+      &lt;config-property name="SessionDefaultType" type="String"&gt;javax.jms.Topic
+      &lt;/config-property&gt;
+      &lt;config-property name="ConnectorClassName" type="String"&gt;
+        org.hornetq.core.remoting.impl.netty.NettyConnectorFactory
+      &lt;/config-property&gt;
+      &lt;config-property name="ConnectionParameters" type="String"&gt;
+          port=5445&lt;/config-property&gt;
+      &lt;max-pool-size&gt;20&lt;/max-pool-size&gt;
+&lt;/tx-connection-factory&gt;</pre><p>&#19978;&#38754;&#30340;&#20363;&#23376;&#20013;&#30340;&#36830;&#25509;&#24037;&#21378;&#32465;&#23450;&#21040;JNDI&#21517;&#23383;<tt class="literal">RemoteJmsXA</tt>&#12290;EJB&#21644;MDB&#21487;&#20197;&#29992;
+                &#19979;&#38754;&#30340;&#26041;&#27861;&#26469;&#24471;&#21040;&#23427;&#65306;</p><pre class="programlisting">@Resource(mappedName="java:RemoteJmsXA")
+private ConnectionFactory connectionFactory;</pre><p><tt class="literal">config-property</tt>&#35206;&#30422;&#20102;<tt class="literal">ra.xml</tt>&#25991;&#20214;&#20013;&#30340;&#37197;&#32622;&#12290;
+                &#20197;&#27492;&#31867;&#25512;&#65292;&#20854;&#23427;&#26377;&#20851;&#36830;&#25509;&#24037;&#21378;&#30340;&#21442;&#25968;&#20063;&#21487;&#20197;&#22312;&#27492;&#35206;&#30422;&#12290;</p><p>&#38500;&#20102;&#20840;&#23616;&#30340;&#37197;&#32622;&#21442;&#25968;&#22806;&#65292;&#22806;&#37096;&#30340;&#37197;&#32622;&#36824;&#23450;&#20041;&#20102;&#20854;&#23427;&#19968;&#20123;&#21442;&#25968;&#12290;</p><div class="table"><a name="d0e7476"></a><p class="title"><b>Table&nbsp;32.2.&nbsp;&#22806;&#37096;&#37197;&#32622;&#21442;&#25968;</b></p><table summary="&#22806;&#37096;&#37197;&#32622;&#21442;&#25968;" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>&#21442;&#25968;&#21517;</th><th>&#21442;&#25968;&#31867;&#22411;</th><th>&#35828;&#26126;</th></tr></thead><tbody><tr><td>SessionDefaultType</td><td>String</td><td>&#40664;&#35748;&#30340;&#20250;&#35805;&#31867;&#22411;</td></tr><tr><td>UseTryLock</td><td>Integer</td><td>&#22312;&#35268;&#23450;&#30340;&#31186;&#25968;&#20869;&#33719;&#24471;&#38145;&#12290;&#22914;&#26524;&#19981;&#24819;&#20351;&#29992;&#36825;&#20010;&#21151;&#33021;&#65292;&#23558;&#23427;&#35774;&#20026;0&#25110;&#36127;&#25968;</td></tr></tbody></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7506"></a>32.4.3.&nbsp;&#36866;&#37197;&#22120;&#20869;&#37096;&#65288;inbound&#65289;&#37197;&#32622;</h3></div></div><div></div></div><p>&#20869;&#37096;&#37197;&#32622;&#21442;&#25968;&#20063;&#24212;&#35813;&#20445;&#25345;&#19981;&#21464;&#12290;&#23427;&#20204;&#25511;&#21046;&#21521;MDB&#36716;&#21457;&#28040;&#24687;&#30340;&#21508;&#31181;&#23646;&#24615;&#12290;&#36890;&#36807;&#22312;MDB&#19978;&#28155;&#21152;&#30456;&#24212;&#30340;&#28608;&#27963;&#37197;&#32622;
+                &#65288;activation configuration&#65289;&#21487;&#20197;&#35206;&#30422;&#36825;&#20123;&#21442;&#25968;&#30340;&#20540;&#12290;&#23427;&#21487;&#20197;&#29992;&#26469;&#37197;&#32622;&#19968;&#20010;MDB&#20174;&#21478;&#22806;&#19968;&#20010;&#26381;&#21153;&#22120;
+                &#25509;&#25910;&#28040;&#24687;&#12290;</p><p>&#38500;&#20102;&#20840;&#23616;&#30340;&#37197;&#32622;&#21442;&#25968;&#22806;&#65292;&#20869;&#37096;&#30340;&#37197;&#32622;&#36824;&#23450;&#20041;&#20102;&#20854;&#23427;&#19968;&#20123;&#21442;&#25968;&#12290;</p><div class="table"><a name="d0e7513"></a><p class="title"><b>Table&nbsp;32.3.&nbsp;Inbound Configuration Properties</b></p><table summary="Inbound Configuration Properties" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>&#21442;&#25968;&#21517;</th><th>&#21442;&#25968;&#31867;&#22411;</th><th>&#35828;&#26126;</th></tr></thead><tbody><tr><td>Destination</td><td>String</td><td>&#30446;&#26631;&#30340;JNDI&#21517;&#23383;</td></tr><tr><td>DestinationType</td><td>String</td><td>&#30446;&#26631;&#30340;&#31867;&#22411;&#65292;<tt class="literal">javax.jms.Queue</tt>&#25110;&#32773;<tt class="literal">javax.jms.Topic</tt>
+                                 (&#40664;&#35748;&#26159;javax.jms.Queue)</td></tr><tr><td>AcknowledgeMode</td><td>String</td><td>&#36890;&#30693;&#27169;&#24335;&#65292;<tt class="literal">Auto-acknowledge</tt> &#25110; <tt class="literal">Dups-ok-acknowledge</tt>
+                                (&#40664;&#35748;&#20540;&#26159;Auto-acknowledge). <tt class="literal">AUTO_ACKNOWLEDGE</tt>&#21644;<tt class="literal">DUPS_OK_ACKNOWLEDGE</tt>&#20063;&#26159;&#26377;&#25928;&#20540;</td></tr><tr><td>MaxSession</td><td>Integer</td><td>&#20869;&#37096;&#37197;&#32622;&#21019;&#24314;&#30340;&#26368;&#22823;&#20250;&#35805;&#25968;&#65288;&#40664;&#35748;&#26159;5&#65289;</td></tr><tr><td>MessageSelector</td><td>String</td><td>&#25509;&#25910;&#32773;&#30340;&#28040;&#24687;&#36873;&#25321;&#22120;</td></tr><tr><td>SubscriptionDurability</td><td>String</td><td>&#35746;&#38405;&#30340;&#31867;&#22411;&#65292;<tt class="literal">Durable</tt>&#25110;&#32773;<tt class="literal">NonDurable</tt></td></tr><tr><td>SubscriptionName</td><td>String</td><td>&#35746;&#38405;&#30340;&#21517;&#23383;</td></tr><tr><td>TransactionTimeout</td><td>Long</td><td>&#20107;&#21153;&#36229;&#26102;&#65288;&#27627;&#31186;&#65292;&#40664;&#35748;&#26159;0&#65292;&#34920;&#31034;&#20107;&#21153;&#19981;&#20250;&#36229;&#26102;&#65289;</td></tr><tr><td>UseJNDI</td><td>Boolean</td><td>&#26159;&#21542;&#20351;&#29992;JNDI&#26469;&#26597;&#25214;&#30446;&#26631;&#65288;&#40664;&#35748;&#26159;true&#65289;</td></tr></tbody></table></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7615"></a>32.4.4.&nbsp;&#37197;&#32622;&#36866;&#37197;&#22120;&#35775;&#38382;&#21333;&#29420;&#30340;HornetQ&#26381;&#21153;&#22120;</h3></div></div><div></div></div><p>&#22312;&#26377;&#30340;&#24773;&#20917;&#19979;&#65292;&#28040;&#24687;&#26381;&#21153;&#22120;&#19982;&#24212;&#29992;&#26381;&#21153;&#22120;&#36816;&#34892;&#22312;&#19981;&#21516;&#30340;&#26426;&#22120;&#19978;&#12290;&#36825;&#26102;&#23458;&#25143;&#31471;&#21482;&#38656;&#35201;&#23433;&#35013;HornetQ&#30340;&#23458;&#25143;&#31471;&#30340;&#24211;&#25991;&#20214;&#12290;&#26412;&#33410;&#32473;&#20986;&#20102;&#20855;&#20307;&#30340;&#37197;&#32622;&#21644;&#25152;&#38656;&#35201;&#30340;jar&#25991;&#20214;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div></div><div></div></div><p>&#20320;&#38656;&#35201;&#37197;&#32622;&#20004;&#20010;&#37197;&#32622;&#25991;&#20214;&#12290;&#19968;&#20010;&#26159;MDB&#25152;&#29992;&#30340;&#20869;&#37096;&#36866;&#37197;&#22120;&#65292;&#21478;&#19968;&#20010;&#26159;&#21487;&#20197;&#21019;&#24314;&#22806;&#37096;&#36830;&#25509;&#30340;&#22806;&#37096;&#36866;&#37197;&#22120;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="d0e7623"></a>32.4.4.1.1.&nbsp;&#37197;&#32622;&#20869;&#37096;&#36866;&#37197;&#22120;</h5></div></div><div></div></div><p>&#39318;&#20808;&#22312;<tt class="literal">deploy</tt>&#30446;&#24405;&#19979;&#21019;&#24314;&#19968;&#20010;&#20197;.rar&#20026;&#32467;&#23614;&#30340;&#25991;&#20214;&#22841;&#12290;
+                      &#22312;&#36825;&#37324;&#25105;&#20204;&#23558;&#20854;&#21629;&#21517;&#20026;<tt class="literal">hornetq-ra.rar</tt>&#12290;&#20027;&#27880;&#24847;&#36825;&#19968;&#28857;&#24456;&#37325;&#35201;&#65292;&#22240;&#20026;MDB&#21644;&#22806;&#37096;&#37197;&#32622;&#37117;&#38656;&#35201;&#24341;&#29992;
+                      &#35813;&#25991;&#20214;&#22841;&#30340;&#21517;&#23383;&#12290;
+                </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>&#22312;JBoss&#20013;&#35813;&#25991;&#20214;&#22841;&#30340;&#40664;&#35748;&#21517;&#20026;<tt class="literal">jms-ra.rar</tt>&#12290;&#20320;&#21487;&#20197;&#30452;&#25509;&#20351;&#29992;&#36825;&#20010;&#21517;&#23383;&#12290;&#20294;&#26159;&#20320;&#21487;&#33021;&#38656;&#35201;&#36991;&#20813;
+                      &#19982;&#20854;&#23427;&#30340;&#36890;&#29992;&#36866;&#37197;&#22120;&#30456;&#20914;&#31361;&#12290;
+                   </p></div><p>&#22312;&#25991;&#20214;&#22841;
+                   <tt class="literal">hornetq-ra.rar</tt>
+                   &#19979;&#21019;&#24314;&#21517;&#20026;
+                   <tt class="literal">META-INF</tt>
+                   &#30340;&#25991;&#20214;&#22841;&#65292;&#28982;&#21518;&#22312;&#20123;&#25991;&#20214;&#22841;&#20869;&#21019;&#24314;&#19968;&#20010;
+                   <tt class="literal">ra.xml</tt>&#37197;&#32622;&#25991;&#20214;&#12290;&#22312;HornetQ&#21457;&#24067;&#21253;&#20013;
+                   &#26377;&#19968;&#20010;<tt class="literal">ra.xml</tt>&#27169;&#26495;&#25991;&#20214;&#20379;&#20320;&#20351;&#29992;&#12290;
+                </p><p>&#35201;&#37197;&#32622;MDB&#25509;&#25910;&#36828;&#31243;HornetQ&#26381;&#21153;&#22120;&#30340;&#28040;&#24687;&#65292;&#20320;&#38656;&#35201;&#20462;&#25913;<tt class="literal">deploy/hornet-ra.rar/META-INF</tt>&#19979;&#38754;&#30340;
+                   <tt class="literal">ra.xml</tt>&#25991;&#20214;&#65292;&#23558;&#20256;&#36755;&#23618;&#25913;&#20026;netty&#36830;&#25509;&#22120;&#65288;&#19981;&#35201;&#20351;&#29992;invm&#36830;&#25509;&#22120;&#65289;&#21450;&#20854;&#30456;&#24212;&#30340;&#21442;&#25968;&#12290;&#19979;&#38754;
+                   &#26159;&#19968;&#20010;&#37197;&#32622;&#30340;&#20363;&#23376;&#65306;
+                </p><pre class="programlisting">
+            &lt;resourceadapter-class&gt;org.hornetq.ra.HornetQResourceAdapter&lt;/resourceadapter-class&gt;
+              &lt;config-property&gt;
+                 &lt;description&gt;The transport type&lt;/description&gt;
+                 &lt;config-property-name&gt;ConnectorClassName&lt;/config-property-name&gt;
+                 &lt;config-property-type&gt;java.lang.String&lt;/config-property-type&gt;
+                 &lt;config-property-value&gt;org.hornetq.core.remoting.impl.netty.NettyConnectorFactory&lt;/config-property-value&gt;
+              &lt;/config-property&gt;
+              &lt;config-property&gt;
+                 &lt;description&gt;The transport configuration. These values must be in the form of key=val;key=val;&lt;/description&gt;
+                 &lt;config-property-name&gt;ConnectionParameters&lt;/config-property-name&gt;
+                 &lt;config-property-type&gt;java.lang.String&lt;/config-property-type&gt;
+                 &lt;config-property-value&gt;host=127.0.0.1;port=5446&lt;/config-property-value&gt;
+              &lt;/config-property&gt;
+          </pre><p>&#19978;&#38754;&#30340;&#37197;&#32622;&#20013;&#65292;&#36866;&#37197;&#22120;&#36830;&#25509;&#21040;&#19968;&#20010;&#36816;&#34892;&#22312;&#26412;&#26426;&#19978;&#31471;&#21475;&#20026;5446&#30340;&#26381;&#21153;&#22120;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="d0e7666"></a>32.4.4.1.2.&nbsp;&#37197;&#32622;&#22806;&#37096;&#36866;&#37197;&#22120;</h5></div></div><div></div></div><p>&#20320;&#36824;&#38656;&#35201;&#21019;&#24314;&#19968;&#20010;<tt class="literal">hornetq-ds.xml</tt>&#25991;&#20214;&#26469;&#37197;&#32622;&#22806;&#37096;&#36830;&#25509;&#12290;&#35813;&#25991;&#20214;&#38656;&#35201;&#25918;&#32622;&#22312;<tt class="literal">deploy</tt>
+                   &#19979;&#30340;&#20219;&#24847;&#19968;&#20010;&#25991;&#20214;&#22841;&#20013;&#12290;&#22312;&#19968;&#30456;&#26631;&#20934;&#30340;&#23433;&#35013;&#20013;&#36825;&#20010;&#25991;&#20214;&#22841;&#26159;<tt class="literal">horneq</tt> &#25110;&#32773; <tt class="literal">hornetq.sar</tt>&#12290;
+                   &#24403;&#28982;&#20320;&#21487;&#20197;&#36873;&#25321;&#20854;&#23427;&#25991;&#20214;&#22841;&#12290;&#35813;&#25991;&#20214;&#30340;&#21517;&#23383;&#21482;&#35201;&#26159;&#20197;<tt class="literal">-ds.xml</tt>&#21363;&#21487;&#12290;&#22312;HornetQ&#30340;&#21457;&#24067;&#21253;&#20013;&#21253;&#21547;&#26377;&#19968;&#20010;&#27169;&#26495;&#25991;&#20214;&#65292;
+                   &#23427;&#30340;&#21517;&#23383;&#26159;<tt class="literal">jms-ds.xml</tt>&#65292;&#20301;&#32622;&#23601;&#22312;config&#25991;&#20214;&#22841;&#19979;&#12290;
+                </p><p>&#19979;&#38754;&#26159;&#19968;&#20010;&#37197;&#32622;&#30340;&#20363;&#23376;&#12290;</p><pre class="programlisting">
+             &lt;tx-connection-factory&gt;
+              &lt;jndi-name&gt;RemoteJmsXA&lt;/jndi-name&gt;
+              &lt;xa-transaction/&gt;
+              &lt;rar-name&gt;hornetq-ra.rar&lt;/rar-name&gt;
+              &lt;connection-definition&gt;org.hornetq.ra.HornetQRAConnectionFactory&lt;/connection-definition&gt;
+              &lt;config-property name="SessionDefaultType" type="java.lang.String"&gt;javax.jms.Topic&lt;/config-property&gt;
+              &lt;config-property name="ConnectorClassName" type="java.lang.String"&gt;org.hornetq.core.remoting.impl.netty.NettyConnectorFactory&lt;/config-property&gt;
+              &lt;config-property name="ConnectionParameters" type="java.lang.String"&gt;host=127.0.0.1;port=5446&lt;/config-property&gt;
+              &lt;max-pool-size&gt;20&lt;/max-pool-size&gt;
+           &lt;/tx-connection-factory&gt;
+          </pre><p>&#36825;&#20010;&#37197;&#32622;&#21516;&#26679;&#26159;&#36830;&#25509;&#21040;&#36816;&#34892;&#22312;&#26412;&#26426;&#19978;&#30340;&#31471;&#21475;&#20026;5446&#30340;HornetQ&#26381;&#21153;&#22120;&#12290;JEE&#27169;&#22359;&#21487;&#20197;&#36890;&#36807;JNDI&#26597;&#25214;
+                <tt class="literal">java:/RemoteJmsXA</tt>&#65288;&#30001;<tt class="literal">jndi-name</tt>&#21442;&#25968;&#23450;&#20041;&#65289;&#12290;&#22914;&#19978;&#33410;&#25152;&#36848;&#65292;
+                &#36164;&#28304;&#36866;&#37197;&#22120;&#26681;&#25454;&#25991;&#20214;&#22841;&#19979;&#30340;&#37197;&#32622;&#26469;&#21019;&#24314;&#22806;&#37096;&#36830;&#25509;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h6 class="title"><a name="d0e7701"></a>32.4.4.1.2.1.&nbsp;&#20381;&#36182;&#30340;jar&#25991;&#20214;</h6></div></div><div></div></div><p>&#19979;&#38754;&#21015;&#20986;&#20102;HornetQ&#25152;&#38656;&#35201;&#30340;&#31532;&#19977;&#26041;jar&#25991;&#20214;</p><div class="table"><a name="d0e7706"></a><p class="title"><b>Table&nbsp;32.4.&nbsp;Jar&#25991;&#20214;</b></p><table summary="Jar&#25991;&#20214;" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Jar&#25991;&#20214;&#21517;</th><th>&#35828;&#26126;</th><th>&#20301;&#32622;</th></tr></thead><tbody><tr><td>hornetq-ra.jar</td><td>HornetQ&#36164;&#28304;&#36866;&#37197;&#22120;&#25991;&#20214;</td><td>deploy/hornetq-ra.rar&#25110;&#30456;&#24212;&#30340;&#20301;&#32622;</td></tr><tr><td>hornetq-core-client.jar</td><td>HornetQ&#26680;&#24515;&#23458;&#25143;&#31867;&#24211;</td><td>&#22312;JBoss&#30340;default/lib&#19979;&#25110;&#32773;&#26159;$JBOSS_HOME/common/lib&#19979;&#12290; </td></tr><tr><td>hornetq-jms-client.jar</td><td>HornetQ&#30340;JMS&#31867;</td><td>&#21516;&#19978;</td></tr><tr><td>netty.jar</td><td>Netty&#31867;&#24211;</td><td>&#21516;&#19978;</td></tr></tbody></table></div></div></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e7750"></a>32.4.5.&nbsp;&#39640;&#21487;&#33719;&#24471;&#24615;JNDI (HA-JNDI)</h3></div></div><div></div></div><p>&#37319;&#29992;JNDI&#26469;&#26597;&#25214;JMS&#23545;&#35937;&#26102;&#65288;&#38431;&#21015;&#65292;&#35805;&#39064;&#21450;&#36830;&#25509;&#24037;&#21378;&#65289;&#65292;&#20351;&#29992;HA&#65293;JNDI&#21487;&#20197;&#22686;&#21152;&#23481;&#38169;&#30340;&#33021;&#21147;&#12290;&#21363;&#24403;&#20320;&#27491;&#22312;&#20351;&#29992;
+            &#30340;JNDI&#26381;&#21153;&#22120;&#21457;&#29983;&#25925;&#38556;&#26102;&#65292;&#23458;&#25143;&#31471;&#21487;&#20197;&#20351;&#29992;&#38598;&#32676;&#20013;&#30340;&#20854;&#23427;JNDI&#26381;&#21153;&#22120;&#32487;&#32493;&#24037;&#20316;&#12290;</p><p>HA-JNDI&#26159;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#19968;&#39033;&#26381;&#21153;&#65292;&#23427;&#20026;&#23458;&#25143;&#31471;&#25552;&#20379;JNDI&#26381;&#21153;&#65292;&#23458;&#25143;&#31471;&#26080;&#38656;&#30693;&#36947;JNDI&#20855;&#20307;&#26381;&#21153;&#22120;&#30340;&#36830;&#25509;
+            &#32454;&#33410;&#12290;&#36825;&#20010;&#26381;&#21153;&#21482;&#26377;&#22312;&#38598;&#32676;&#30340;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#19978;&#25165;&#21487;&#20351;&#29992;&#12290;</p><p>&#35201;&#20351;&#29992;HA&#65293;JNDI&#65292;&#38656;&#35201;&#20351;&#29992;&#19979;&#38754;&#30340;JNDI&#21442;&#25968;&#12290;</p><pre class="programlisting">Hashtable&lt;String, String&gt; jndiParameters = new Hashtable&lt;String, String&gt;();
+jndiParameters.put("java.naming.factory.initial", 
+    "org.jnp.interfaces.NamingContextFactory");
+jndiParameters.put("java.naming.factory.url.pkgs=", 
+    "org.jboss.naming:org.jnp.interfaces");
+
+initialContext = new InitialContext(jndiParameters);</pre><p>&#26377;&#20851;HA-JNDI&#26356;&#22810;&#30340;&#20449;&#24687;&#35831;&#21442;&#35265;<a href="http://www.jboss.org/file-access/default/members/jbossas/freezone/docs/Clustering_Guide/5/html/clustering-jndi.html" target="_top">JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#38598;&#32676;&#25991;&#26723;</a>&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="xa-recovery"></a>32.4.6.&nbsp;XA&#24674;&#22797;</h3></div></div><div></div></div><p><span class="emphasis"><em>XA&#24674;&#22797;</em></span>&#35299;&#20915;&#30340;&#26159;&#20107;&#21153;&#22312;&#31995;&#32479;&#25110;&#24212;&#29992;&#20986;&#29616;&#25925;&#38556;&#26102;&#30340;&#22788;&#29702;&#12290;&#23427;&#21487;&#20197;&#20445;&#35777;&#22312;&#24212;&#29992;&#36827;&#31243;&#25110;&#20027;&#26426;&#20986;&#29616;&#25925;&#38556;
+            &#25110;&#32593;&#32476;&#23849;&#28291;&#31561;&#24773;&#20917;&#19979;&#65292;&#20107;&#21153;&#20869;&#25152;&#26377;&#36164;&#28304;&#30340;&#29366;&#24577;&#30340;&#19968;&#33268;&#24615;&#12290;&#26377;&#20851;XA&#24674;&#22797;&#30340;&#26356;&#22810;&#20449;&#24687;&#35831;&#35265; <a href="http://www.jboss.org/community/wiki/JBossTransactions" target="_top">JBoss
+                &#20107;&#21153;</a>&#12290;</p><p>&#24403;HornetQ&#19982;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#38598;&#25104;&#26102;&#65292;&#23427;&#21487;&#20197;&#21033;&#29992;JBoss&#30340;&#20107;&#21153;&#22788;&#29702;&#26469;&#23545;&#28040;&#24687;&#36164;&#28304;&#36827;&#34892;&#24674;&#22797;&#12290;&#22914;&#26524;&#28040;&#24687;&#22788;&#29702;&#21253;&#25324;
+            &#22312;&#19968;&#20010;XA&#20107;&#21153;&#20013;&#65292;&#22914;&#26524;&#26381;&#21153;&#22120;&#20986;&#29616;&#25925;&#38556;&#24182;&#37325;&#21551;&#26102;&#65292;&#24674;&#22797;&#31649;&#29702;&#22120;&#23558;&#36127;&#36131;&#24674;&#22797;&#20107;&#21153;&#65292;&#36825;&#26679;&#20854;&#20013;&#30340;&#28040;&#24687;&#35201;&#20040;&#34987;&#25552;&#20132;&#65292;&#35201;&#20040;&#34987;&#22238;&#28378;&#65288;&#21462;
+            &#20915;&#20110;&#20107;&#21153;&#30340;&#22788;&#29702;&#20915;&#23450;&#65289;&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e7778"></a>32.4.6.1.&nbsp;XA&#24674;&#22797;&#30340;&#37197;&#32622;</h4></div></div><div></div></div><p>&#35201;&#24819;HornetQ&#20855;&#26377;XA&#24674;&#22797;&#21151;&#33021;&#65292;&#21017;&#24517;&#39035;&#37197;&#32622;&#24674;&#22797;&#31649;&#29702;&#22120;&#36830;&#25509;&#21040;HornetQ&#24182;&#24674;&#22797;&#20854;&#36164;&#28304;&#12290;&#19979;&#38754;&#30340;&#21442;&#25968;&#24517;&#39035;&#35201;&#21152;&#21040;
+                <tt class="literal">conf/jbossts-properties.xml</tt>&#25991;&#20214;&#20013;&#30340;<tt class="literal">jta</tt>&#37096;&#20998;:</p><pre class="programlisting">
+&lt;properties depends="arjuna" name="jta"&gt;
+   ...
+                     
+   &lt;property name="com.arjuna.ats.jta.recovery.XAResourceRecovery.HornetQ1"
+                value="org.hornetq.jms.server.recovery.HornetQXAResourceRecovery;[&#36830;&#25509;&#37197;&#32622;]"/&gt;
+&lt;/properties&gt;
+            </pre><p>&#20854;&#20013;<tt class="literal">[&#36830;&#25509;&#37197;&#32622;]</tt>&#21253;&#25324;&#36830;&#25509;HornetQ&#33410;&#28857;&#25152;&#24517;&#38656;&#30340;&#20449;&#24687;&#12290;
+                &#23427;&#30340;&#26684;&#24335;&#26159;<tt class="literal">[&#36830;&#25509;&#24037;&#21378;&#31867;&#21517;],[&#29992;&#25143;&#21517;], [&#23494;&#30721;], [&#36830;&#25509;&#21442;&#25968;]</tt>&#12290; </p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">[&#36830;&#25509;&#24037;&#21378;&#31867;&#21517;]</tt>&#25351;&#30340;&#26159;<tt class="literal">ConnectorFactory</tt>
+                        &#30340;&#31867;&#21517;&#65292;&#29992;&#26469;&#36830;&#25509;HornetQ&#26381;&#21153;&#22120;&#12290;&#20854;&#20540;&#21487;&#20197;&#26159;<tt class="literal">org.hornetq.core.remoting.impl.invm.InVMConnectorFactory</tt> &#25110;
+                            <tt class="literal">org.hornetq.core.remoting.impl.netty.NettyConnectorFactory</tt></p></li><li><p><tt class="literal">[&#29992;&#25143;&#21517;]</tt>&#26159;&#29992;&#20110;&#21019;&#24314;&#23458;&#25143;&#20250;&#35805;&#30340;&#29992;&#25143;&#21517;&#12290;&#26159;&#21487;&#36873;&#39033;&#12290;</p></li><li><p><tt class="literal">[&#23494;&#30721;]</tt>&#26159;&#21019;&#24314;&#23458;&#25143;&#20250;&#35805;&#26102;&#25152;&#29992;&#30340;&#23494;&#30721;&#12290;&#21482;&#26377;&#22312;&#29992;&#25143;&#21517;&#23384;&#22312;&#26102;&#38656;&#35201;&#12290;</p></li><li><p><tt class="literal">[&#36830;&#25509;&#21442;&#25968;]</tt> &#26159;&#29992;&#36887;&#21495;&#20998;&#38548;&#30340;&#19968;&#20018;&#38190;&#65293;&#20540;&#23545;&#12290;&#23427;&#20204;&#20250;&#20256;&#36882;&#32473;&#36830;&#25509;&#22120;&#24037;&#21378;
+                        &#65288;&#21442;&#35265; <a href="configuring-transports.html" title="Chapter&nbsp;16.&nbsp;&#20256;&#36755;&#23618;&#30340;&#37197;&#32622;">Chapter&nbsp;16, <i>&#20256;&#36755;&#23618;&#30340;&#37197;&#32622;</i></a>&#65289;&#12290;</p></li></ul></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>HornetQ&#24517;&#39035;&#26377;&#19968;&#20010;&#19982;<tt class="literal">conf/jbossts-properties.xml</tt>&#20013;&#23450;&#20041;&#30340;&#36830;&#25509;&#22120;&#30456;&#23545;&#24212;&#30340;&#25509;&#21463;&#22120;&#65288;acceptor&#65289;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="d0e7836"></a>32.4.6.1.1.&nbsp;&#37197;&#32622;&#21442;&#25968;</h5></div></div><div></div></div><p>&#22914;&#26524;HornetQ&#37197;&#32622;&#20102;&#19968;&#20010;&#40664;&#35748;&#30340;in-vm&#25509;&#21463;&#22120;&#65306;</p><pre class="programlisting">
+&lt;acceptor name="in-vm"&gt;
+    &lt;factory-class&gt;org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory&lt;/factory-class&gt;
+&lt;/acceptor&gt;
+                </pre><p>&#30456;&#24212;&#22320;&#22312; <tt class="literal">conf/jbossts-properties.xml</tt>&#25991;&#20214;&#20013;&#65306;</p><pre class="programlisting">
+&lt;property name="com.arjuna.ats.jta.recovery.XAResourceRecovery.HORNETQ1"
+   value="org.hornetq.jms.server.recovery.HornetQXAResourceRecovery;org.hornetq.core.remoting.impl.invm.InVMConnectorFactory"/&gt;        			
+                </pre><p>&#22914;&#26524;&#37197;&#32622;&#20102;&#19968;&#20010;netty&#25509;&#21463;&#22120;&#65292;&#24182;&#19988;&#31471;&#21475;&#19981;&#26159;&#40664;&#35748;&#30340;&#65306;</p><pre class="programlisting">
+&lt;acceptor name="netty"&gt;
+    &lt;factory-class&gt;org.hornetq.core.remoting.impl.netty.NettyConnectorFactory&lt;/factory-class&gt;
+    &lt;param key="port" value="8888"/&gt;
+&lt;/acceptor&gt;
+                </pre><p>&#30456;&#24212;&#30340;&#22312; <tt class="literal">conf/jbossts-properties.xml</tt>&#25991;&#20214;&#20013;&#65306;</p><pre class="programlisting">
+&lt;property name="com.arjuna.ats.jta.recovery.XAResourceRecovery.HORNETQ1"
+       value="org.hornetq.jms.server.recovery.HornetQXAResourceRecovery;org.hornetq.core.remoting.impl.netty.NettyConnectorFactory, , , port=8888"/&gt;        			                    
+                </pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>&#27880;&#24847;&#22312;&#27809;&#26377;&#29992;&#25143;&#21517;&#21644;&#23494;&#30721;&#26102;&#65292;&#36887;&#21495;&#26159;&#19981;&#33021;&#30465;&#30053;&#30340;&#12290;</p></div><p>&#22914;&#26524;&#24674;&#22797;&#24517;&#39035;&#35201;&#27714;&#26159;<tt class="literal">admin, adminpass</tt>&#65292;&#21017;&#20854;&#37197;&#32622;
+                    &#24212;&#20026;&#22914;&#19979;&#25152;&#31034;&#65306;</p><pre class="programlisting">
+                    &lt;property name="com.arjuna.ats.jta.recovery.XAResourceRecovery.HORNETQ1"
+                           value="org.hornetq.jms.server.recovery.HornetQXAResourceRecovery;org.hornetq.core.remoting.impl.netty.NettyConnectorFactory, admin, adminpass, port=8888"/&gt;        			                    
+                </pre><p>&#25512;&#33616;&#22312;XA&#24674;&#22797;&#20013;&#65292;&#23558;HornetQ&#37197;&#32622;&#19968;&#20010;invm&#25509;&#21463;&#22120;&#65292;&#24182;&#37197;&#32622;&#24674;&#22797;&#31649;&#29702;&#22120;&#20351;&#29992;invm&#36830;&#25509;&#22120;&#12290;</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e7873"></a>32.4.6.2.&nbsp;&#20363;&#23376;</h4></div></div><div></div></div><p>&#21442;&#35265;<a href="examples.html#xa-recovery-example" title="11.3.9.&nbsp;XA &#24674;&#22797;&#65288;recovery&#65289;">Section&nbsp;11.3.9, &#8220;XA &#24674;&#22797;&#65288;recovery&#65289;&#8221;</a>&#12290;&#36825;&#20010;&#20363;&#23376;&#23637;&#31034;&#20102;&#22914;&#20309;&#26469;&#37197;&#32622;XA&#24674;&#22797;&#20197;&#20415;&#22312;&#26381;&#21153;&#22120;&#23849;&#28291;&#21518;&#24674;&#22797;&#28040;&#24687;&#12290;</p></div></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="security.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="jms-bridge.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;31.&nbsp;&#23433;&#20840;&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;33.&nbsp;JMS&#26725;&#65288;Bridge&#65289;</td></tr></table></div></body></html>

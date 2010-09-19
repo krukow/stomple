@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;43.&nbsp;Embedding HornetQ</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="logging.html" title="Chapter&nbsp;42.&nbsp;Logging"><link rel="next" href="intercepting-operations.html" title="Chapter&nbsp;44.&nbsp;Intercepting Operations"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;43.&nbsp;Embedding HornetQ</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="logging.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="intercepting-operations.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="embedding-hornetq"></a>Chapter&nbsp;43.&nbsp;Embedding HornetQ</h2></div></div><div></div></div><p>HornetQ is designed as set of simple Plain Old Java Objects (POJOs). This means HornetQ
+   <title>Chapter&nbsp;43.&nbsp;Embedding HornetQ</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.1 User Manual"><link rel="up" href="index.html" title="HornetQ 2.1 User Manual"><link rel="previous" href="logging.html" title="Chapter&nbsp;42.&nbsp;Logging"><link rel="next" href="intercepting-operations.html" title="Chapter&nbsp;44.&nbsp;Intercepting Operations"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;43.&nbsp;Embedding HornetQ</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="logging.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="intercepting-operations.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="embedding-hornetq"></a>Chapter&nbsp;43.&nbsp;Embedding HornetQ</h2></div></div><div></div></div><p>HornetQ is designed as set of simple Plain Old Java Objects (POJOs). This means HornetQ
         can be instantiated and run in any dependency injection framework such as JBoss
         Microcontainer, Spring or Google Guice. It also means that if you have an application that
         could use messaging functionality internally, then it can <span class="emphasis"><em>directly
@@ -9,7 +9,7 @@
         very high performance, transactional, persistent messaging but doesn't want the hassle of
         writing it all from scratch.</p><p>Embedding HornetQ can be done in very few easy steps. Instantiate the configuration
         object, instantiate the server, start it, and you have a HornetQ running in your virtual
-        machine. It's as simple and easy as that.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10577"></a>43.1.&nbsp;POJO instantiation</h2></div></div><div></div></div><p>You can follow this step-by-step guide:</p><p>Create the configuration object - this contains configuration information for a
+        machine. It's as simple and easy as that.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10965"></a>43.1.&nbsp;POJO instantiation</h2></div></div><div></div></div><p>You can follow this step-by-step guide:</p><p>Create the configuration object - this contains configuration information for a
             HornetQ. If you want to configure it from a file on the classpath, use <tt class="literal">FileConfigurationImpl</tt></p><pre class="programlisting">import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.FileConfiguration;
 
@@ -43,7 +43,7 @@ HornetQServer server = HornetQ.newHornetQServer(config);
 server.start();</pre><p>You also have the option of instantiating <tt class="literal">HornetQServerImpl</tt>
             directly:</p><pre class="programlisting">HornetQServer server = 
         new HornetQServerImpl(config);
-server.start();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10617"></a>43.2.&nbsp;Dependency Frameworks</h2></div></div><div></div></div><p>You may also choose to use a dependency injection framework such as <span class="trademark">JBoss
+server.start();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11005"></a>43.2.&nbsp;Dependency Frameworks</h2></div></div><div></div></div><p>You may also choose to use a dependency injection framework such as <span class="trademark">JBoss
                 Micro Container</span>&#8482; or <span class="trademark">Spring Framework</span>&#8482;.</p><p>HornetQ standalone uses JBoss Micro Container as the injection framework. <tt class="literal">HornetQBootstrapServer</tt> and <tt class="literal">hornetq-beans.xml</tt> which are
             part of the HornetQ distribution provide a very complete implementation of what's needed
             to bootstrap the server using JBoss Micro Container. </p><p>When using JBoss Micro Container, you need to provide an XML file declaring the
@@ -70,7 +70,7 @@ server.start();</pre></div><div class="section" lang="en"><div class="titlepage"
    &lt;/deployment&gt;</pre><p><tt class="literal">HornetQBootstrapServer</tt> provides an easy encapsulation of JBoss
             Micro Container.</p><pre class="programlisting">HornetQBootstrapServer bootStrap = 
         new HornetQBootstrapServer(new String[] {"hornetq-beans.xml"});
-        bootStrap.run();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10654"></a>43.3.&nbsp;Connecting to the Embedded HornetQ</h2></div></div><div></div></div><p>To connect clients to HornetQ you just create the factories as normal:</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e10659"></a>43.3.1.&nbsp;Core API</h3></div></div><div></div></div><p>If using the core API, just create the <tt class="literal">ClientSessionFactory</tt> and
+        bootStrap.run();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11042"></a>43.3.&nbsp;Connecting to the Embedded HornetQ</h2></div></div><div></div></div><p>To connect clients to HornetQ you just create the factories as normal:</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e11047"></a>43.3.1.&nbsp;Core API</h3></div></div><div></div></div><p>If using the core API, just create the <tt class="literal">ClientSessionFactory</tt> and
                 use the regular core API.</p><pre class="programlisting">ClientSessionFactory nettyFactory =  HornetQClient.createClientSessionFactory(
                                         new TransportConfiguration(
                                            InVMConnectorFactory.class.getName()));
@@ -95,7 +95,7 @@ ClientMessage msgReceived = consumer.receive();
 
 System.out.println("message = " + msgReceived.getBody().readString());
 
-session.close();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e10669"></a>43.3.2.&nbsp;JMS API</h3></div></div><div></div></div><p>Connection on an Embedded HornetQ through JMS is also simple. Just instantiate
+session.close();</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e11057"></a>43.3.2.&nbsp;JMS API</h3></div></div><div></div></div><p>Connection on an Embedded HornetQ through JMS is also simple. Just instantiate
                     <tt class="literal">ConnectionFactory</tt> directly. The following example
                 illustrates that.</p><pre class="programlisting">ConnectionFactory cf =
     HornetQJMSClient.createConnectionFactory(
@@ -123,5 +123,5 @@ System.out.println("Msg = " + txtmsg.getText());
 
 sess.commit();
 
-conn.close();</pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10679"></a>43.4.&nbsp;JMS Embedding Example</h2></div></div><div></div></div><p>Please see <a href="examples.html#examples.embedded" title="11.2.1.&nbsp;Embedded">Section&nbsp;11.2.1, &#8220;Embedded&#8221;</a> for an example which shows how to setup
+conn.close();</pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e11067"></a>43.4.&nbsp;JMS Embedding Example</h2></div></div><div></div></div><p>Please see <a href="examples.html#examples.embedded" title="11.2.1.&nbsp;Embedded">Section&nbsp;11.2.1, &#8220;Embedded&#8221;</a> for an example which shows how to setup
             and run HornetQ embedded with JMS.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="logging.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="intercepting-operations.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;42.&nbsp;Logging&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;44.&nbsp;Intercepting Operations</td></tr></table></div></body></html>

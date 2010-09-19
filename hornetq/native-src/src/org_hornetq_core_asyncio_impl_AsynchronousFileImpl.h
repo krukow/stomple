@@ -54,58 +54,66 @@ JNIEXPORT jobject JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImp
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    init
- * Signature: (Ljava/lang/String;ILorg/hornetq/core/logging/Logger;)J
+ * Signature: (Ljava/lang/String;ILorg/hornetq/core/logging/Logger;)Ljava/nio/ByteBuffer;
  */
-JNIEXPORT jlong JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_init
+JNIEXPORT jobject JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_init
   (JNIEnv *, jclass, jstring, jint, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    size0
- * Signature: (J)J
+ * Signature: (Ljava/nio/ByteBuffer;)J
  */
 JNIEXPORT jlong JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_size0
-  (JNIEnv *, jobject, jlong);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    write
- * Signature: (JJJJLjava/nio/ByteBuffer;Lorg/hornetq/core/asyncio/AIOCallback;)V
+ * Signature: (Ljava/nio/ByteBuffer;JJJLjava/nio/ByteBuffer;Lorg/hornetq/core/asyncio/AIOCallback;)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_write
-  (JNIEnv *, jobject, jlong, jlong, jlong, jlong, jobject, jobject);
+  (JNIEnv *, jobject, jobject, jlong, jlong, jlong, jobject, jobject);
+
+/*
+ * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
+ * Method:    writeInternal
+ * Signature: (Ljava/nio/ByteBuffer;JJLjava/nio/ByteBuffer;)V
+ */
+JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_writeInternal
+  (JNIEnv *, jobject, jobject, jlong, jlong, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    read
- * Signature: (JJJLjava/nio/ByteBuffer;Lorg/hornetq/core/asyncio/AIOCallback;)V
+ * Signature: (Ljava/nio/ByteBuffer;JJLjava/nio/ByteBuffer;Lorg/hornetq/core/asyncio/AIOCallback;)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_read
-  (JNIEnv *, jobject, jlong, jlong, jlong, jobject, jobject);
+  (JNIEnv *, jobject, jobject, jlong, jlong, jobject, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    fill
- * Signature: (JJIJB)V
+ * Signature: (Ljava/nio/ByteBuffer;JIJB)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_fill
-  (JNIEnv *, jclass, jlong, jlong, jint, jlong, jbyte);
+  (JNIEnv *, jclass, jobject, jlong, jint, jlong, jbyte);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    closeInternal
- * Signature: (J)V
+ * Signature: (Ljava/nio/ByteBuffer;)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_closeInternal
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    stopPoller
- * Signature: (J)V
+ * Signature: (Ljava/nio/ByteBuffer;)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_stopPoller
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
@@ -118,10 +126,10 @@ JNIEXPORT jint JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_g
 /*
  * Class:     org_hornetq_core_asyncio_impl_AsynchronousFileImpl
  * Method:    internalPollEvents
- * Signature: (J)V
+ * Signature: (Ljava/nio/ByteBuffer;)V
  */
 JNIEXPORT void JNICALL Java_org_hornetq_core_asyncio_impl_AsynchronousFileImpl_internalPollEvents
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jobject);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;33.&nbsp;The JMS Bridge</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="appserver-integration.html" title="Chapter&nbsp;32.&nbsp;Application Server Integration and Java EE"><link rel="next" href="client-reconnection.html" title="Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;33.&nbsp;The JMS Bridge</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="appserver-integration.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="client-reconnection.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="jms-bridge"></a>Chapter&nbsp;33.&nbsp;The JMS Bridge</h2></div></div><div></div></div><p>HornetQ includes a fully functional JMS message bridge.</p><p>The function of the bridge is to consume messages from a source queue or topic, and
+   <title>Chapter&nbsp;33.&nbsp;The JMS Bridge</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.1 User Manual"><link rel="up" href="index.html" title="HornetQ 2.1 User Manual"><link rel="previous" href="appserver-integration.html" title="Chapter&nbsp;32.&nbsp;Application Server Integration and Java EE"><link rel="next" href="client-reconnection.html" title="Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;33.&nbsp;The JMS Bridge</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="appserver-integration.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="client-reconnection.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="jms-bridge"></a>Chapter&nbsp;33.&nbsp;The JMS Bridge</h2></div></div><div></div></div><p>HornetQ includes a fully functional JMS message bridge.</p><p>The function of the bridge is to consume messages from a source queue or topic, and
             send them to a target queue or topic, typically on a different server.</p><p>The source and target servers do not have to be in the same cluster which makes
             bridging suitable for reliably sending messages from one cluster to another, for
             instance across a WAN, and where the connection may be unreliable.</p><p>A bridge can be deployed as a standalone application, with HornetQ standalone server or inside a JBoss AS
@@ -144,6 +144,14 @@
                   &lt;key&gt;java.naming.factory.url.pkgs&lt;/key&gt;
                   &lt;value&gt;org.jboss.naming:org.jnp.interfaces"&lt;/value&gt;
                &lt;/entry&gt;
+               &lt;entry&gt;
+                  &lt;key&gt;jnp.timeout&lt;/key&gt;
+                  &lt;value&gt;5000&lt;/value&gt;
+               &lt;/entry&gt;
+               &lt;entry&gt;
+                  &lt;key&gt;jnp.sotimeout&lt;/key&gt;
+                  &lt;value&gt;5000&lt;/value&gt;
+               &lt;/entry&gt;
             &lt;/map&gt;
          &lt;/constructor&gt;
       &lt;/bean&gt;
@@ -152,7 +160,7 @@
          &lt;constructor factoryClass="org.jboss.mx.util.MBeanServerLocator"
                       factoryMethod="locateJBoss"/&gt;
       &lt;/bean&gt;
-&lt;/deployment&gt;</pre><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e7934"></a>33.1.&nbsp;JMS Bridge Parameters</h2></div></div><div></div></div><p>The main bean deployed is the <tt class="literal">JMSBridge</tt> bean. The bean is
+&lt;/deployment&gt;</pre><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8284"></a>33.1.&nbsp;JMS Bridge Parameters</h2></div></div><div></div></div><p>The main bean deployed is the <tt class="literal">JMSBridge</tt> bean. The bean is
                 configurable by the parameters passed to its constructor.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>To let a parameter be unspecified (for example, if the authentication is
                     anonymous or no message selector is provided), use <tt class="literal">&lt;null
                         /&gt;</tt> for the unspecified parameter value.</p></div><div class="itemizedlist"><ul type="disc"><li><p>Source Connection Factory Factory</p><p>This injects the <tt class="literal">SourceCFF</tt> bean (also defined in the
@@ -200,23 +208,23 @@
                             correlation id of the first message id, so when the original sender gets
                             it back it will be able to correlate it. </p></div></li><li><p>MBean Server</p><p>To manage the JMS Bridge using JMX, set the MBeanServer where the JMS Bridge MBean
                       must be registered (e.g. the JVM Platform MBeanServer or JBoss AS MBeanServer)</p></li><li><p>ObjectName</p><p>If you set the MBeanServer, you also need to set the ObjectName used to register
-                      the JMS Bridge MBean (must be unique)</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8139"></a>33.2.&nbsp;Source and Target Connection Factories</h2></div></div><div></div></div><p>The source and target connection factory factories are used to create the
+                      the JMS Bridge MBean (must be unique)</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8489"></a>33.2.&nbsp;Source and Target Connection Factories</h2></div></div><div></div></div><p>The source and target connection factory factories are used to create the
                 connection factory used to create the connection for the source or target
                 server.</p><p>The configuration example above uses the default implementation provided by
                 HornetQ that looks up the connection factory using JNDI. For other Application
                 Servers or JMS providers a new implementation may have to be provided. This can
-                easily be done by implementing the interface <tt class="literal">org.hornetq.jms.bridge.ConnectionFactoryFactory</tt>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8149"></a>33.3.&nbsp;Source and Target Destination Factories</h2></div></div><div></div></div><p>Again, similarly, these are used to create or lookup up the destinations.</p><p>In the configuration example above, we have used the default provided by HornetQ
+                easily be done by implementing the interface <tt class="literal">org.hornetq.jms.bridge.ConnectionFactoryFactory</tt>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e8499"></a>33.3.&nbsp;Source and Target Destination Factories</h2></div></div><div></div></div><p>Again, similarly, these are used to create or lookup up the destinations.</p><p>In the configuration example above, we have used the default provided by HornetQ
                 that looks up the destination using JNDI.</p><p>A new implementation can be provided by implementing <tt class="literal">org.hornetq.jms.bridge.DestinationFactory</tt> interface.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="quality-of-service"></a>33.4.&nbsp;Quality Of Service</h2></div></div><div></div></div><p>The quality of service modes used by the bridge are described here in more
-                detail.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8166"></a>33.4.1.&nbsp;AT_MOST_ONCE</h3></div></div><div></div></div><p>With this QoS mode messages will reach the destination from the source at most
+                detail.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8516"></a>33.4.1.&nbsp;AT_MOST_ONCE</h3></div></div><div></div></div><p>With this QoS mode messages will reach the destination from the source at most
                     once. The messages are consumed from the source and acknowledged before sending
                     to the destination. Therefore there is a possibility that if failure occurs
                     between removing them from the source and them arriving at the destination they
-                    could be lost. Hence delivery will occur at most once.</p><p>This mode is available for both durable and non-durable messages.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8173"></a>33.4.2.&nbsp;DUPLICATES_OK</h3></div></div><div></div></div><p>With this QoS mode, the messages are consumed from the source and then
+                    could be lost. Hence delivery will occur at most once.</p><p>This mode is available for both durable and non-durable messages.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8523"></a>33.4.2.&nbsp;DUPLICATES_OK</h3></div></div><div></div></div><p>With this QoS mode, the messages are consumed from the source and then
                     acknowledged after they have been successfully sent to the destination.
                     Therefore there is a possibility that if failure occurs after sending to the
                     destination but before acknowledging them, they could be sent again when the
                     system recovers. I.e. the destination might receive duplicates after a
-                    failure.</p><p>This mode is available for both durable and non-durable messages.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8180"></a>33.4.3.&nbsp;ONCE_AND_ONLY_ONCE</h3></div></div><div></div></div><p>This QoS mode ensures messages will reach the destination from the source once
+                    failure.</p><p>This mode is available for both durable and non-durable messages.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8530"></a>33.4.3.&nbsp;ONCE_AND_ONLY_ONCE</h3></div></div><div></div></div><p>This QoS mode ensures messages will reach the destination from the source once
                     and only once. (Sometimes this mode is known as "exactly once"). If both the
                     source and the destination are on the same HornetQ server instance then this can
                     be achieved by sending and acknowledging the messages in the same local
@@ -235,7 +243,16 @@
                         message ids on disk and comparing received messages to them. The cache would
                         only be valid for a certain period of time so this approach is not as
                         watertight as using ONCE_AND_ONLY_ONCE but may be a good choice depending on
-                        your specific application.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8190"></a>33.4.4.&nbsp;Examples</h3></div></div><div></div></div><p>Please see <a href="examples.html#examples.javaee.jms-bridge" title="11.3.4.&nbsp;JMS Bridge">Section&nbsp;11.3.4, &#8220;JMS Bridge&#8221;</a> which shows how to configure
+                        your specific application.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8540"></a>33.4.4.&nbsp;Time outs and the JMS bridge</h3></div></div><div></div></div><p>There is a possibility that the target or source server will not be available at some point in time.
+              If this occurs then the bridge will try <tt class="literal">Max Retries</tt> to reconnect every
+              <tt class="literal">Failure Retry Interval</tt> milliseconds as specified in the JMS Bridge definition.</p><p>However since a third party JNDI is used, in this case the JBoss naming server, it is possible for the
+              JNDI lookup to hang if the network were to disappear during the JNDI lookup. To stop this occuring the JNDI
+              definition can be configured to time out if this occurs. To do this set the <tt class="literal">jnp.timeout</tt>
+               and the <tt class="literal">jnp.sotimeout</tt> on the Initial Context definition. The first sets the connection
+              timeout for the initial connection and the second the read timeout for the socket.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Once the initial JNDI connection has succeeded all calls are made using RMI. If you want to control
+                    the timeouts for the RMI connections then this can be done via system properties. JBoss uses Sun's RMI
+                 and the properties can be found <a href="http://java.sun.com/j2se/1.5.0/docs/guide/rmi/sunrmiproperties.html" target="_top">here</a>.
+                 The default connection timeout is 10 seconds and the default read timeout is 18 seconds.</p></div><p>If you implement your own factories for looking up JMS resources then you will have to bear in mind timeout issues.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e8567"></a>33.4.5.&nbsp;Examples</h3></div></div><div></div></div><p>Please see <a href="examples.html#examples.javaee.jms-bridge" title="11.3.5.&nbsp;JMS Bridge">Section&nbsp;11.3.5, &#8220;JMS Bridge&#8221;</a> which shows how to configure
                     and use a JMS Bridge with JBoss AS to send messages to the source destination and consume them
                     from the target destination.</p><p>Please see <a href="examples.html#examples.jms.jms-bridge" title="11.1.20.&nbsp;JMS Bridge">Section&nbsp;11.1.20, &#8220;JMS Bridge&#8221;</a> which shows how to configure
                     and use a JMS Bridge between two standalone HornetQ servers.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="appserver-integration.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="client-reconnection.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;32.&nbsp;Application Server Integration and Java EE&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;34.&nbsp;Client Reconnection and Session Reattachment</td></tr></table></div></body></html>

@@ -101,6 +101,7 @@
       <fileset dir="${jars.dir}">
          <include name="org/jboss/naming/lib/jnpserver.jar"/>
          <include name="org/jboss/netty/lib/netty*.jar"/>
+         <include name="org/twitter4j/lib/twitter4j*.jar"/>
       </fileset>
    </path>
 
@@ -201,10 +202,11 @@
             <exclude name="jms/jms-bridge/build.xml"/>
             <exclude name="jms/large-message/build.xml"/>
             <exclude name="jms/perf/build.xml"/>
+            <exclude name="jms/stomp-websockets/build.xml"/>
          </fileset>
       </subant>
    	
-   	  <echo message="Do not forget to run jms/applet, jms/clustered-standalone &amp; jms-bridge examples manually!" />
+   	  <echo message="Do not forget to run jms/applet, jms/clustered-standalone, jms/stomp-websockets &amp; jms/jms-bridge examples manually!" />
    </target>
 
 </project>

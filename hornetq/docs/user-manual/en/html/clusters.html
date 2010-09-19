@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;38.&nbsp;Clusters</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="duplicate-detection.html" title="Chapter&nbsp;37.&nbsp;Duplicate Message Detection"><link rel="next" href="ha.html" title="Chapter&nbsp;39.&nbsp;High Availability and Failover"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;38.&nbsp;Clusters</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="duplicate-detection.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ha.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="clusters"></a>Chapter&nbsp;38.&nbsp;Clusters</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9028"></a>38.1.&nbsp;Clusters Overview</h2></div></div><div></div></div><p>HornetQ clusters allow groups of HornetQ servers to be grouped together in order to
+   <title>Chapter&nbsp;38.&nbsp;Clusters</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.1 User Manual"><link rel="up" href="index.html" title="HornetQ 2.1 User Manual"><link rel="previous" href="duplicate-detection.html" title="Chapter&nbsp;37.&nbsp;Duplicate Message Detection"><link rel="next" href="ha.html" title="Chapter&nbsp;39.&nbsp;High Availability and Failover"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;38.&nbsp;Clusters</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="duplicate-detection.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ha.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="clusters"></a>Chapter&nbsp;38.&nbsp;Clusters</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9405"></a>38.1.&nbsp;Clusters Overview</h2></div></div><div></div></div><p>HornetQ clusters allow groups of HornetQ servers to be grouped together in order to
             share message processing load. Each active node in the cluster is an active HornetQ
             server which manages its own messages and handles its own connections. A server must be
             configured to be clustered, you will need to set the <tt class="literal">clustered</tt>
@@ -72,7 +72,7 @@
                 particular server it updates its entry in the list for that server.</p><p>If it has not received a broadcast from a particular server for a length of time
                 it will remove that server's entry from its list.</p><p>Discovery groups are used in two places in HornetQ:</p><div class="itemizedlist"><ul type="disc"><li><p>By cluster connections so they know what other servers in the cluster they
                         should make connections to.</p></li><li><p>By messaging clients so they can discovery what servers in the cluster
-                        they can connect to.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9196"></a>38.2.3.&nbsp;Defining Discovery Groups on the Server</h3></div></div><div></div></div><p>For cluster connections, discovery groups are defined in the server side
+                        they can connect to.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9573"></a>38.2.3.&nbsp;Defining Discovery Groups on the Server</h3></div></div><div></div></div><p>For cluster connections, discovery groups are defined in the server side
                 configuration file <tt class="literal">hornetq-configuration.xml</tt>. All discovery
                 groups must be defined inside a <tt class="literal">discovery-groups</tt> element. There
                 can be many discovery groups defined by HornetQ server. Let's look at an
@@ -100,7 +100,7 @@
                         optional, the default value is <tt class="literal">10000</tt> milliseconds (10
                         seconds).</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="clusters-discovery.groups.clientside"></a>38.2.4.&nbsp;Discovery Groups on the Client Side</h3></div></div><div></div></div><p>Let's discuss how to configure a HornetQ client to use discovery to discover a
                 list of servers to which it can connect. The way to do this differs depending on
-                whether you're using JMS or the core API.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9254"></a>38.2.4.1.&nbsp;Configuring client discovery using JMS</h4></div></div><div></div></div><p>If you're using JMS and you're also using the JMS Service on the server to
+                whether you're using JMS or the core API.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9631"></a>38.2.4.1.&nbsp;Configuring client discovery using JMS</h4></div></div><div></div></div><p>If you're using JMS and you're also using the JMS Service on the server to
                     load your JMS connection factory instances into JNDI, then you can specify which
                     discovery group to use for your JMS connection factory in the server side xml
                     configuration <tt class="literal">hornetq-jms.xml</tt>. Let's take a look at an
@@ -127,13 +127,13 @@ ConnectionFactory jmsConnectionFactory =
 Connection jmsConnection1 = jmsConnectionFactory.createConnection();
 
 Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>The <tt class="literal">refresh-timeout</tt> can be set directly on the connection
-                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout() if you
-                        want to change the default value.</tt></p><p>There is also a further parameter settable on the connection factory using the
+                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout()</tt> if you
+                        want to change the default value.</p><p>There is also a further parameter settable on the connection factory using the
                     setter method <tt class="literal">setDiscoveryInitialWaitTimeout()</tt>. If the connection
                     factory is used immediately after creation then it may not have had enough time
                     to received broadcasts from all the nodes in the cluster. On first usage, the
                     connection factory will make sure it waits this long since creation before
-                    creating the first connection. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9293"></a>38.2.4.2.&nbsp;Configuring client discovery using Core</h4></div></div><div></div></div><p>If you're using the core API to directly instantiate <tt class="literal">ClientSessionFactory</tt> instances, then you can specify the
+                    creating the first connection. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9671"></a>38.2.4.2.&nbsp;Configuring client discovery using Core</h4></div></div><div></div></div><p>If you're using the core API to directly instantiate <tt class="literal">ClientSessionFactory</tt> instances, then you can specify the
                     discovery group parameters directly when creating the session factory. Here's an
                     example:
                     </p><pre class="programlisting">
@@ -144,13 +144,13 @@ Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>The
                     session2 = factory.createClientSession(...);
                 
                 </pre><p>The <tt class="literal">refresh-timeout</tt> can be set directly on the session
-                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout() if you
-                        want to change the default value.</tt></p><p>There is also a further parameter settable on the session factory using the
+                    factory by using the setter method <tt class="literal">setDiscoveryRefreshTimeout()</tt> if you
+                        want to change the default value.</p><p>There is also a further parameter settable on the session factory using the
                     setter method <tt class="literal">setDiscoveryInitialWaitTimeout()</tt>. If the session factory
                     is used immediately after creation then it may not have had enough time to
                     received broadcasts from all the nodes in the cluster. On first usage, the
                     session factory will make sure it waits this long since creation before creating
-                    the first session. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9318"></a>38.3.&nbsp;Server-Side Message Load Balancing</h2></div></div><div></div></div><p>If cluster connections are defined between nodes of a cluster, then HornetQ will load
+                    the first session. The default value for this parameter is <tt class="literal">10000</tt> milliseconds.</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9697"></a>38.3.&nbsp;Server-Side Message Load Balancing</h2></div></div><div></div></div><p>If cluster connections are defined between nodes of a cluster, then HornetQ will load
             balance messages arriving at a particular node from a client.</p><p>Let's take a simple example of a cluster of four nodes A, B, C, and D arranged in a
                 <span class="emphasis"><em>symmetric cluster</em></span> (described in <a href="clusters.html#symmetric-cluster" title="38.7.1.&nbsp;Symmetric cluster">Section&nbsp;38.7.1, &#8220;Symmetric cluster&#8221;</a>). We have a queue called <tt class="literal">OrderQueue</tt>
             deployed on each node of the cluster.</p><p>We have client Ca connected to node A, sending orders to the server. We have also have
@@ -192,7 +192,7 @@ Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>The
                         balancing messages for those addresses, potentially to different clusters of
                         servers. By having multiple cluster connections on different addresses a
                         single HornetQ Server can effectively take part in multiple clusters
-                        simultaneously.</p><p>By careful not to have multiple cluster connections with overlapping
+                        simultaneously.</p><p>Be careful not to have multiple cluster connections with overlapping
                         values of <tt class="literal">address</tt>, e.g. "europe" and "europe.news" since
                         this could result in the same messages being distributed between more than
                         one cluster connection, possibly resulting in duplicate deliveries. </p><p>This parameter is mandatory.</p></li><li><p><tt class="literal">retry-interval</tt>. We mentioned before that, internally,
@@ -274,10 +274,10 @@ jmsConnectionFactory.setLoadBalancingPolicyClassName("com.acme.MyLoadBalancingPo
 ClientSessionFactory factory = HornetQClient.createClientSessionFactory(...);
 factory.setLoadBalancingPolicyClassName("com.acme.MyLoadBalancingPolicy");
             </pre><p>The set of servers over which the factory load balances can be determined in one of
-            two ways:</p><div class="itemizedlist"><ul type="disc"><li><p>Specifying servers explicitly</p></li><li><p>Using discovery.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9539"></a>38.5.&nbsp;Specifying Members of a Cluster Explicitly</h2></div></div><div></div></div><p>Sometimes UDP is not enabled on a network so it's not possible to use UDP server
+            two ways:</p><div class="itemizedlist"><ul type="disc"><li><p>Specifying servers explicitly</p></li><li><p>Using discovery.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9918"></a>38.5.&nbsp;Specifying Members of a Cluster Explicitly</h2></div></div><div></div></div><p>Sometimes UDP is not enabled on a network so it's not possible to use UDP server
             discovery for clients to discover the list of servers in the cluster, or for servers to
             discover what other servers are in the cluster.</p><p>In this case, the list of servers in the cluster can be specified explicitly on each
-            node and on the client side. Let's look at how we do this:</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9546"></a>38.5.1.&nbsp;Specify List of Servers on the Client Side</h3></div></div><div></div></div><p>This differs depending on whether you're using JMS or the Core API</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9551"></a>38.5.1.1.&nbsp;Specifying List of Servers using JMS</h4></div></div><div></div></div><p>If you're using JMS, and you're using the JMS Service to load your JMS
+            node and on the client side. Let's look at how we do this:</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9925"></a>38.5.1.&nbsp;Specify List of Servers on the Client Side</h3></div></div><div></div></div><p>This differs depending on whether you're using JMS or the Core API</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9930"></a>38.5.1.1.&nbsp;Specifying List of Servers using JMS</h4></div></div><div></div></div><p>If you're using JMS, and you're using the JMS Service to load your JMS
                     connection factory instances directly into JNDI on the server, then you can
                     specify the list of servers in the server side configuration file <tt class="literal">hornetq-jms.xml</tt>. Let's take a look at an example:</p><pre class="programlisting">&lt;connection-factory name="ConnectionFactory"&gt;
    &lt;connectors&gt;
@@ -320,7 +320,7 @@ Connection jmsConnection2 = jmsConnectionFactory.createConnection();</pre><p>In 
                     connection to a specific server.</p><p>A <tt class="literal">HornetQConnectionFactory</tt> instance is then created passing
                     the list of servers in the constructor. Any connections subsequently created by
                     this factory will create connections according to the client connection load
-                    balancing policy applied to that list of servers.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9611"></a>38.5.1.2.&nbsp;Specifying List of Servers using the Core API</h4></div></div><div></div></div><p>If you're using the core API you can also specify the list of servers directly
+                    balancing policy applied to that list of servers.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e9990"></a>38.5.1.2.&nbsp;Specifying List of Servers using the Core API</h4></div></div><div></div></div><p>If you're using the core API you can also specify the list of servers directly
                     when creating the <tt class="literal">ClientSessionFactory</tt> instance. Here's an
                     example:</p><pre class="programlisting">List&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt; serverList = 
         new ArrayList&lt;Pair&lt;TransportConfiguration, TransportConfiguration&gt;&gt;();
@@ -390,7 +390,7 @@ ClientSession session2 = factory.createClientSession(...);</pre><p>In the above 
             signifies that messages will never be redistributed. The default value is <tt class="literal">-1</tt>.</p><p>It often makes sense to introduce a delay before redistributing as it's a common case
             that a consumer closes but another one quickly is created on the same queue, in such a
             case you probably don't want to redistribute immediately since the new consumer will
-            arrive shortly.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e9736"></a>38.7.&nbsp;Cluster topologies</h2></div></div><div></div></div><p>HornetQ clusters can be connected together in many different topologies, let's
+            arrive shortly.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e10115"></a>38.7.&nbsp;Cluster topologies</h2></div></div><div></div></div><p>HornetQ clusters can be connected together in many different topologies, let's
             consider the two most common ones here</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="symmetric-cluster"></a>38.7.1.&nbsp;Symmetric cluster</h3></div></div><div></div></div><p>A symmetric cluster is probably the most common cluster topology, and you'll be
                 familiar with if you've had experience of JBoss Application Server
                 clustering.</p><p>With a symmetric cluster every node in the cluster is connected to every other
@@ -402,7 +402,7 @@ ClientSession session2 = factory.createClientSession(...);</pre><p>In the above 
                 explicitly define each target server too in the cluster connection if, for example,
                 UDP is not available on your network.</p><p>With a symmetric cluster each node knows about all the queues that exist on all
                 the other nodes and what consumers they have. With this knowledge it can determine
-                how to load balance and redistribute messages around the nodes.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e9758"></a>38.7.2.&nbsp;Chain cluster</h3></div></div><div></div></div><p>With a chain cluster, each node in the cluster is not connected to every node in
+                how to load balance and redistribute messages around the nodes.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e10137"></a>38.7.2.&nbsp;Chain cluster</h3></div></div><div></div></div><p>With a chain cluster, each node in the cluster is not connected to every node in
                 the cluster directly, instead the nodes form a chain with a node on each end of the
                 chain and all other nodes just connecting to the previous and next nodes in the
                 chain.</p><p>An example of this would be a three node chain consisting of nodes A, B and C.

@@ -1,0 +1,208 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>HornetQ&#24555;&#36895;&#25351;&#21335;</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="d0e18"></a>HornetQ&#24555;&#36895;&#25351;&#21335;</h1></div><div><h2 class="subtitle">Putting the buzz in messaging</h2></div></div><div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#notice">1. &#27861;&#24459;&#22768;&#26126;</a></span></dt><dt><span class="chapter"><a href="#about">2. &#20851;&#20110;HornetQ</a></span></dt><dt><span class="chapter"><a href="#introduction">3. &#24555;&#36895;&#20837;&#25163;</a></span></dt><dt><span class="chapter"><a href="#download">4. &#19979;&#36733;</a></span></dt><dd><dl><dt><span class="section"><a href="#download.software">4.1. &#36719;&#20214;&#19979;&#36733;</a></span></dt><dt><span class="section"><a href="#download.svn">4.2. &#39033;&#30446;&#20449;&#24687;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#installation">5. &#23433;&#35013;</a></span></dt><dd><dl><dt><span class="section"><a href="#installation.prerequisites">5.1. &#20934;&#22791;</a></span></dt><dt><span class="section"><a href="#installation.standalone">5.2. &#21333;&#29420;&#30340;HornetQ&#26381;&#21153;&#22120;</a></span></dt><dt><span class="section"><a href="#installation.jboss.as5">5.3. HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;5.x</a></span></dt><dt><span class="section"><a href="#installation.jboss.as4">5.4. HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;4.x</a></span></dt></dl></dd><dt><span class="chapter"><a href="#running">6. Starting The Server</a></span></dt><dd><dl><dt><span class="section"><a href="#running.standalone">6.1. &#21333;&#29420;HornetQ</a></span></dt><dt><span class="section"><a href="#running.jboss.as5">6.2. HornetQ&#22312;JBoss AS 5.x&#20013;&#36816;&#34892;</a></span></dt><dt><span class="section"><a href="#running.jboss.as4">6.3. HornetQ&#22312;JBoss AS 4&#20013;&#36816;&#34892;</a></span></dt><dt><span class="section"><a href="#running.jboss.as6">6.4. HornetQ&#22312;JBoss AS 6.0&#20013;&#36816;&#34892;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#examples">7. &#36816;&#34892;HornetQ&#20363;&#23376;</a></span></dt><dd><dl><dt><span class="section"><a href="#examples.jms">7.1. JMS&#20363;&#23376;</a></span></dt><dt><span class="section"><a href="#examples.messaging">7.2. Java EE&#20363;&#23376;</a></span></dt></dl></dd></dl></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="notice"></a>Chapter&nbsp;1.&nbsp;&#27861;&#24459;&#22768;&#26126;</h2></div></div><div></div></div><p>Red Hat, Inc. &#20197;&#21450;&#20854;&#20182;&#20844;&#21496;2010&#24180;&#29256;&#26435;&#25152;&#26377;&#12290;</p><p>Red Hat&#20844;&#21496;&#20381;&#29031; CC-BY-SA 3.0 Unported(Creative Commons 
+              Attribution-Share Alike)&#26465;&#27454;&#20043;&#35268;&#23450;&#25480;&#26435;&#29992;&#25142;&#26159;&#29992;&#26412;&#25163;&#20876;&#20013;&#30340;&#25991;&#23383;&#21644;&#25554;&#22270;&#12290;</p><p>&#26377;&#20851; CC-BY-SA &#30340;&#35299;&#37322;&#35831;&#35775;&#38382;<a href="http://creativecommons.org/licenses/by-sa/3.0/" target="_top">http://creativecommons.org/licenses/by-sa/3.0/</a>&#12290;&#26681;&#25454;CC&#65293;BY&#65293;SA&#30340;&#35268;&#23450;&#65292;&#22914;&#26524;&#35201;&#21457;&#24067;&#26412;&#25991;&#26723;&#25110;&#20219;&#20309;&#26412;&#25991;&#26723;&#30340;&#20462;&#25913;&#29256;&#26412;&#65292;&#37117;&#24517;&#39035;&#32473;&#20986;&#21407;&#22987;&#29256;&#26412;&#25991;&#26723;&#30340;URL&#12290;</p><p>Red Hat &#20316;&#20026;&#26412;&#25991;&#26723;&#30340;&#25480;&#26435;&#26041;&#22768;&#26126;&#22312;&#30456;&#20851;&#27861;&#24459;&#20801;&#35768;&#30340;&#26368;&#22823;&#33539;&#22260;&#20869;&#25918;&#24323;CC-BY-SA&#31532;4d&#33410;&#25152;&#35268;&#23450;&#30340;&#26435;&#21033;&#12290;</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="about"></a>Chapter&nbsp;2.&nbsp;&#20851;&#20110;HornetQ</h2></div></div><div></div></div><p>&#20160;&#20040;&#26159;HornetQ?</p><div class="itemizedlist"><ul type="disc"><li><p>HornetQ&#26159;&#19968;&#20010;&#24320;&#28304;&#39033;&#30446;&#12290;&#23427;&#30340;&#30446;&#26631;&#26159;&#19968;&#20010;&#22810;&#21327;&#35758;&#12289;&#21487;&#23884;&#20837;&#12289;&#39640;&#24615;&#33021;&#12289;&#21487;&#38598;&#32676;&#30340;&#24322;&#27493;&#30340;&#28040;&#24687;&#31995;&#32479;&#12290;</p></li><li><p>&#26377;&#20851;HornetQ&#26159;&#20160;&#20040;&#21450;&#19981;&#26159;&#20160;&#20040;&#30340;&#26356;&#22810;&#30340;&#38382;&#39064;&#65292;&#35831;&#35775;&#38382;
+                <a href="http://www.jboss.org/community/wiki/HornetQGeneralFAQs" target="_top">FAQs wiki
+                    &#39029;</a>&#12290;</p></li></ul></div><p>&#20026;&#20160;&#20040;&#35201;&#20351;&#29992;HornetQ&#65311; &#20197;&#19979;&#32473;&#20986;&#20102;&#20960;&#20010;&#29702;&#30001;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p>HornetQ&#26159;100%&#30340;&#24320;&#28304;&#36719;&#20214;&#12290; HornetQ &#37319;&#29992; Apache v 2.0&#24320;&#28304;&#21327;&#35758;&#65292;&#23545;&#29992;&#25143;&#30340;&#38480;&#21046;&#26368;&#23567;&#12290;</p></li><li><p>HornetQ&#30340;&#35774;&#35745;&#24378;&#35843;&#21487;&#29992;&#24615;&#12290;</p></li><li><p>&#37319;&#29992;Java&#35821;&#35328;&#32534;&#20889;&#12290;&#21487;&#20197;&#22312;&#20219;&#20309;Java 6+ &#30340;&#24179;&#21488;&#19978;&#36816;&#34892;&#12290;&#36825;&#20960;&#20046;&#21253;&#25324;&#20102;&#20174;Windows&#21040;IBM mainframes&#30340;&#27599;&#20010;&#24179;&#21488;&#12290;</p></li><li><p>&#24615;&#33021;&#20986;&#20247;&#12290;&#19981;&#20294;&#23545;&#38750;&#25345;&#20037;&#21270;&#28040;&#24687;&#30340;&#22788;&#29702;&#24615;&#33021;&#36798;&#21040;&#20102;&#38750;&#24120;&#39640;&#30340;&#24615;&#33021;&#12290;&#29420;&#29305;&#39640;&#25928;&#30340;&#26085;&#24535;&#65288;journal&#65289;&#20351;&#25345;&#20037;&#28040;&#24687;&#22788;&#29702;&#25509;&#36817;&#38750;&#25345;&#20037;&#28040;&#24687;&#30340;&#24615;&#33021;&#12290;</p></li><li><p>&#21151;&#33021;&#20840;&#38754;&#12290;&#19981;&#20165;&#25317;&#26377;&#20854;&#23427;&#25104;&#29087;&#28040;&#24687;&#20135;&#21697;&#25152;&#20855;&#26377;&#30340;&#20840;&#37096;&#21151;&#33021;&#65292;&#32780;&#19988;&#36824;&#26377;&#24456;&#22810;&#29420;&#29305;&#30340;&#21151;&#33021;&#12290;</p></li><li><p>HornetQ&#30340;&#35774;&#35745;&#36981;&#20174;&#20102;&#31616;&#32422;&#30340;&#21407;&#21017;&#12290;&#23545;&#31532;&#19977;&#26041;&#36719;&#20214;&#30340;&#20381;&#36182;&#26497;&#23569;&#12290;&#26681;&#25454;&#19981;&#21516;&#30340;&#38656;&#35201;&#65292;
+                  HornetQ&#21487;&#20197;&#21333;&#29420;&#36816;&#34892;&#65292;&#20063;&#21487;&#20197;&#36816;&#34892;&#20110;JEE&#24212;&#29992;&#26381;&#21153;&#22120;&#20013;&#12290;&#23427;&#36824;&#21487;&#20197;&#23884;&#20837;&#21040;&#20320;&#33258;&#24049;&#30340;&#24212;&#29992;&#31243;&#24207;&#20013;&#12290;</p></li><li><p>&#23436;&#32654;&#30340;&#21487;&#33719;&#24471;&#24615;&#12290;HornetQ&#25552;&#20379;&#33258;&#21160;&#23458;&#25143;&#31471;&#22833;&#25928;&#22791;&#25588;&#65288;automatic client failover&#65289;&#21151;&#33021;&#65292;&#33021;&#20445;&#35777;&#22312;&#26381;&#21153;&#22120;&#25925;&#38556;&#26102;&#27809;&#26377;&#28040;&#24687;&#20002;&#22833;&#25110;&#28040;&#24687;&#37325;&#22797;&#12290;</p></li><li><p>&#36229;&#32423;&#28789;&#27963;&#30340;&#38598;&#32676;&#26041;&#26696;&#12290;&#21487;&#20197;&#25511;&#21046;&#38598;&#32676;&#36827;&#34892;&#28040;&#24687;&#36127;&#36733;&#22343;&#34913;&#30340;&#26041;&#24335;&#12290;&#20998;&#24067;&#22312;&#19981;&#21516;&#22320;&#29702;&#20301;&#32622;&#30340;&#21508;&#20010;&#38598;&#32676;&#38388;&#21487;&#20197;&#36890;&#36807;&#38750;&#21487;&#38752;&#30340;&#32593;&#32476;&#36830;&#25509;&#24418;&#25104;&#19968;&#20010;&#20840;&#29699;&#32593;&#32476;&#12290;
+                  &#36824;&#21487;&#20197;&#38750;&#24120;&#28789;&#27963;&#22320;&#37197;&#32622;&#28040;&#24687;&#36335;&#30001;&#12290;</p></li><li><p>&#35831;&#35775;&#38382; <a href="http://www.jboss.org/community/wiki/HornetQFeatures" target="_top">wiki</a>&#26469;&#20840;&#38754;&#20102;&#35299;HornetQ&#30340;&#25152;&#26377;&#21151;&#33021;&#20171;&#32461;&#12290;</p></li></ul></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="introduction"></a>Chapter&nbsp;3.&nbsp;&#24555;&#36895;&#20837;&#25163;</h2></div></div><div></div></div><p>&#26412;&#31616;&#30701;&#30340;&#25351;&#21335;&#32473;&#20986;&#20102;&#22914;&#20309;&#19979;&#36733;&#12289;&#23433;&#35013;HornetQ&#65292;&#20197;&#21450;&#23613;&#24555;&#24320;&#22987;&#20351;&#29992;HornetQ&#12290;</p><p>&#25105;&#20204;&#24378;&#28872;&#24314;&#35758;&#24403;&#19979;&#36733;&#23433;&#35013;&#23436;&#25104;&#21518;&#65292;&#36816;&#34892;HornetQ&#30340;&#20363;&#23376;&#26469;&#20102;&#35299;HornetQ&#12290;&#25105;&#20204;&#26377;70&#22810;&#20010;&#20363;&#23376;&#26469;&#23637;&#31034;&#20960;&#20046;
+        &#25152;&#26377;HornetQ&#30340;&#21151;&#33021;&#12290;</p><p>&#26412;&#25351;&#21335;&#19981;&#33021;&#20195;&#26367;&#29992;&#25143;&#25163;&#20876;&#12290;&#29992;&#25143;&#25163;&#20876;&#21253;&#25324;&#26356;&#21152;&#23436;&#25972;&#21644;&#28145;&#20837;&#30340;&#20449;&#24687;&#65292;&#20379;&#29992;&#25143;&#36827;&#19968;&#27493;&#20840;&#38754;&#25484;&#25569;HornetQ&#12290;</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="download"></a>Chapter&nbsp;4.&nbsp;&#19979;&#36733;</h2></div></div><div></div></div><p>HornetQ&#39033;&#30446;&#30340;&#23448;&#26041;&#22320;&#22336;&#26159; <a href="http://hornetq.org/" target="_top">http://hornetq.org/</a>&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="download.software"></a>4.1.&nbsp;&#36719;&#20214;&#19979;&#36733;</h2></div></div><div></div></div><p>HornetQ&#30340;&#19979;&#36733;&#22320;&#22336;&#26159;<a href="http://hornetq.org/downloads.html/" target="_top">http://hornetq.org/downloads.html</a></p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="download.svn"></a>4.2.&nbsp;&#39033;&#30446;&#20449;&#24687;</h2></div></div><div></div></div><p>
+         </p><div class="itemizedlist"><ul type="disc"><li><p>HornetQ&#30340; <a href="http://www.jboss.org/community/wiki/HornetQ" target="_top">wiki</a></p></li><li><p>&#22914;&#26524;&#22312;&#20351;&#29992;HornetQ&#20013;&#21457;&#29983;&#20219;&#20309;&#38382;&#39064;&#65292;&#21487;&#20197;&#21435;&#25105;&#20204;&#30340; <a href="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=312" target="_top">&#29992;&#25143;&#35770;&#22363;
+                     </a></p></li><li><p>&#22914;&#26524;&#20320;&#26377;&#24320;&#21457;&#26041;&#38754;&#30340;&#38382;&#39064;&#19982;&#24819;&#27861;&#65292;&#35831;&#35775;&#38382;&#25105;&#20204;&#30340; <a href="http://www.jboss.org/index.html?module=bb&amp;op=viewforum&amp;f=313" target="_top">&#24320;&#21457;&#35770;&#22363;</a></p></li><li><p>&#35831;&#21152;&#20837;&#25105;&#20204;&#30340;<a href="irc://irc.freenode.net:6667/hornetq" target="_top">IRC&#39057;&#36947;</a>&#19982;&#25105;&#20204;&#30340;&#26680;&#24515;&#24320;&#21457;&#24037;&#31243;&#24072;&#20132;&#27969;&#12290;</p></li><li><p>&#25105;&#20204;&#39033;&#30446;&#26377;&#33258;&#24049;&#30340; <a href="http://hornetq.blogspot.com/" target="_top">&#21338;&#23458;</a></p></li><li><p>&#36824;&#21487;&#20197;&#36319;&#36394;&#25105;&#20204;&#30340;<a href="http://twitter.com/hornetq" target="_top">twitter</a></p></li><li><p>HornetQ&#30340;Subversion&#20195;&#30721;&#24211;&#22320;&#22336; <a href="http://anonsvn.jboss.org/repos/hornetq/trunk" target="_top">http://anonsvn.jboss.org/repos/hornetq/trunk</a></p></li><li><p>&#27599;&#27425;&#21457;&#24067;&#30340;&#29256;&#26412;&#26631;&#31614;&#37117;&#22312;<a href="http://anonsvn.jboss.org/repos/hornetq/tags" target="_top">http://anonsvn.jboss.org/repos/hornetq/tags</a>&#19979;&#33021;&#25214;&#21040;&#12290;</p></li></ul></div><p>
+      </p></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="installation"></a>Chapter&nbsp;5.&nbsp;&#23433;&#35013;</h2></div></div><div></div></div><p>&#26412;&#31456;&#35762;&#36848;&#22914;&#20309;&#23433;&#35013;HornetQ&#12290;</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.prerequisites"></a>5.1.&nbsp;&#20934;&#22791;</h2></div></div><div></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>HornetQ&#21482;&#33021;&#22312;Java 6&#25110;&#20197;&#19978;&#29256;&#26412;&#20013;&#36816;&#34892;</p></div><p>&#40664;&#35748;&#24773;&#20917;&#19979;HornetQ&#36816;&#34892;&#30340;&#20869;&#23384;&#26159;1GiB&#12290;&#22914;&#26524;&#20320;&#30340;&#30005;&#33041;&#20869;&#23384;&#23569;&#20110;1GiB&#65292;&#25110;&#32773;&#20320;&#24076;&#26395;&#26356;&#22810;&#30340;&#20869;&#23384;&#32473;HornetQ&#65292;&#20320;
+         &#21487;&#20197;&#20462;&#25913; <tt class="literal">bin/run.sh</tt>&#33050;&#26412;&#25991;&#20214;&#12290;</p><p>HornetQ&#26377;&#33258;&#24049;&#30340;&#24555;&#36895;&#26085;&#24535;&#31995;&#32479;&#65292;&#23427;&#33021;&#22815;&#20351;&#29992;libaio&#65288;&#22312;Linux&#19978;&#23427;&#26159;&#40664;&#35748;&#30340;&#65289;&#25110;Java&#30340;NIO&#12290;
+         &#22914;&#26524;&#35201;&#20351;&#29992;libaio&#65292;&#20320;&#38656;&#35201;&#39318;&#20808;&#22312;&#20320;&#30340;Linux&#19978;&#23433;&#35013;&#23427;&#12290;</p><p>&#22914;&#26524;&#20320;&#19981;&#22312;&#20351;&#29992;Linux&#65292;&#21017;&#19981;&#38656;&#35201;&#32771;&#34385;&#36825;&#20010;&#38382;&#39064;&#12290;</p><p>&#35201;&#23433;&#35013;libaio&#65292;&#20320;&#21487;&#20197;&#20351;&#29992;root&#29992;&#25143;&#23436;&#25104;&#20197;&#19979;&#27493;&#39588;&#65306;</p><p>&#20351;&#29992;yum&#65288;&#20363;&#22914;&#22312;Fedora &#25110; Red Hat Enterprise Linux&#19978;&#65289;&#65306;</p><pre class="programlisting">yum install libaio</pre><p>&#20351;&#29992;aptitude, (&#20363;&#22914;&#22312;Ubuntu&#25110;Debian&#31995;&#32479;&#19978;&#65289;&#65306;</p><pre class="programlisting">apt-get install libaio</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.standalone"></a>5.2.&nbsp;&#21333;&#29420;&#30340;HornetQ&#26381;&#21153;&#22120;</h2></div></div><div></div></div><p>&#23558;&#36719;&#20214;&#21253;&#19979;&#36733;&#21518;&#65292;&#23558;&#20854;&#35299;&#21387;&#21040;&#20320;&#36873;&#23450;&#30340;&#30446;&#24405;&#19979;&#12290;&#36825;&#37324;&#20320;&#23601;&#21487;&#20197;<a href="#running.standalone" title="6.1.&nbsp;&#21333;&#29420;HornetQ">&#30452;&#25509;&#36816;&#34892;&#20102;</a>&#12290;
+         &#19979;&#38754;&#32473;&#20986;&#20102;&#23427;&#30340;&#30446;&#24405;&#32467;&#26500;&#65306; </p><pre class="programlisting">
+         |___ bin
+         |
+         |___ config
+         |      |___ jboss-as-4
+         |      |___ jboss-as-5
+         |      |___ stand-alone
+         |
+         |___ docs
+         |      |___ api
+         |      |___ quickstart-guide
+         |      |___ user-manual
+         |
+         |___ examples
+         |      |___ core
+         |      |___ javaee
+         |      |___ jms
+         |
+         |___ lib
+         |
+         |___ licenses
+         |
+         |___ schemas
+      </pre><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">bin</tt> -- &#36816;&#34892;HornetQ&#30340;&#20108;&#36827;&#21046;&#25991;&#20214;&#21644;&#33050;&#26412;&#25991;&#20214;&#12290;</p></li><li><p><tt class="literal">config</tt> -- HornetQ&#30340;&#37197;&#32622;&#25991;&#20214;&#12290;&#23427;&#21253;&#25324;&#20102;&#21333;&#29420;&#27169;&#24335;&#25110;&#32773;&#36816;&#34892;&#22312;
+               JBoss AS 4 &#25110; 5&#20013;&#30340;&#37197;&#32622;&#12290;&#35831;&#21442;&#32771;&#37197;&#32622;&#32034;&#24341;&#26469;&#20102;&#35299;&#37197;&#32622;&#26377;&#35814;&#32454;&#20449;&#24687;&#12290;</p></li><li><p><tt class="literal">docs</tt> -- HornetQ&#30340;&#25991;&#26723;&#21450;Javadoc&#12290; </p></li><li><p><tt class="literal">examples</tt> -- JMS and Java EE&#20363;&#23376;&#12290;&#26377;&#20851;&#35814;&#32454;&#20449;&#24687;&#35831;&#21442;&#35265;
+               'running examples'&#19968;&#31456;&#12290; </p></li><li><p><tt class="literal">lib</tt> -- &#36816;&#34892;HornetQ&#25152;&#38656;&#35201;&#30340;jar&#25991;&#20214;&#21644;&#24211;&#25991;&#20214; </p></li><li><p><tt class="literal">licenses</tt> -- HornetQ&#30340;&#36719;&#20214;&#21327;&#35758;</p></li><li><p><tt class="literal">schemas</tt> -- HornetQ&#37197;&#32622;&#25991;&#20214;&#30340;XML Schema</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as5"></a>5.3.&nbsp;HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;5.x</h2></div></div><div></div></div><p>HornetQ&#21487;&#20197;&#37096;&#32626;&#22312;<a href="http://www.jboss.org/jbossas/" target="_top">JBoss AS
+            5</a>&#20013;&#12290;&#30446;&#21069;&#40664;&#35748;&#30340;&#24212;&#29992;&#26381;&#21153;&#22120;&#27809;&#26377;&#23433;&#35013;HornetQ&#65288;HornetQ&#23558;&#26159;JBoss 6&#30340;&#40664;&#35748;JMS&#25552;&#20379;&#32773;&#65289;&#65292;&#22240;&#27492;
+         &#20320;&#38656;&#35201;&#20026;HornetQ&#21019;&#24314;&#26032;&#30340;AS 5&#30340;&#37197;&#32622;&#65288;profile&#65289;&#12290;</p><p>&#21019;&#24314;AS 5&#26032;&#37197;&#32622;&#30340;&#27493;&#39588;&#65306;</p><div class="orderedlist"><ol type="1"><li><p>&#19979;&#36733;&#24182;&#23433;&#35013;JBoss AS 5</p></li><li><p>&#35774;&#32622;&#29615;&#22659;&#21464;&#37327;<tt class="literal">JBOSS_HOME</tt>&#25351;&#21521;JBoss AS 5&#30340;&#23433;&#35013;&#30446;&#24405;&#12290;</p></li><li><p>&#36816;&#34892;HornetQ&#30340;<tt class="literal">config/jboss-as-5</tt>&#19979;&#30340;<tt class="literal">./build.sh</tt> &#65288;&#25110;
+               &#32773;&#22914;&#26524;&#22312;Windows&#19979;&#36816;&#34892;<tt class="literal">build.bat</tt>&#65289;&#12290;</p></li></ol></div><p>&#36825;&#23558;&#20250;&#22312;<tt class="literal">$JBOSS_HOME/server</tt>&#21019;&#24314;&#20004;&#20010;&#26381;&#21153;&#22120;&#37197;&#32622;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- &#36825;&#20010;&#30456;&#24403;&#20110;AS 5&#30340;<tt class="literal">default</tt>&#37197;&#32622;&#20294;&#20854;JMS&#25552;&#20379;&#32773;&#26367;&#25442;&#25104;&#20026;HornetQ&#12290;&#22312;&#36825;&#20010;&#37197;&#32622;&#20013;&#30340;HornetQ
+               &#26159;<span class="emphasis"><em>&#38750;&#38598;&#32676;</em></span>&#30340;&#12290;</p></li><li><p><tt class="literal">all-with-hornetq</tt> -- &#36825;&#20010;&#30456;&#24403;&#20110;AS 5&#30340;<tt class="literal">all</tt>&#37197;&#32622;&#20294;&#20854;JMS&#25552;&#20379;&#32773;&#26367;&#25442;&#25104;&#20026;HornetQ&#12290;&#36825;&#20010;&#37197;&#32622;&#20013;&#30340;HornetQ
+               &#26159;<span class="emphasis"><em>&#38598;&#32676;</em></span>&#30340;&#12290;</p></li></ul></div><p>&#36825;&#26102;&#65292;&#20320;&#23601;&#21487;&#20197;&#21551;&#21160;&#19978;&#38754;&#20854;&#20013;&#20219;&#20309;&#19968;&#20010;&#37197;&#32622;&#30340;JBoss AS 5&#26381;&#21153;&#22120;&#20102;&#65292;&#20363;&#22914;&#65306;</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="installation.jboss.as4"></a>5.4.&nbsp;HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;4.x</h2></div></div><div></div></div><p>&#20026;&#20102;&#22312;AS 4&#20013;&#23433;&#35013;HornetQ&#65292;&#20320;&#38656;&#35201;&#21019;&#24314;&#26032;&#30340;&#37197;&#32622;&#65288;profile&#65289;&#12290;</p><p>&#27493;&#39588;&#22914;&#19979;&#65306;</p><div class="orderedlist"><ol type="1"><li><p>&#19979;&#36733;&#24182;&#23433;&#35013;JBoss AS 4</p></li><li><p>&#35774;&#32622;&#29615;&#22659;&#21464;&#37327;<tt class="literal">JBOSS_HOME</tt>&#25351;&#21521;JBoss AS 4&#30340;&#23433;&#35013;&#30446;&#24405;&#12290;</p></li><li><p>&#36816;&#34892;HornetQ&#30340;<tt class="literal">config/jboss-as-4</tt>&#19979;&#30340;<tt class="literal">./build.sh</tt> &#65288;&#25110;
+               &#32773;&#22914;&#26524;&#22312;Windows&#19979;&#36816;&#34892;<tt class="literal">build.bat</tt>&#65289;&#12290;</p></li></ol></div><p>&#36825;&#23558;&#20250;&#22312;<tt class="literal">$JBOSS_HOME/server</tt>&#21019;&#24314;&#20004;&#20010;&#26381;&#21153;&#22120;&#37197;&#32622;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">default-with-hornetq</tt> -- &#36825;&#20010;&#30456;&#24403;&#20110;AS 4&#30340;<tt class="literal">default</tt>&#37197;&#32622;&#20294;&#20854;JMS&#25552;&#20379;&#32773;&#26367;&#25442;&#25104;&#20026;HornetQ&#12290;&#22312;&#36825;&#20010;&#37197;&#32622;&#20013;&#30340;HornetQ
+               &#26159;<span class="emphasis"><em>&#38750;&#38598;&#32676;</em></span>&#30340;&#12290;</p></li><li><p><tt class="literal">all-with-hornetq</tt> -- &#36825;&#20010;&#30456;&#24403;&#20110;AS 4&#30340;<tt class="literal">all</tt>&#37197;&#32622;&#20294;&#20854;JMS&#25552;&#20379;&#32773;&#26367;&#25442;&#25104;&#20026;HornetQ&#12290;&#36825;&#20010;&#37197;&#32622;&#20013;&#30340;HornetQ
+               &#26159;<span class="emphasis"><em>&#38598;&#32676;</em></span>&#30340;&#12290;</p></li></ul></div><p>&#36825;&#26102;&#65292;&#20320;&#23601;&#21487;&#20197;&#21551;&#21160;&#19978;&#38754;&#20854;&#20013;&#20219;&#20309;&#19968;&#20010;&#37197;&#32622;&#30340;JBoss AS 4&#26381;&#21153;&#22120;&#20102;&#65292;&#20363;&#22914;&#65306;</p><pre class="programlisting">$JBOSS_HOME/bin/run.sh -c default-with-hornetq</pre></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="running"></a>Chapter&nbsp;6.&nbsp;Starting The Server</h2></div></div><div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.standalone"></a>6.1.&nbsp;&#21333;&#29420;HornetQ</h2></div></div><div></div></div><p>&#35201;&#36816;&#34892;&#21333;&#29420;&#30340;HornetQ&#26381;&#21153;&#65292;&#25171;&#24320;&#19968;&#20010;&#21629;&#20196;&#34892;&#31383;&#21475;&#65292;&#36827;&#20837;&#21040;HornetQ&#30340;<tt class="literal">bin</tt>
+            &#30446;&#24405;&#19979;&#65292;&#25191;&#34892;<tt class="literal">./run.sh</tt> (&#25110;&#32773;&#22312;Windows&#19979; <tt class="literal">run.bat</tt>&#65289;&#12290;&#20320;&#23558;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">
+         bin$ ./run.sh
+         
+         15:05:54,108 INFO  @main [HornetQBootstrapServer] Starting HornetQ server
+         ...
+         15:06:02,566 INFO  @main [HornetQServerImpl] HornetQ Server version 
+         2.0.0.CR3 (yellowjacket, 111) started
+      </pre><p>&#36825;&#34920;&#26126;HornetQ&#24050;&#32463;&#21551;&#21160;&#24182;&#36816;&#34892;&#20102;&#12290;</p><p>&#40664;&#35748;&#24773;&#20917;&#19979;&#65292;&#19981;&#35770;&#26159;&#21551;&#21160;&#36824;&#26159;&#20572;&#27490;&#33050;&#26412;&#37117;&#20351;&#29992;<tt class="literal">config/stand-alone/non-clustered</tt>
+         &#19979;&#30340;&#37197;&#32622;&#25991;&#20214;&#12290;&#35201;&#20351;&#29992;&#19981;&#21516;&#30340;&#37197;&#32622;&#30446;&#24405;&#65292;&#21487;&#36816;&#34892;<tt class="literal">./run.sh ../config/stand-alone/clustered</tt>
+         &#25110;&#32773;&#20854;&#23427;&#36873;&#23450;&#30340;&#30446;&#24405;&#12290;&#21516;&#26679;&#26041;&#27861;&#36866;&#29992;&#20110;&#20572;&#27490;&#33050;&#26412;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as5"></a>6.2.&nbsp;HornetQ&#22312;JBoss AS 5.x&#20013;&#36816;&#34892;</h2></div></div><div></div></div><p>&#35201;&#22312;JBoss AS 5&#36816;&#34892;HornetQ&#65292;&#20320;&#38656;&#35201;&#21019;&#24314;<a href="#installation.jboss.as5" title="5.3.&nbsp;HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;5.x">&#23433;&#35013;&#26377;HornetQ&#30340;AS 5&#30340;&#37197;&#32622;</a>&#12290;&#28982;&#21518;&#29992;&#36825;&#20010;&#37197;&#32622;&#21551;&#21160;AS 5&#12290;
+         &#20363;&#22914;&#65292;&#35201;&#36816;&#34892;&#19968;&#20010;&#24102;&#26377;<span class="emphasis"><em>&#38750;&#38598;&#32676;</em></span>&#30340;HornetQ&#26381;&#21153;&#30340;AS 5&#65292;&#36827;&#20837;<tt class="literal">$JBOSS_HOME/bin</tt>&#30446;&#24405;&#65292;&#28982;&#21518;&#38190;&#20837;&#65306;</p><pre class="programlisting">
+        bin$ ./run.sh -c default-with-hornetq
+        
+        15:18:35,460 INFO  [ServerImpl] Starting JBoss (Microcontainer)...
+        15:18:35,462 INFO  [ServerImpl] Release ID: JBoss (Microcontainer) [5.1.0.GA (build: SVNTag=
+        JBoss_5_1_0_GA date=200905221053)
+        ...
+        15:19:30,305 INFO  [HornetQServerImpl] HornetQ Server version 
+        2.0.0.CR3 (yellowjacket, 111) started
+        ...
+        15:19:43,601 INFO  [ServerImpl] JBoss (Microcontainer) [5.1.0.GA (build: SVNTag=
+        JBoss_5_1_0_GA date=200905221053)]Started in 1m:14s:556ms
+      </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as4"></a>6.3.&nbsp;HornetQ&#22312;JBoss AS 4&#20013;&#36816;&#34892;</h2></div></div><div></div></div><p>&#39318;&#20808;&#25353;&#29031;&#19982;JBoss AS 5&#30456;&#21516;&#30340;&#27493;&#39588;&#21019;&#24314;<a href="#installation.jboss.as4" title="5.4.&nbsp;HornetQ&#36816;&#34892;&#20110;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;4.x">&#23433;&#35013;&#26377;HornetQ&#30340;AS 4&#37197;&#32622;
+            </a>&#28982;&#21518;&#20197;&#30456;&#21516;&#30340;&#26041;&#24335;&#21551;&#21160;AS&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="running.jboss.as6"></a>6.4.&nbsp;HornetQ&#22312;JBoss AS 6.0&#20013;&#36816;&#34892;</h2></div></div><div></div></div><p>&#20174;JBoss AS 6.0 M3&#24320;&#22987;&#65292;HornetQ&#24050;&#32463;&#26159;&#40664;&#35748;&#30340;&#65288;&#20869;&#24314;&#65289;JMS&#25552;&#20379;&#32773;&#12290;&#25152;&#20197;&#26080;&#38656;&#23433;&#35013;&#21363;&#21487;&#36816;&#34892;&#12290;</p></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="examples"></a>Chapter&nbsp;7.&nbsp;&#36816;&#34892;HornetQ&#20363;&#23376;</h2></div></div><div></div></div><p>&#22312;HornetQ&#30340;<tt class="literal">examples</tt>&#30446;&#24405;&#19979;&#26377;&#20004;&#32452;&#20363;&#23376;&#65292;&#23427;&#20204;&#26159;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p>JMS&#20363;&#23376; - &#36825;&#20123;&#20363;&#23376;&#23637;&#31034;&#30340;&#26159;&#20351;&#29992;JMS&#21457;&#36865;&#19982;&#25509;&#25910;&#28040;&#24687;&#30340;&#21151;&#33021;&#12290;</p></li><li><p>Java EE &#20363;&#23376; - &#36825;&#20123;&#20363;&#23376;&#23637;&#31034;&#30340;&#26159;&#19982;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#38598;&#25104;&#65292;&#20363;&#22914;MDB&#65292;EJB&#65292;Servlet&#31561;&#12290;</p></li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.jms"></a>7.1.&nbsp;JMS&#20363;&#23376;</h2></div></div><div></div></div><p>&#25152;&#26377;JMS&#37117;&#26377;&#32479;&#19968;&#30340;&#26684;&#24335;&#12290;&#27599;&#20010;&#20363;&#23376;&#37117;&#26377;&#33258;&#24049;&#30340;&#30446;&#24405;&#65292;&#23427;&#30340;&#20869;&#23481;&#21253;&#25324;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">build.xml</tt></p><p>ant&#30340;build&#25991;&#20214;&#65292;&#29992;&#26469;&#36816;&#34892;&#20363;&#23376;&#12290;</p></li><li><p><tt class="literal">src</tt> &#30446;&#24405;</p><p>&#20363;&#23376;&#30340;&#20195;&#30721;&#12290;</p></li><li><p><tt class="literal">server0</tt>&#37197;&#32622;&#30446;&#24405;</p><p>&#23427;&#21253;&#21547;&#20102;&#36816;&#34892;&#26381;&#21153;&#22120;&#25152;&#38656;&#35201;&#30340;&#37197;&#32622;&#25991;&#20214;&#12290;&#26377;&#30340;&#38598;&#32676;&#30340;&#20363;&#23376;&#21487;&#33021;&#26377;&#22810;&#20010;&#36825;&#26679;&#30340;&#30446;&#24405;&#65292;&#22914;<tt class="literal">server0</tt>, 
+                  <tt class="literal">server1</tt>&#31561;&#12290;</p></li></ul></div><p>&#22312;&#36816;&#34892;&#27599;&#20010;&#20363;&#23376;&#26102;&#65292;&#37117;&#35201;&#20808;&#21551;&#21160;&#19968;&#20010;&#25110;&#22810;&#20010;&#21333;&#29420;&#30340;&#26381;&#21153;&#22120;&#12290;&#24403;&#20363;&#23376;&#36816;&#34892;&#23436;&#27605;&#65292;&#20877;&#23558;&#23427;&#20204;&#20572;&#27490;&#12290;</p><p>&#20570;&#20026;&#28436;&#31034;&#25105;&#20204;&#36825;&#37324;&#36816;&#34892;queue&#20363;&#23376;&#12290;&#20854;&#23427;&#30340;&#20363;&#23376;&#21487;&#20197;&#21442;&#35265;&#29992;&#25143;&#25163;&#20876;&#12290;</p><p>&#39318;&#20808;&#25171;&#24320;&#19968;&#20010;&#21629;&#20196;&#34892;&#31383;&#21475;&#65288;shell&#65289;&#65292;&#36827;&#20837;&#21040;HornetQ&#30340; <tt class="literal">examples/jms/queue</tt>&#30446;&#24405;&#12290;</p><p>&#25970;&#20837;&#21629;&#20196;<tt class="literal">./build.sh</tt> (&#25110;&#32773;&#22312;Windows&#19978;<tt class="literal">build.bat</tt>&#65289;&#65292;&#20320;
+         &#23558;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+     [echo] src.example.dir=/home/andy/projects/hornetq/trunk/examples/jms/queue/src
+    [javac] Compiling 5 source files to /home/andy/projects/hornetq/trunk/examples/jms/queue
+/build/classes
+
+runExample:
+     [java] 10:41:04,149 INFO  @main [JMSExample] hornetq.example.runServer is true
+     [java] 10:41:04,149 INFO  @main [JMSExample] starting server with config 'server0'
+ logServerOutput true
+     [java] 10:41:04,149 INFO  @main [JMSExample] and vm args: -Xms512M,-Xmx512M,-XX:+U
+seParallelGC,-XX:+AggressiveOpts,-XX:+UseFastAccessorMethods,-Djava.util.logging.config.
+file=/home/andy/projects/hornetq/trunk/examples/jms/common/../../../src/config/stand-alone/no
+n-clustered/logging.properties
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 INFO  @main [Journal
+StorageManager] AIO journal selected
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Journal
+StorageManager] AIO wasn't located on this platform, it will fall back to using pure Jav
+a NIO. If your platform is Linux, install LibAIO to enable the AIO journal
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Securit
+yStoreImpl] It has been detected that the cluster admin password which is used to replic
+ate management operation from one node to the other has not had its password changed fro
+m the installation default. Please see the HornetQ user guide for instructions o
+n how to do this.
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/ConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/XAConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [Messagi
+ngServerImpl] HornetQ Server version 2.0.0.BETA5 (buzz-buzz, 107) started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [HornetQBoot
+strapServer] HornetQ server started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:STARTED::
+     [java] 10:41:11,276 INFO  @main [JMSExample] using server0/client-jndi.properties f
+or jndi
+     [java] Sent message: This is a text message
+     [java] Received message: This is a text message
+     [java] 
+     [java] #####################
+     [java] ###    SUCCESS!   ###
+     [java] #####################
+
+BUILD SUCCESSFUL
+Total time: 13 seconds
+</pre><p>&#24685;&#21916;&#65281;&#20320;&#24050;&#32463;&#25104;&#21151;&#22320;&#36816;&#34892;&#20102;&#20320;&#30340;&#31532;&#19968;&#20010;HornetQ&#20363;&#23376;&#12290;&#35797;&#30528;&#36816;&#34892;&#20854;&#23427;&#30340;&#20363;&#23376;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.messaging"></a>7.2.&nbsp;Java EE&#20363;&#23376;</h2></div></div><div></div></div><p>Java EE&#30340;&#20363;&#23376;&#38656;&#35201;&#39318;&#20808;&#36816;&#34892;&#19968;&#20010;JEE&#24212;&#29992;&#26381;&#21153;&#22120;&#12290;&#36825;&#20123;&#20363;&#23376;&#21253;&#25324;MDB&#65292;Servlet&#65292;EJB&#31561;&#31561;&#12290;&#20320;&#39318;&#20808;&#35201;&#23433;&#35013;JBoss&#24212;&#29992;&#26381;&#21153;
+         &#22120;&#12290;&#21442;&#35265;&#21069;&#38754;&#30340;&#31456;&#33410;&#36827;&#34892;&#23433;&#35013;&#12290;</p><p>&#36825;&#37324;&#25105;&#20204;&#23558;&#29992;MDB&#20363;&#23376;&#26469;&#35828;&#26126;&#12290;&#26377;&#20851;&#20854;&#23427;&#20363;&#23376;&#30340;&#35814;&#32454;&#20449;&#24687;&#21442;&#35265;&#29992;&#25143;&#25163;&#20876;&#12290;&#39318;&#20808;&#30830;&#35748;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#24050;&#32463;&#21551;&#21160;&#12290;</p><p>&#22914;&#21516;&#20854;&#23427;Java EE&#20363;&#23376;&#19968;&#26679;&#65292;MDB&#38656;&#35201;&#37096;&#32626;&#21040;&#24212;&#29992;&#26381;&#21153;&#22120;&#12290;&#31532;&#19968;&#65292;&#23558;<tt class="literal">JBOSS_HOME</tt>&#29615;&#22659;&#21464;&#37327;
+         &#25351;&#21521;&#20320;&#30340;&#24212;&#29992;&#26381;&#21153;&#22120;&#23433;&#35013;&#30446;&#24405;&#12290;&#22914;&#22312;Linux&#19979;&#65306;</p><pre class="programlisting">export JBOSS_HOME=/home/jbossas5.1/build/output/jboss-5.1.0.GA</pre><p>&#28982;&#21518;&#23601;&#21487;&#20197;&#36827;&#34892;&#37096;&#32626;&#20102;&#12290;&#22312;<tt class="literal">examples/javaee/mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#65306;</p><pre class="programlisting">./build.sh deploy</pre><p>&#23427;&#23558;&#21019;&#24314;&#19968;&#20010;&#8220;messaging"&#30340;AS&#37197;&#32622;&#65292;&#24182;&#29992;&#23427;&#26469;&#21551;&#21160;AS&#26381;&#21153;&#22120;&#12290;</p><p>&#22312;&#21629;&#20196;&#34892;&#31383;&#21475;&#20320;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+deploy:
+
+deploy-resources:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+
+init:
+
+compile:
+
+jar:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.jar
+
+ear:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.ear
+
+deploy-ear:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+
+     .......
+
+
+     [exec] 16:01:04,607 INFO  [JBossASKernel] 	Class:javax.jms.MessageListener
+     [exec] 16:01:04,607 INFO  [JBossASKernel] Added bean(jboss.j2ee:ear=mdb-example.ear,
+     jar=mdb-example.jar,name=MessageMDBExample,service=EJB3) to KernelDeployment of: 
+     mdb-example.jar
+     [exec] 16:01:04,702 INFO  [EJBContainer] STARTED EJB: org.hornetq.javaee.example.server
+     .MDBExample ejbName: MessageMDBExample
+     [exec] 16:01:09,496 INFO  [TomcatDeployment] deploy, ctxPath=/mdb-example
+     [exec] 16:01:09,812 WARNING [config] Unable to process deployment descriptor for cont
+     ext '/mdb-example'
+     [exec] 16:01:09,812 INFO  [config] Initializing Mojarra (1.2_12-b01-FCS) for context 
+     '/mdb-example'
+     [exec] 16:01:09,958 INFO  [Http11Protocol] Starting Coyote HTTP/1.1 on http-127.0.0.1-
+     8080
+     [exec] 16:01:09,990 INFO  [AjpProtocol] Starting Coyote AJP/1.3 on ajp-127.0.0.1-8009
+     [exec] 16:01:10,001 INFO  [ServerImpl] JBoss (Microcontainer) [5.1.0.GA (build: SVNTag
+     =JBoss_5_1_0_GA date=200905151005)] Started in 6m:21s:797ms
+
+</pre><p>&#29616;&#22312;&#25105;&#20204;&#21487;&#20197;&#36816;&#34892;&#20363;&#23376;&#20102;&#12290;&#22312;<tt class="literal">mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#19979;&#21015;&#21629;&#20196;&#65306;</p><pre class="programlisting">./build.sh</pre><p>&#20320;&#23558;&#30475;&#21040;&#22914;&#19979;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+
+runExample:
+     [java] Sent message: This is a text message
+
+BUILD SUCCESSFUL
+Total time: 7 seconds</pre><p>&#22312;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#31471;&#20320;&#36824;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">16:27:54,703 INFO  [STDOUT] message This is a text message received</pre><p>&#28982;&#21518;&#22312;<tt class="literal">mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#19979;&#38754;&#30340;&#21629;&#20196;&#21487;&#20197;&#23558;&#36825;&#20010;&#20363;&#23376;&#21368;&#36733;&#12290;</p><pre class="programlisting">./build.sh undeploy</pre><p>&#20320;&#23558;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+undeploy:
+
+undeploy-misc:
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/mdb-example.ear
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-queues.xml
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-jms.xml
+
+BUILD SUCCESSFUL
+Total time: 1 second
+</pre><p>&#20320;&#36824;&#20250;&#22312;&#31383;&#21475;&#36755;&#20986;&#20013;&#30475;&#21040;MDB&#30340;&#24212;&#29992;&#26368;&#32066;&#34987;&#21024;&#38500;&#20102;&#65292;&#22914;&#65306;</p><pre class="programlisting">16:36:45,277 INFO  [EJBContainer] STOPPED EJB: org.jboss.javaee.example.server.MDBExample 
+         ejbName: MessageMDBExample
+</pre><p>&#24685;&#21916;&#65281;&#20320;&#24050;&#32463;&#25104;&#21151;&#22320;&#37096;&#32626;&#24182;&#36816;&#34892;&#20102;&#19968;&#20010;Java EE&#30340;&#20363;&#23376;&#12290;</p></div></div></div></body></html>

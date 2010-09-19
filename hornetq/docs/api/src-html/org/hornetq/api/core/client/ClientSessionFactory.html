@@ -470,7 +470,7 @@
 <FONT color="green">467</FONT>       /**<a name="line.467"></a>
 <FONT color="green">468</FONT>        * Sets the acknowledgements batch size.<a name="line.468"></a>
 <FONT color="green">469</FONT>        * <a name="line.469"></a>
-<FONT color="green">470</FONT>        * Value must be greater than 0.<a name="line.470"></a>
+<FONT color="green">470</FONT>        * Value must be equal or greater than 0.<a name="line.470"></a>
 <FONT color="green">471</FONT>        * <a name="line.471"></a>
 <FONT color="green">472</FONT>        * @param ackBatchSize acknowledgements batch size<a name="line.472"></a>
 <FONT color="green">473</FONT>        */<a name="line.473"></a>
@@ -488,7 +488,7 @@
 <FONT color="green">485</FONT>       /**<a name="line.485"></a>
 <FONT color="green">486</FONT>        * Sets the local bind address to which the multicast socket is bound for discovery.<a name="line.486"></a>
 <FONT color="green">487</FONT>        * <a name="line.487"></a>
-<FONT color="green">488</FONT>        * @param the local bind address<a name="line.488"></a>
+<FONT color="green">488</FONT>        * @param localBindAddress the local bind address<a name="line.488"></a>
 <FONT color="green">489</FONT>        */<a name="line.489"></a>
 <FONT color="green">490</FONT>       void setLocalBindAddress(String localBindAddress);<a name="line.490"></a>
 <FONT color="green">491</FONT>       <a name="line.491"></a>
@@ -694,102 +694,100 @@
 <FONT color="green">691</FONT>        * Returns true if the client will automatically attempt to connect to the backup server if the initial<a name="line.691"></a>
 <FONT color="green">692</FONT>        * connection to the live server fails<a name="line.692"></a>
 <FONT color="green">693</FONT>        * <a name="line.693"></a>
-<FONT color="green">694</FONT>        * Default value is {@link HornetQClient.DEFAULT_FAILOVER_ON_INITIAL_CONNECTION}.<a name="line.694"></a>
-<FONT color="green">695</FONT>        * <a name="line.695"></a>
-<FONT color="green">696</FONT>        * @return<a name="line.696"></a>
-<FONT color="green">697</FONT>        */<a name="line.697"></a>
-<FONT color="green">698</FONT>       boolean isFailoverOnInitialConnection();<a name="line.698"></a>
-<FONT color="green">699</FONT>       <a name="line.699"></a>
-<FONT color="green">700</FONT>       /**<a name="line.700"></a>
-<FONT color="green">701</FONT>        * Sets the value for FailoverOnInitialReconnection<a name="line.701"></a>
-<FONT color="green">702</FONT>        * <a name="line.702"></a>
-<FONT color="green">703</FONT>        * @param failover<a name="line.703"></a>
-<FONT color="green">704</FONT>        */<a name="line.704"></a>
-<FONT color="green">705</FONT>       void setFailoverOnInitialConnection(boolean failover);<a name="line.705"></a>
-<FONT color="green">706</FONT>    <a name="line.706"></a>
-<FONT color="green">707</FONT>       /**<a name="line.707"></a>
-<FONT color="green">708</FONT>        * Returns whether connections created by this factory must failover in case the server they are<a name="line.708"></a>
-<FONT color="green">709</FONT>        * connected to &lt;em&gt;has normally shut down&lt;/em&gt;.<a name="line.709"></a>
+<FONT color="green">694</FONT>        * Default value is {@link HornetQClient#DEFAULT_FAILOVER_ON_INITIAL_CONNECTION}.<a name="line.694"></a>
+<FONT color="green">695</FONT>        */<a name="line.695"></a>
+<FONT color="green">696</FONT>       boolean isFailoverOnInitialConnection();<a name="line.696"></a>
+<FONT color="green">697</FONT>       <a name="line.697"></a>
+<FONT color="green">698</FONT>       /**<a name="line.698"></a>
+<FONT color="green">699</FONT>        * Sets the value for FailoverOnInitialReconnection<a name="line.699"></a>
+<FONT color="green">700</FONT>        * <a name="line.700"></a>
+<FONT color="green">701</FONT>        * @param failover<a name="line.701"></a>
+<FONT color="green">702</FONT>        */<a name="line.702"></a>
+<FONT color="green">703</FONT>       void setFailoverOnInitialConnection(boolean failover);<a name="line.703"></a>
+<FONT color="green">704</FONT>    <a name="line.704"></a>
+<FONT color="green">705</FONT>       /**<a name="line.705"></a>
+<FONT color="green">706</FONT>        * Returns whether connections created by this factory must failover in case the server they are<a name="line.706"></a>
+<FONT color="green">707</FONT>        * connected to &lt;em&gt;has normally shut down&lt;/em&gt;.<a name="line.707"></a>
+<FONT color="green">708</FONT>        * <a name="line.708"></a>
+<FONT color="green">709</FONT>        * Default value is {@link HornetQClient#DEFAULT_FAILOVER_ON_SERVER_SHUTDOWN}.<a name="line.709"></a>
 <FONT color="green">710</FONT>        * <a name="line.710"></a>
-<FONT color="green">711</FONT>        * Default value is {@link HornetQClient#DEFAULT_FAILOVER_ON_SERVER_SHUTDOWN}.<a name="line.711"></a>
-<FONT color="green">712</FONT>        * <a name="line.712"></a>
-<FONT color="green">713</FONT>        * @return &lt;code&gt;true&lt;/code&gt; if connections must failover if the server has normally shut down, else &lt;code&gt;false&lt;/code&gt;<a name="line.713"></a>
-<FONT color="green">714</FONT>        */<a name="line.714"></a>
-<FONT color="green">715</FONT>       boolean isFailoverOnServerShutdown();<a name="line.715"></a>
-<FONT color="green">716</FONT>    <a name="line.716"></a>
-<FONT color="green">717</FONT>       /**<a name="line.717"></a>
-<FONT color="green">718</FONT>        * Sets whether connections created by this factory must failover in case the server they are<a name="line.718"></a>
-<FONT color="green">719</FONT>        * connected to &lt;em&gt;has normally shut down&lt;/em&gt;<a name="line.719"></a>
-<FONT color="green">720</FONT>        * <a name="line.720"></a>
-<FONT color="green">721</FONT>        * @param failoverOnServerShutdown &lt;code&gt;true&lt;/code&gt; if connections must failover if the server has normally shut down, &lt;code&gt;false&lt;/code&gt; else<a name="line.721"></a>
-<FONT color="green">722</FONT>        */<a name="line.722"></a>
-<FONT color="green">723</FONT>       void setFailoverOnServerShutdown(boolean failoverOnServerShutdown);<a name="line.723"></a>
-<FONT color="green">724</FONT>    <a name="line.724"></a>
-<FONT color="green">725</FONT>       /**<a name="line.725"></a>
-<FONT color="green">726</FONT>        * Returns the class name of the connection load balancing policy.<a name="line.726"></a>
+<FONT color="green">711</FONT>        * @return &lt;code&gt;true&lt;/code&gt; if connections must failover if the server has normally shut down, else &lt;code&gt;false&lt;/code&gt;<a name="line.711"></a>
+<FONT color="green">712</FONT>        */<a name="line.712"></a>
+<FONT color="green">713</FONT>       boolean isFailoverOnServerShutdown();<a name="line.713"></a>
+<FONT color="green">714</FONT>    <a name="line.714"></a>
+<FONT color="green">715</FONT>       /**<a name="line.715"></a>
+<FONT color="green">716</FONT>        * Sets whether connections created by this factory must failover in case the server they are<a name="line.716"></a>
+<FONT color="green">717</FONT>        * connected to &lt;em&gt;has normally shut down&lt;/em&gt;<a name="line.717"></a>
+<FONT color="green">718</FONT>        * <a name="line.718"></a>
+<FONT color="green">719</FONT>        * @param failoverOnServerShutdown &lt;code&gt;true&lt;/code&gt; if connections must failover if the server has normally shut down, &lt;code&gt;false&lt;/code&gt; else<a name="line.719"></a>
+<FONT color="green">720</FONT>        */<a name="line.720"></a>
+<FONT color="green">721</FONT>       void setFailoverOnServerShutdown(boolean failoverOnServerShutdown);<a name="line.721"></a>
+<FONT color="green">722</FONT>    <a name="line.722"></a>
+<FONT color="green">723</FONT>       /**<a name="line.723"></a>
+<FONT color="green">724</FONT>        * Returns the class name of the connection load balancing policy.<a name="line.724"></a>
+<FONT color="green">725</FONT>        * <a name="line.725"></a>
+<FONT color="green">726</FONT>        * Default value is "org.hornetq.api.core.client.loadbalance.RoundRobinConnectionLoadBalancingPolicy".<a name="line.726"></a>
 <FONT color="green">727</FONT>        * <a name="line.727"></a>
-<FONT color="green">728</FONT>        * Default value is "org.hornetq.api.core.client.loadbalance.RoundRobinConnectionLoadBalancingPolicy".<a name="line.728"></a>
-<FONT color="green">729</FONT>        * <a name="line.729"></a>
-<FONT color="green">730</FONT>        * @return the class name of the connection load balancing policy<a name="line.730"></a>
-<FONT color="green">731</FONT>        */<a name="line.731"></a>
-<FONT color="green">732</FONT>       String getConnectionLoadBalancingPolicyClassName();<a name="line.732"></a>
-<FONT color="green">733</FONT>    <a name="line.733"></a>
-<FONT color="green">734</FONT>       /**<a name="line.734"></a>
-<FONT color="green">735</FONT>        * Sets the class name of the connection load balancing policy.<a name="line.735"></a>
+<FONT color="green">728</FONT>        * @return the class name of the connection load balancing policy<a name="line.728"></a>
+<FONT color="green">729</FONT>        */<a name="line.729"></a>
+<FONT color="green">730</FONT>       String getConnectionLoadBalancingPolicyClassName();<a name="line.730"></a>
+<FONT color="green">731</FONT>    <a name="line.731"></a>
+<FONT color="green">732</FONT>       /**<a name="line.732"></a>
+<FONT color="green">733</FONT>        * Sets the class name of the connection load balancing policy.<a name="line.733"></a>
+<FONT color="green">734</FONT>        * <a name="line.734"></a>
+<FONT color="green">735</FONT>        * Value must be the name of a class implementing {@link ConnectionLoadBalancingPolicy}.<a name="line.735"></a>
 <FONT color="green">736</FONT>        * <a name="line.736"></a>
-<FONT color="green">737</FONT>        * Value must be the name of a class implementing {@link ConnectionLoadBalancingPolicy}.<a name="line.737"></a>
-<FONT color="green">738</FONT>        * <a name="line.738"></a>
-<FONT color="green">739</FONT>        * @param loadBalancingPolicyClassName class name of the connection load balancing policy<a name="line.739"></a>
-<FONT color="green">740</FONT>        */<a name="line.740"></a>
-<FONT color="green">741</FONT>       void setConnectionLoadBalancingPolicyClassName(String loadBalancingPolicyClassName);<a name="line.741"></a>
-<FONT color="green">742</FONT>    <a name="line.742"></a>
-<FONT color="green">743</FONT>       /**<a name="line.743"></a>
-<FONT color="green">744</FONT>        * Returns the initial size of messages created through this factory.<a name="line.744"></a>
+<FONT color="green">737</FONT>        * @param loadBalancingPolicyClassName class name of the connection load balancing policy<a name="line.737"></a>
+<FONT color="green">738</FONT>        */<a name="line.738"></a>
+<FONT color="green">739</FONT>       void setConnectionLoadBalancingPolicyClassName(String loadBalancingPolicyClassName);<a name="line.739"></a>
+<FONT color="green">740</FONT>    <a name="line.740"></a>
+<FONT color="green">741</FONT>       /**<a name="line.741"></a>
+<FONT color="green">742</FONT>        * Returns the initial size of messages created through this factory.<a name="line.742"></a>
+<FONT color="green">743</FONT>        * <a name="line.743"></a>
+<FONT color="green">744</FONT>        * Value is in bytes, default value is  {@link HornetQClient#DEFAULT_INITIAL_MESSAGE_PACKET_SIZE}.<a name="line.744"></a>
 <FONT color="green">745</FONT>        * <a name="line.745"></a>
-<FONT color="green">746</FONT>        * Value is in bytes, default value is  {@link HornetQClient#DEFAULT_INITIAL_MESSAGE_PACKET_SIZE}.<a name="line.746"></a>
-<FONT color="green">747</FONT>        * <a name="line.747"></a>
-<FONT color="green">748</FONT>        * @return the initial size of messages created through this factory<a name="line.748"></a>
-<FONT color="green">749</FONT>        */<a name="line.749"></a>
-<FONT color="green">750</FONT>       int getInitialMessagePacketSize();<a name="line.750"></a>
-<FONT color="green">751</FONT>    <a name="line.751"></a>
-<FONT color="green">752</FONT>       /**<a name="line.752"></a>
-<FONT color="green">753</FONT>        * Sets the initial size of messages created through this factory.<a name="line.753"></a>
+<FONT color="green">746</FONT>        * @return the initial size of messages created through this factory<a name="line.746"></a>
+<FONT color="green">747</FONT>        */<a name="line.747"></a>
+<FONT color="green">748</FONT>       int getInitialMessagePacketSize();<a name="line.748"></a>
+<FONT color="green">749</FONT>    <a name="line.749"></a>
+<FONT color="green">750</FONT>       /**<a name="line.750"></a>
+<FONT color="green">751</FONT>        * Sets the initial size of messages created through this factory.<a name="line.751"></a>
+<FONT color="green">752</FONT>        * <a name="line.752"></a>
+<FONT color="green">753</FONT>        * Value must be greater than 0.<a name="line.753"></a>
 <FONT color="green">754</FONT>        * <a name="line.754"></a>
-<FONT color="green">755</FONT>        * Value must be greater than 0.<a name="line.755"></a>
-<FONT color="green">756</FONT>        * <a name="line.756"></a>
-<FONT color="green">757</FONT>        * @param size initial size of messages created through this factory.<a name="line.757"></a>
-<FONT color="green">758</FONT>        */<a name="line.758"></a>
-<FONT color="green">759</FONT>       void setInitialMessagePacketSize(int size);<a name="line.759"></a>
-<FONT color="green">760</FONT>       <a name="line.760"></a>
-<FONT color="green">761</FONT>       /**<a name="line.761"></a>
-<FONT color="green">762</FONT>        * Adds an interceptor which will be executed &lt;em&gt;after packets are received from the server&lt;/em&gt;.<a name="line.762"></a>
-<FONT color="green">763</FONT>        * <a name="line.763"></a>
-<FONT color="green">764</FONT>        * @param interceptor an Interceptor<a name="line.764"></a>
-<FONT color="green">765</FONT>        */<a name="line.765"></a>
-<FONT color="green">766</FONT>       void addInterceptor(Interceptor interceptor);<a name="line.766"></a>
-<FONT color="green">767</FONT>    <a name="line.767"></a>
-<FONT color="green">768</FONT>       /**<a name="line.768"></a>
-<FONT color="green">769</FONT>        * Removes an interceptor.<a name="line.769"></a>
+<FONT color="green">755</FONT>        * @param size initial size of messages created through this factory.<a name="line.755"></a>
+<FONT color="green">756</FONT>        */<a name="line.756"></a>
+<FONT color="green">757</FONT>       void setInitialMessagePacketSize(int size);<a name="line.757"></a>
+<FONT color="green">758</FONT>       <a name="line.758"></a>
+<FONT color="green">759</FONT>       /**<a name="line.759"></a>
+<FONT color="green">760</FONT>        * Adds an interceptor which will be executed &lt;em&gt;after packets are received from the server&lt;/em&gt;.<a name="line.760"></a>
+<FONT color="green">761</FONT>        * <a name="line.761"></a>
+<FONT color="green">762</FONT>        * @param interceptor an Interceptor<a name="line.762"></a>
+<FONT color="green">763</FONT>        */<a name="line.763"></a>
+<FONT color="green">764</FONT>       void addInterceptor(Interceptor interceptor);<a name="line.764"></a>
+<FONT color="green">765</FONT>    <a name="line.765"></a>
+<FONT color="green">766</FONT>       /**<a name="line.766"></a>
+<FONT color="green">767</FONT>        * Removes an interceptor.<a name="line.767"></a>
+<FONT color="green">768</FONT>        * <a name="line.768"></a>
+<FONT color="green">769</FONT>        * @param interceptor interceptor to remove<a name="line.769"></a>
 <FONT color="green">770</FONT>        * <a name="line.770"></a>
-<FONT color="green">771</FONT>        * @param interceptor interceptor to remove<a name="line.771"></a>
-<FONT color="green">772</FONT>        * <a name="line.772"></a>
-<FONT color="green">773</FONT>        * @return &lt;code&gt;true&lt;/code&gt; if the interceptor is removed from this factory, &lt;code&gt;false&lt;/code&gt; else<a name="line.773"></a>
-<FONT color="green">774</FONT>        */<a name="line.774"></a>
-<FONT color="green">775</FONT>       boolean removeInterceptor(Interceptor interceptor);<a name="line.775"></a>
-<FONT color="green">776</FONT>    <a name="line.776"></a>
-<FONT color="green">777</FONT>       /**<a name="line.777"></a>
-<FONT color="green">778</FONT>        * Closes this factory and release all its resources<a name="line.778"></a>
-<FONT color="green">779</FONT>        */<a name="line.779"></a>
-<FONT color="green">780</FONT>       void close();<a name="line.780"></a>
-<FONT color="green">781</FONT>    <a name="line.781"></a>
-<FONT color="green">782</FONT>       /**<a name="line.782"></a>
-<FONT color="green">783</FONT>        * Creates a copy of this factory.<a name="line.783"></a>
-<FONT color="green">784</FONT>        * <a name="line.784"></a>
-<FONT color="green">785</FONT>        * @return a copy of this factory with the same parameters values<a name="line.785"></a>
-<FONT color="green">786</FONT>        */<a name="line.786"></a>
-<FONT color="green">787</FONT>       ClientSessionFactory copy();<a name="line.787"></a>
-<FONT color="green">788</FONT>    <a name="line.788"></a>
-<FONT color="green">789</FONT>    }<a name="line.789"></a>
+<FONT color="green">771</FONT>        * @return &lt;code&gt;true&lt;/code&gt; if the interceptor is removed from this factory, &lt;code&gt;false&lt;/code&gt; else<a name="line.771"></a>
+<FONT color="green">772</FONT>        */<a name="line.772"></a>
+<FONT color="green">773</FONT>       boolean removeInterceptor(Interceptor interceptor);<a name="line.773"></a>
+<FONT color="green">774</FONT>    <a name="line.774"></a>
+<FONT color="green">775</FONT>       /**<a name="line.775"></a>
+<FONT color="green">776</FONT>        * Closes this factory and release all its resources<a name="line.776"></a>
+<FONT color="green">777</FONT>        */<a name="line.777"></a>
+<FONT color="green">778</FONT>       void close();<a name="line.778"></a>
+<FONT color="green">779</FONT>    <a name="line.779"></a>
+<FONT color="green">780</FONT>       /**<a name="line.780"></a>
+<FONT color="green">781</FONT>        * Creates a copy of this factory.<a name="line.781"></a>
+<FONT color="green">782</FONT>        * <a name="line.782"></a>
+<FONT color="green">783</FONT>        * @return a copy of this factory with the same parameters values<a name="line.783"></a>
+<FONT color="green">784</FONT>        */<a name="line.784"></a>
+<FONT color="green">785</FONT>       ClientSessionFactory copy();<a name="line.785"></a>
+<FONT color="green">786</FONT>    <a name="line.786"></a>
+<FONT color="green">787</FONT>    }<a name="line.787"></a>
 
 
 

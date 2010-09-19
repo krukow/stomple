@@ -1,0 +1,139 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;7.&nbsp;&#36816;&#34892;HornetQ&#20363;&#23376;</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ&#24555;&#36895;&#25351;&#21335;"><link rel="up" href="index.html" title="HornetQ&#24555;&#36895;&#25351;&#21335;"><link rel="previous" href="running.html" title="Chapter&nbsp;6.&nbsp;Starting The Server"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;7.&nbsp;&#36816;&#34892;HornetQ&#20363;&#23376;</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="running.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;</td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="examples"></a>Chapter&nbsp;7.&nbsp;&#36816;&#34892;HornetQ&#20363;&#23376;</h2></div></div><div></div></div><p>&#22312;HornetQ&#30340;<tt class="literal">examples</tt>&#30446;&#24405;&#19979;&#26377;&#20004;&#32452;&#20363;&#23376;&#65292;&#23427;&#20204;&#26159;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p>JMS&#20363;&#23376; - &#36825;&#20123;&#20363;&#23376;&#23637;&#31034;&#30340;&#26159;&#20351;&#29992;JMS&#21457;&#36865;&#19982;&#25509;&#25910;&#28040;&#24687;&#30340;&#21151;&#33021;&#12290;</p></li><li><p>Java EE &#20363;&#23376; - &#36825;&#20123;&#20363;&#23376;&#23637;&#31034;&#30340;&#26159;&#19982;&#24212;&#29992;&#26381;&#21153;&#22120;&#30340;&#38598;&#25104;&#65292;&#20363;&#22914;MDB&#65292;EJB&#65292;Servlet&#31561;&#12290;</p></li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.jms"></a>7.1.&nbsp;JMS&#20363;&#23376;</h2></div></div><div></div></div><p>&#25152;&#26377;JMS&#37117;&#26377;&#32479;&#19968;&#30340;&#26684;&#24335;&#12290;&#27599;&#20010;&#20363;&#23376;&#37117;&#26377;&#33258;&#24049;&#30340;&#30446;&#24405;&#65292;&#23427;&#30340;&#20869;&#23481;&#21253;&#25324;&#65306;</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">build.xml</tt></p><p>ant&#30340;build&#25991;&#20214;&#65292;&#29992;&#26469;&#36816;&#34892;&#20363;&#23376;&#12290;</p></li><li><p><tt class="literal">src</tt> &#30446;&#24405;</p><p>&#20363;&#23376;&#30340;&#20195;&#30721;&#12290;</p></li><li><p><tt class="literal">server0</tt>&#37197;&#32622;&#30446;&#24405;</p><p>&#23427;&#21253;&#21547;&#20102;&#36816;&#34892;&#26381;&#21153;&#22120;&#25152;&#38656;&#35201;&#30340;&#37197;&#32622;&#25991;&#20214;&#12290;&#26377;&#30340;&#38598;&#32676;&#30340;&#20363;&#23376;&#21487;&#33021;&#26377;&#22810;&#20010;&#36825;&#26679;&#30340;&#30446;&#24405;&#65292;&#22914;<tt class="literal">server0</tt>, 
+                  <tt class="literal">server1</tt>&#31561;&#12290;</p></li></ul></div><p>&#22312;&#36816;&#34892;&#27599;&#20010;&#20363;&#23376;&#26102;&#65292;&#37117;&#35201;&#20808;&#21551;&#21160;&#19968;&#20010;&#25110;&#22810;&#20010;&#21333;&#29420;&#30340;&#26381;&#21153;&#22120;&#12290;&#24403;&#20363;&#23376;&#36816;&#34892;&#23436;&#27605;&#65292;&#20877;&#23558;&#23427;&#20204;&#20572;&#27490;&#12290;</p><p>&#20570;&#20026;&#28436;&#31034;&#25105;&#20204;&#36825;&#37324;&#36816;&#34892;queue&#20363;&#23376;&#12290;&#20854;&#23427;&#30340;&#20363;&#23376;&#21487;&#20197;&#21442;&#35265;&#29992;&#25143;&#25163;&#20876;&#12290;</p><p>&#39318;&#20808;&#25171;&#24320;&#19968;&#20010;&#21629;&#20196;&#34892;&#31383;&#21475;&#65288;shell&#65289;&#65292;&#36827;&#20837;&#21040;HornetQ&#30340; <tt class="literal">examples/jms/queue</tt>&#30446;&#24405;&#12290;</p><p>&#25970;&#20837;&#21629;&#20196;<tt class="literal">./build.sh</tt> (&#25110;&#32773;&#22312;Windows&#19978;<tt class="literal">build.bat</tt>&#65289;&#65292;&#20320;
+         &#23558;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+     [echo] src.example.dir=/home/andy/projects/hornetq/trunk/examples/jms/queue/src
+    [javac] Compiling 5 source files to /home/andy/projects/hornetq/trunk/examples/jms/queue
+/build/classes
+
+runExample:
+     [java] 10:41:04,149 INFO  @main [JMSExample] hornetq.example.runServer is true
+     [java] 10:41:04,149 INFO  @main [JMSExample] starting server with config 'server0'
+ logServerOutput true
+     [java] 10:41:04,149 INFO  @main [JMSExample] and vm args: -Xms512M,-Xmx512M,-XX:+U
+seParallelGC,-XX:+AggressiveOpts,-XX:+UseFastAccessorMethods,-Djava.util.logging.config.
+file=/home/andy/projects/hornetq/trunk/examples/jms/common/../../../src/config/stand-alone/no
+n-clustered/logging.properties
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 INFO  @main [Journal
+StorageManager] AIO journal selected
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Journal
+StorageManager] AIO wasn't located on this platform, it will fall back to using pure Jav
+a NIO. If your platform is Linux, install LibAIO to enable the AIO journal
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:08,437 WARN  @main [Securit
+yStoreImpl] It has been detected that the cluster admin password which is used to replic
+ate management operation from one node to the other has not had its password changed fro
+m the installation default. Please see the HornetQ user guide for instructions o
+n how to do this.
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,941 INFO  @main [HornetQCo
+nnectionFactory] read only is false
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/ConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:10,991 WARN  @main [JMSServ
+erManagerImpl] Binding for java:/XAConnectionFactory already exists
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [Messagi
+ngServerImpl] HornetQ Server version 2.0.0.BETA5 (buzz-buzz, 107) started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:10:41:11,241 INFO  @main [HornetQBoot
+strapServer] HornetQ server started
+     [java] org.hornetq.jms.example.SpawnedJMSServer out:STARTED::
+     [java] 10:41:11,276 INFO  @main [JMSExample] using server0/client-jndi.properties f
+or jndi
+     [java] Sent message: This is a text message
+     [java] Received message: This is a text message
+     [java] 
+     [java] #####################
+     [java] ###    SUCCESS!   ###
+     [java] #####################
+
+BUILD SUCCESSFUL
+Total time: 13 seconds
+</pre><p>&#24685;&#21916;&#65281;&#20320;&#24050;&#32463;&#25104;&#21151;&#22320;&#36816;&#34892;&#20102;&#20320;&#30340;&#31532;&#19968;&#20010;HornetQ&#20363;&#23376;&#12290;&#35797;&#30528;&#36816;&#34892;&#20854;&#23427;&#30340;&#20363;&#23376;&#12290;</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples.messaging"></a>7.2.&nbsp;Java EE&#20363;&#23376;</h2></div></div><div></div></div><p>Java EE&#30340;&#20363;&#23376;&#38656;&#35201;&#39318;&#20808;&#36816;&#34892;&#19968;&#20010;JEE&#24212;&#29992;&#26381;&#21153;&#22120;&#12290;&#36825;&#20123;&#20363;&#23376;&#21253;&#25324;MDB&#65292;Servlet&#65292;EJB&#31561;&#31561;&#12290;&#20320;&#39318;&#20808;&#35201;&#23433;&#35013;JBoss&#24212;&#29992;&#26381;&#21153;
+         &#22120;&#12290;&#21442;&#35265;&#21069;&#38754;&#30340;&#31456;&#33410;&#36827;&#34892;&#23433;&#35013;&#12290;</p><p>&#36825;&#37324;&#25105;&#20204;&#23558;&#29992;MDB&#20363;&#23376;&#26469;&#35828;&#26126;&#12290;&#26377;&#20851;&#20854;&#23427;&#20363;&#23376;&#30340;&#35814;&#32454;&#20449;&#24687;&#21442;&#35265;&#29992;&#25143;&#25163;&#20876;&#12290;&#39318;&#20808;&#30830;&#35748;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#24050;&#32463;&#21551;&#21160;&#12290;</p><p>&#22914;&#21516;&#20854;&#23427;Java EE&#20363;&#23376;&#19968;&#26679;&#65292;MDB&#38656;&#35201;&#37096;&#32626;&#21040;&#24212;&#29992;&#26381;&#21153;&#22120;&#12290;&#31532;&#19968;&#65292;&#23558;<tt class="literal">JBOSS_HOME</tt>&#29615;&#22659;&#21464;&#37327;
+         &#25351;&#21521;&#20320;&#30340;&#24212;&#29992;&#26381;&#21153;&#22120;&#23433;&#35013;&#30446;&#24405;&#12290;&#22914;&#22312;Linux&#19979;&#65306;</p><pre class="programlisting">export JBOSS_HOME=/home/jbossas5.1/build/output/jboss-5.1.0.GA</pre><p>&#28982;&#21518;&#23601;&#21487;&#20197;&#36827;&#34892;&#37096;&#32626;&#20102;&#12290;&#22312;<tt class="literal">examples/javaee/mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#65306;</p><pre class="programlisting">./build.sh deploy</pre><p>&#23427;&#23558;&#21019;&#24314;&#19968;&#20010;&#8220;messaging"&#30340;AS&#37197;&#32622;&#65292;&#24182;&#29992;&#23427;&#26469;&#21551;&#21160;AS&#26381;&#21153;&#22120;&#12290;</p><p>&#22312;&#21629;&#20196;&#34892;&#31383;&#21475;&#20320;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+deploy:
+
+deploy-resources:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+     /server/default-with-hornetq/deploy/hornetq.sar
+
+init:
+
+compile:
+
+jar:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.jar
+
+ear:
+      [jar] Building jar: /home/andy/projects/hornetq/trunk/examples/javaee/mdb/build/mdb-exa
+      mple.ear
+
+deploy-ear:
+     [copy] Copying 1 file to /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+
+     .......
+
+
+     [exec] 16:01:04,607 INFO  [JBossASKernel] 	Class:javax.jms.MessageListener
+     [exec] 16:01:04,607 INFO  [JBossASKernel] Added bean(jboss.j2ee:ear=mdb-example.ear,
+     jar=mdb-example.jar,name=MessageMDBExample,service=EJB3) to KernelDeployment of: 
+     mdb-example.jar
+     [exec] 16:01:04,702 INFO  [EJBContainer] STARTED EJB: org.hornetq.javaee.example.server
+     .MDBExample ejbName: MessageMDBExample
+     [exec] 16:01:09,496 INFO  [TomcatDeployment] deploy, ctxPath=/mdb-example
+     [exec] 16:01:09,812 WARNING [config] Unable to process deployment descriptor for cont
+     ext '/mdb-example'
+     [exec] 16:01:09,812 INFO  [config] Initializing Mojarra (1.2_12-b01-FCS) for context 
+     '/mdb-example'
+     [exec] 16:01:09,958 INFO  [Http11Protocol] Starting Coyote HTTP/1.1 on http-127.0.0.1-
+     8080
+     [exec] 16:01:09,990 INFO  [AjpProtocol] Starting Coyote AJP/1.3 on ajp-127.0.0.1-8009
+     [exec] 16:01:10,001 INFO  [ServerImpl] JBoss (Microcontainer) [5.1.0.GA (build: SVNTag
+     =JBoss_5_1_0_GA date=200905151005)] Started in 6m:21s:797ms
+
+</pre><p>&#29616;&#22312;&#25105;&#20204;&#21487;&#20197;&#36816;&#34892;&#20363;&#23376;&#20102;&#12290;&#22312;<tt class="literal">mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#19979;&#21015;&#21629;&#20196;&#65306;</p><pre class="programlisting">./build.sh</pre><p>&#20320;&#23558;&#30475;&#21040;&#22914;&#19979;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+run:
+
+init:
+
+compile:
+
+runExample:
+     [java] Sent message: This is a text message
+
+BUILD SUCCESSFUL
+Total time: 7 seconds</pre><p>&#22312;JBoss&#24212;&#29992;&#26381;&#21153;&#22120;&#31471;&#20320;&#36824;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">16:27:54,703 INFO  [STDOUT] message This is a text message received</pre><p>&#28982;&#21518;&#22312;<tt class="literal">mdb</tt>&#30446;&#24405;&#19979;&#36816;&#34892;&#19979;&#38754;&#30340;&#21629;&#20196;&#21487;&#20197;&#23558;&#36825;&#20010;&#20363;&#23376;&#21368;&#36733;&#12290;</p><pre class="programlisting">./build.sh undeploy</pre><p>&#20320;&#23558;&#20250;&#30475;&#21040;&#22914;&#19979;&#30340;&#36755;&#20986;&#65306;</p><pre class="programlisting">Buildfile: build.xml
+
+validate-jboss:
+
+undeploy:
+
+undeploy-misc:
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/mdb-example.ear
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-queues.xml
+   [delete] Deleting: /home/andy/projects/jbossas5.1/build/output/jboss-5.1.0.GA
+   /server/default-with-hornetq/deploy/hornetq.sar/hornetq-jms.xml
+
+BUILD SUCCESSFUL
+Total time: 1 second
+</pre><p>&#20320;&#36824;&#20250;&#22312;&#31383;&#21475;&#36755;&#20986;&#20013;&#30475;&#21040;MDB&#30340;&#24212;&#29992;&#26368;&#32066;&#34987;&#21024;&#38500;&#20102;&#65292;&#22914;&#65306;</p><pre class="programlisting">16:36:45,277 INFO  [EJBContainer] STOPPED EJB: org.jboss.javaee.example.server.MDBExample 
+         ejbName: MessageMDBExample
+</pre><p>&#24685;&#21916;&#65281;&#20320;&#24050;&#32463;&#25104;&#21151;&#22320;&#37096;&#32626;&#24182;&#36816;&#34892;&#20102;&#19968;&#20010;Java EE&#30340;&#20363;&#23376;&#12290;</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="running.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;6.&nbsp;Starting The Server&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>

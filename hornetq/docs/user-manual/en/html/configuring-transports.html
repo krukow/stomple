@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;16.&nbsp;Configuring the Transport</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.0 User Manual"><link rel="up" href="index.html" title="HornetQ 2.0 User Manual"><link rel="previous" href="persistence.html" title="Chapter&nbsp;15.&nbsp;Persistence"><link rel="next" href="connection-ttl.html" title="Chapter&nbsp;17.&nbsp;Detecting Dead Connections"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;16.&nbsp;Configuring the Transport</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="persistence.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="connection-ttl.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="configuring-transports"></a>Chapter&nbsp;16.&nbsp;Configuring the Transport</h2></div></div><div></div></div><p>HornetQ has a fully pluggable and highly flexible transport layer and defines its own
+   <title>Chapter&nbsp;16.&nbsp;Configuring the Transport</title><link rel="stylesheet" href="css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="HornetQ 2.1 User Manual"><link rel="up" href="index.html" title="HornetQ 2.1 User Manual"><link rel="previous" href="persistence.html" title="Chapter&nbsp;15.&nbsp;Persistence"><link rel="next" href="connection-ttl.html" title="Chapter&nbsp;17.&nbsp;Detecting Dead Connections"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;16.&nbsp;Configuring the Transport</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="persistence.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="connection-ttl.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="configuring-transports"></a>Chapter&nbsp;16.&nbsp;Configuring the Transport</h2></div></div><div></div></div><p>HornetQ has a fully pluggable and highly flexible transport layer and defines its own
         Service Provider Interface (SPI) to make plugging in a new transport provider relatively
         straightforward.</p><p>In this chapter we'll describe the concepts required for understanding HornetQ transports
         and where and how they're configured.</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="configuring-transports.acceptors"></a>16.1.&nbsp;Understanding Acceptors</h2></div></div><div></div></div><p>One of the most important concepts in HornetQ transports is the
@@ -100,9 +100,9 @@ ConnectionFactory connectionFactory = HornetQJMSClient.createConnectionFactory(t
 Connection jmsConnection = connectionFactory.createConnection();
 
 etc                       
-        </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e2998"></a>16.4.&nbsp;Configuring the Netty transport</h2></div></div><div></div></div><p>Out of the box, HornetQ currently uses <a href="http://www.jboss.org/netty/" target="_top">Netty</a>, a high performance low level network library.</p><p>Our Netty transport can be configured in several different ways; to use old (blocking)
+        </pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e3087"></a>16.4.&nbsp;Configuring the Netty transport</h2></div></div><div></div></div><p>Out of the box, HornetQ currently uses <a href="http://www.jboss.org/netty/" target="_top">Netty</a>, a high performance low level network library.</p><p>Our Netty transport can be configured in several different ways; to use old (blocking)
             Java IO, or NIO (non-blocking), also to use straightforward TCP sockets, SSL, or to
-            tunnel over HTTP or HTTPS, on top of that we also provide a servlet transport.</p><p>We believe this caters for the vast majority of transport requirements.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3010"></a>16.4.1.&nbsp;Configuring Netty TCP</h3></div></div><div></div></div><p>Netty TCP is a simple unencrypted TCP sockets based transport. Netty TCP can be
+            tunnel over HTTP or HTTPS, on top of that we also provide a servlet transport.</p><p>We believe this caters for the vast majority of transport requirements.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3099"></a>16.4.1.&nbsp;Configuring Netty TCP</h3></div></div><div></div></div><p>Netty TCP is a simple unencrypted TCP sockets based transport. Netty TCP can be
                 configured to use old blocking Java IO or non blocking Java NIO. We recommend you
                 use the Java NIO on the server side for better scalability with many concurrent
                 connections. However using Java old IO can sometimes give you better latency than
@@ -112,16 +112,18 @@ etc
                 configurations.</p><p>With the Netty TCP transport all connections are initiated from the client side.
                 I.e. the server does not initiate any connections to the client. This works well
                 with firewall policies that typically only allow connections to be initiated in one
-                direction.</p><p>All the valid Netty transport keys are defined in the class <tt class="literal">org.hornetq.core.remoting.impl.netty.TransportConstants</tt>. The
-                parameters can be used either with acceptors or connectors. The following parameters
-                can be used to configure Netty for simple TCP:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">use-nio</tt>. If this is <tt class="literal">true</tt> then Java
-                        non blocking NIO will be used. If set to <tt class="literal">false</tt> than old
-                        blocking Java IO will be used.</p><p>We highly recommend that you use non blocking Java NIO. Java NIO does not
-                        maintain a thread per connection so can scale to many more concurrent
-                        connections than with old blocking IO. We recommend the usage of Java 6 for
-                        NIO and the best scalability. The default value for this property is
-                            <tt class="literal">true</tt> on the server side and <tt class="literal">false</tt>
-                        on the client side.</p></li><li><p><tt class="literal">host</tt>. This specifies the host name or IP address to
+                direction.</p><p>All the valid Netty transport keys are defined in the class <tt class="literal">org.hornetq.core.remoting.impl.netty.TransportConstants</tt>. Most
+                parameters can be used either with acceptors or connectors, some only work with
+                acceptors. The following parameters can be used to configure Netty for simple
+                TCP:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">use-nio</tt>. If this is <tt class="literal">true</tt> then Java
+                        non blocking NIO will be used. If set to <tt class="literal">false</tt> then old
+                        blocking Java IO will be used.</p><p>If you require the server to handle many concurrent connections, we highly
+                        recommend that you use non blocking Java NIO. Java NIO does not maintain a
+                        thread per connection so can scale to many more concurrent connections than
+                        with old blocking IO. If you don't require the server to handle many
+                        concurrent connections, you might get slightly better performance by using
+                        old (blocking) IO. The default value for this property is <tt class="literal">false</tt> on the server side and <tt class="literal">false</tt> on the
+                        client side.</p></li><li><p><tt class="literal">host</tt>. This specifies the host name or IP address to
                         connect to (when configuring a connector) or to listen on (when configuring
                         an acceptor). The default value for this property is <tt class="literal">localhost</tt>. When configuring acceptors, multiple hosts or IP
                         addresses can be specified by separating them with commas. It is also
@@ -137,8 +139,8 @@ etc
                         default value for this property is <tt class="literal">5445</tt>.</p></li><li><p><tt class="literal">tcp-no-delay</tt>. If this is <tt class="literal">true</tt> then
                             <a href="http://en.wikipedia.org/wiki/Nagle's_algorithm" target="_top">Nagle's
                             algorithm</a> will be enabled. The default value for this property
-                        is <tt class="literal">true</tt>.</p></li><li><p><tt class="literal">tcp-send-buffer-size</tt>. This parameter determines the size
-                        of the TCP send buffer in bytes. The default value for this property is
+                        is <tt class="literal">true</tt>.</p></li><li><p><tt class="literal">tcp-send-buffer-size</tt>. This parameter determines the
+                        size of the TCP send buffer in bytes. The default value for this property is
                             <tt class="literal">32768</tt> bytes (32KiB).</p><p>TCP buffer sizes should be tuned according to the bandwidth and latency of
                         your network. Here's a good link that explains the theory behind <a href="http://www-didc.lbl.gov/TCP-tuning/" target="_top">this</a>.</p><p>In summary TCP send/receive buffer sizes should be calculated as:</p><pre class="programlisting">
                         buffer_size = bandwidth * RTT.
@@ -147,23 +149,40 @@ etc
                             <tt class="literal">ping</tt> utility.</p><p>For fast networks you may want to increase the buffer sizes from the
                         defaults.</p></li><li><p><tt class="literal">tcp-receive-buffer-size</tt>. This parameter determines the
                         size of the TCP receive buffer in bytes. The default value for this property
-                        is <tt class="literal">32768</tt> bytes (32KiB).</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3115"></a>16.4.2.&nbsp;Configuring Netty SSL</h3></div></div><div></div></div><p>Netty SSL is similar to the Netty TCP transport but it provides additional
+                        is <tt class="literal">32768</tt> bytes (32KiB).</p></li><li><p><tt class="literal">batch-delay</tt>. Before writing packets to the transport,
+                        HornetQ can be configured to batch up writes for a maximum of <tt class="literal">batch-delay</tt> milliseconds. This can increase overall
+                        throughput for very small messages. It does so at the expense of an increase
+                        in average latency for message transfer. The default value for this property
+                        is <tt class="literal">0</tt> ms.</p></li><li><p><tt class="literal">direct-deliver</tt>. When a message arrives on the server
+                        and is delivered to waiting consumers, by default, the delivery is done on a
+                        different thread to that which the message arrived on. This gives the best
+                        overall throughput and scalability, especially on multi-core machines.
+                        However it also introduces some extra latency due to the extra context
+                        switch required. If you want the lowest latency and the possible expense of
+                        some reduction in throughput then you can make sure <tt class="literal">direct-deliver</tt> to true. The default value for this parameter
+                        is <tt class="literal">true</tt>. If you are willing to take some small extra hit
+                        on latency but want the highest throughput set this parameter to <tt class="literal">false</tt>.</p></li><li><p><tt class="literal">nio-remoting-threads</tt>. When configured to use NIO,
+                        HornetQ will, by default, use a number of threads equal to three times the
+                        number of cores (or hyper-threads) as reported by <tt class="literal">Runtime.getRuntime().availableProcessors()</tt> for processing
+                        incoming packets. If you want to override this value, you can set the number
+                        of threads by specifying this parameter. The default value for this
+                        parameter is <tt class="literal">-1</tt> which means use the value from <tt class="literal">Runtime.getRuntime().availableProcessors()</tt> * 3.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3243"></a>16.4.2.&nbsp;Configuring Netty SSL</h3></div></div><div></div></div><p>Netty SSL is similar to the Netty TCP transport but it provides additional
                 security by encrypting TCP connections using the Secure Sockets Layer SSL</p><p>Please see the examples for a full working example of using Netty SSL.</p><p>Netty SSL uses all the same properties as Netty TCP but adds the following
                 additional properties:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">ssl-enabled</tt>. Must be <tt class="literal">true</tt> to enable
-                        SSL.</p></li><li><p><tt class="literal">key-store-path</tt>. This is the path to the SSL key store on
-                        the client which holds the client certificates.</p></li><li><p><tt class="literal">key-store-password</tt>. This is the password for the client
-                        certificate key store on the client.</p></li><li><p><tt class="literal">trust-store-path</tt>. This is the path to the trusted client
-                        certificate store on the server.</p></li><li><p><tt class="literal">trust-store-password</tt>. This is the password to the trusted
-                        client certificate store on the server.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3153"></a>16.4.3.&nbsp;Configuring Netty HTTP</h3></div></div><div></div></div><p>Netty HTTP tunnels packets over the HTTP protocol. It can be useful in scenarios
+                        SSL.</p></li><li><p><tt class="literal">key-store-path</tt>. This is the path to the SSL key store
+                        on the client which holds the client certificates.</p></li><li><p><tt class="literal">key-store-password</tt>. This is the password for the client
+                        certificate key store on the client.</p></li><li><p><tt class="literal">trust-store-path</tt>. This is the path to the trusted
+                        client certificate store on the server.</p></li><li><p><tt class="literal">trust-store-password</tt>. This is the password to the
+                        trusted client certificate store on the server.</p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3281"></a>16.4.3.&nbsp;Configuring Netty HTTP</h3></div></div><div></div></div><p>Netty HTTP tunnels packets over the HTTP protocol. It can be useful in scenarios
                 where firewalls only allow HTTP traffice to pass.</p><p>Please see the examples for a full working example of using Netty HTTP.</p><p>Netty HTTP uses the same properties as Netty TCP but adds the following additional
                 properties:</p><div class="itemizedlist"><ul type="disc"><li><p><tt class="literal">http-enabled</tt>. Must be <tt class="literal">true</tt> to enable
                         HTTP.</p></li><li><p><tt class="literal">http-client-idle-time</tt>. How long a client can be idle
-                        before sending an empty http request to keep the connection alive</p></li><li><p><tt class="literal">http-client-idle-scan-period</tt>. How often, in milliseconds,
-                        to scan for idle clients</p></li><li><p><tt class="literal">http-response-time</tt>. How long the server can wait before
+                        before sending an empty http request to keep the connection alive</p></li><li><p><tt class="literal">http-client-idle-scan-period</tt>. How often, in
+                        milliseconds, to scan for idle clients</p></li><li><p><tt class="literal">http-response-time</tt>. How long the server can wait before
                         sending an empty http response to keep the connection alive</p></li><li><p><tt class="literal">http-server-scan-period</tt>. How often, in milliseconds, to
                         scan for clients needing responses</p></li><li><p><tt class="literal">http-requires-session-id</tt>. If true the client will wait
                         after the first call to receive a session id. Used the http connector is
-                        connecting to servlet acceptor (not recommended) </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3196"></a>16.4.4.&nbsp;Configuring Netty Servlet</h3></div></div><div></div></div><p>We also provide a Netty servlet transport for use with HornetQ. The servlet
+                        connecting to servlet acceptor (not recommended) </p></li></ul></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3324"></a>16.4.4.&nbsp;Configuring Netty Servlet</h3></div></div><div></div></div><p>We also provide a Netty servlet transport for use with HornetQ. The servlet
                 transport allows HornetQ traffic to be tunneled over HTTP to a servlet running in a
                 servlet engine which then redirects it to an in-VM HornetQ server.</p><p>The servlet transport differs from the Netty HTTP transport in that, with the HTTP
                 transport HornetQ effectively acts a web server listening for HTTP traffic on, e.g.
@@ -222,7 +241,7 @@ etc
       &lt;/connector&gt;
 
  &lt;/connectors&gt;</pre></li></ul></div><p>Heres a list of the init params and what they are used for</p><div class="itemizedlist"><ul type="disc"><li><p>endpoint - This is the name of the netty acceptor that the servlet will
-                        forward its packets too. You can see it matches the name of the <tt class="literal">host</tt> param.</p></li></ul></div><p>The servlet pattern configured in the <tt class="literal">web.xml</tt> is the path of
+                        forward its packets to. You can see it matches the name of the <tt class="literal">host</tt> param.</p></li></ul></div><p>The servlet pattern configured in the <tt class="literal">web.xml</tt> is the path of
                 the URL that is used. The connector param <tt class="literal">servlet-path</tt> on the
                 connector config must match this using the application context of the web app if
                 there is one.</p><p>Its also possible to use the servlet transport over SSL. simply add the following
