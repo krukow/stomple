@@ -28,7 +28,8 @@
 <body class="yui3-skin-sam">
 <h1>Note: This requires a running Stomp server with destination jms.topic.chat (see README)</h1>
 <script type="text/javascript">
-
+var resultsXML = {"result": "42"};
+    
 if (Stomple) {
 	YUI({ logInclude: { TestRunner: true } }).use("test",'console',  function(Y){
 		
@@ -40,15 +41,21 @@ if (Stomple) {
 		Y.Test.Runner.add(new Y.Test.Case(test_client_ack));
 		Y.Test.Runner.add(new Y.Test.Case(test_disconnect));
 		
+	    var TestRunner = Y.Test.Runner;
+	    TestRunner.subscribe(TestRunner.COMPLETE_EVENT, function(){
+		console.log("extract");
+		var resultsObject = Y.Test.Runner.getResults();
+		resultsXML = Y.Test.Runner.getResults(Y.Test.Format.XML);
+		console.log(resultsXML);
+	    });
+
 	    var yconsole = new Y.Console({
 	        newestOnTop: false                   
 	    });
 	    yconsole.render('#log');
 	 
 	    //run the tests
-	    Y.Test.Runner.run();
-
-			
+	    Y.Test.Runner.run(); 			
 	 
 	});	
 } else {

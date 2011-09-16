@@ -69,7 +69,27 @@
 			  url: "ws://localhost:61614/stomp",
 			  destination: "jms.topic.chat",
 			  login: "guest",
-			  passcode: "guest"
+			  passcode: "guest",
+				socketOpen: function() {
+					console.log("socket opened");
+				},
+		        
+		        socketMessage: function(msg) {
+					console.log("socket msg");
+					console.log(msg);
+			    },
+		        
+		        socketClose: function(e) {
+					console.log("socket close");
+					console.log(e);
+			    },
+		        
+				socketError: function() {
+					console.log("socket error");
+					console.log(client.websocket);
+					return false;
+				}
+			  
 		  });
 		  var msgHandler = {
 				fn: function(msg) {
@@ -79,14 +99,14 @@
 		  };
 		  client.subscribe({
 			handler: msgHandler.fn,
-			scope: msgHandler,
+			thisObj: msgHandler,
 			
 			success: function() {//did subscription succeed?
 				console.log("sub ok..");
 			},
 			failure: function(reason) {//did subscription fail?
 				console.log(reason);
-			} 
+			}
 		  });
 		  document.getElementById('inputText').focus();
 
